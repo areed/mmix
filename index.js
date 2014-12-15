@@ -26,7 +26,7 @@ var padSignedOcta = (function() {
 })();
 
 var address = function(l) {
-  return padOcta(l.toString(16));
+  return padOcta(l.toString(16).toUpperCase());
 };
 
 /**
@@ -160,5 +160,26 @@ MMIX.prototype.LDTH = function(X, Y, Z) {
   this.LDTU(X, Y, Z);
   this.registers[X] = this.registers[X].substring(8,16) + '00000000';
 };
+
+/**
+ * Load the memory address Y + Z into register X.
+ * @param {Register} X
+ * @param {Octabyte} Y
+ * @param {Octabyte} Z
+ */
+MMIX.prototype.LDA = function(X, Y, Z) {
+  if (typeof registers[X] === 'undefined') {
+    throw new Error('The machine does not have a register named ' + X);
+  }
+  if (typeof Y !== 'string' || Y.length !== 2) {
+    throw new Error(Y + ' should be a single byte hex string.');
+  }
+  if (typeof Z !== 'string' || Z.length !== 2) {
+    throw new Error(Z + ' should be a single byte hex string.');
+  }
+
+  this.registers[X] = address(uint64(Y).add(uint64(Z)));
+};
+
 
 module.exports = MMIX;

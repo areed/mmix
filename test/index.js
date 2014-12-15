@@ -79,3 +79,19 @@ describe('Load From Memory Operations', function() {
     '89ABCDEF00000000',
   ]);
 });
+
+describe('Load Address operation', function() {
+  var mmix = new MMIX();
+  var tests = [
+    ['$1', 'F4', '9C', '0000000000000190']
+  ];
+
+  tests.forEach(function(t) {
+    describe(['LDA', t[0], t[1], t[2]].join(' '), function() {
+      it(['should set', t[0], ' to ', t[3]].join(' '), function() {
+        mmix.LDA(t[0], t[1], t[2]);
+        expect(mmix.registers[t[0]]).to.equal(t[3]);
+      });
+    });
+  });
+});

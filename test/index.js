@@ -35,7 +35,8 @@ describe('LDW', function() {
   var mmix = new MMIX();
   var tests = [
     //register, Y operand, Z operand, M8 address, data, correct register value
-    ['$1', '00', '02', '0000000000000002', '0123456789ABCDEF', '0000000000004567']
+    ['$1', '00', '02', '0000000000000002', '0123456789ABCDEF', '0000000000004567'],
+    ['$1', '00', '05', '0000000000000005', '0123456789ABCDEF', 'FFFFFFFFFFFF89AB'],
   ];
   var X = nth(0);
   var Y = nth(1);

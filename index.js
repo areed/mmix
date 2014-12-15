@@ -17,6 +17,14 @@ var padOcta = (function() {
   };
 })();
 
+var padSignedOcta = (function() {
+  var d = 'FFFFFFFFFFFFFFFF';
+
+  return function(s) {
+    return d.split('').concat(s.split('')).slice(s.length).join('');
+  };
+})();
+
 var address = function(l) {
   return padOcta(l.toString(16));
 };
@@ -92,9 +100,14 @@ MMIX.prototype.LDW = function(X, Y, Z) {
 
   var y = uint64(Y);
   var z = uint64(Z);
-  var A1 = address(y.add(z));
-  var A2 = address(y.add(z.add(1)));
-  this.registers[X] = padOcta(this.memory[A1] + this.memory[A2]);
+  var A = y.add(z);
+  var offset = A.modulo(2);
+  var effective = A.subtract(offset);
+  var A1 = address(effective);
+  var A2 = address(effective.add(1));
+  var data = this.memory[A1] + this.memory[A2];
+  var isNegative = /^[89ABCDEF]/.test(data);
+  this.registers[X] = isNegative ? padSignedOcta(data) : padOcta(data);
 };
 
 module.exports = MMIX;

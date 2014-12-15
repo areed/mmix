@@ -58,29 +58,38 @@ function MMIX() {
   this.registers = {};
 }
 
+var LD = function(byteWidth) {
+  return function(X, Y, Z) {
+    if (typeof registers[X] === 'undefined') {
+      throw new Error('The machine does not have a register named ' + X);
+    }
+    if (typeof Y !== 'string' || Y.length !== 2) {
+      throw new Error(Y + ' should be a single byte hex string.');
+    }
+    if (typeof Z !== 'string' || Z.length !== 2) {
+      throw new Error(Z + ' should be a single byte hex string.');
+    }
+
+    var A = uint64(Y).add(uint64(Z));
+    var offset = A.modulo(byteWidth);
+    var startAddress = A.subtract(offset);
+    var bytes = [];
+    for (var i = 0; i < byteWidth; i++) {
+      bytes.push(this.memory[address(startAddress.add(i))]);
+    }
+    var data = bytes.join('');
+    var isNegative = /^[89ABCDEF]/.test(data);
+    this.registers[X] = isNegative ? padSignedOcta(data) : padOcta(data);
+  };
+};
+
 /**
  * Load the byte at memory address Y + Z into register X.
  * @param {Register} X
  * @param {Octabyte} Y
  * @param {Octabyte} Z
  */
-MMIX.prototype.LDB = function(X, Y, Z) {
-  if (typeof registers[X] === 'undefined') {
-    throw new Error('The machine does not have a register named ' + X);
-  }
-  if (typeof Y !== 'string' || Y.length !== 2) {
-    throw new Error(Y + ' should be a single byte hex string.');
-  }
-  if (typeof Z !== 'string' || Z.length !== 2) {
-    throw new Error(Z + ' should be a single byte hex string.');
-  }
- 
-  var y = uint64(Y);
-  var z = uint64(Z);
-  var data = this.memory[address(y.add(z))];
-  var isNegative = /^[89ABCDEF]/.test(data);
-  this.registers[X] = isNegative ? padSignedOcta(data) : padOcta(data);
-};
+MMIX.prototype.LDB = LD(1);
 
 /**
  * Load the wyde at memory address Y + Z into register X.
@@ -88,27 +97,6 @@ MMIX.prototype.LDB = function(X, Y, Z) {
  * @param {Octabyte} Y
  * @param {Octabyte} Z
  */
-MMIX.prototype.LDW = function(X, Y, Z) {
-  if (typeof registers[X] === 'undefined') {
-    throw new Error('The machine does not have a register named ' + X);
-  }
-  if (typeof Y !== 'string' || Y.length !== 2) {
-    throw new Error(Y + ' should be a single byte hex string.');
-  }
-  if (typeof Z !== 'string' || Z.length !== 2) {
-    throw new Error(Z + ' should be a single byte hex string.');
-  }
-
-  var y = uint64(Y);
-  var z = uint64(Z);
-  var A = y.add(z);
-  var offset = A.modulo(2);
-  var effective = A.subtract(offset);
-  var A1 = address(effective);
-  var A2 = address(effective.add(1));
-  var data = this.memory[A1] + this.memory[A2];
-  var isNegative = /^[89ABCDEF]/.test(data);
-  this.registers[X] = isNegative ? padSignedOcta(data) : padOcta(data);
-};
+MMIX.prototype.LDW = LD(2);
 
 module.exports = MMIX;

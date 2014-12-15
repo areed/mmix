@@ -107,4 +107,12 @@ MMIX.prototype.LDW = LD(2);
  */
 MMIX.prototype.LDT = LD(4);
 
+/**
+ * Load the tetra at memory address Y + Z into register X.
+ * @param {Register} X
+ * @param {Octabyte} Y
+ * @param {Octabyte} Z
+ */
+MMIX.prototype.LDO = LD(8);
+
 module.exports = MMIX;

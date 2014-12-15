@@ -49,4 +49,8 @@ describe('Load Signed Operations', function() {
     'FFFFFFFF89ABCDEF',
   ]);
 
+  test('LDO', [
+    '0123456789ABCDEF',
+    '0123456789ABCDEF',
+  ]);
 });

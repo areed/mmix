@@ -150,4 +150,15 @@ MMIX.prototype.LDTU = LD(4, true);
  */
 MMIX.prototype.LDOU = MMIX.prototype.LDO;
 
+/**
+ * Load the tetra at memory address Y + Z into the high bits of register X.
+ * @param {Register} X
+ * @param {Octabyte} Y
+ * @param {Octabyte} Z
+ */
+MMIX.prototype.LDTH = function(X, Y, Z) {
+  this.LDTU(X, Y, Z);
+  this.registers[X] = this.registers[X].substring(8,16) + '00000000';
+};
+
 module.exports = MMIX;

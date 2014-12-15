@@ -73,4 +73,9 @@ describe('Load From Memory Operations', function() {
     '0123456789ABCDEF',
     '0123456789ABCDEF',
   ]);
+
+  test('LDTH', [
+    '0123456700000000',
+    '89ABCDEF00000000',
+  ]);
 });

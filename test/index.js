@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 var nth = require('highlandx/nth');
 var MMIX = require('../');
 
-describe('Load Signed Operations', function() {
+describe('Load From Memory Operations', function() {
   var mmix = new MMIX();
   var tests = [
     //register, Y operand, Z operand, address, octabyte at the memory address
@@ -50,6 +50,26 @@ describe('Load Signed Operations', function() {
   ]);
 
   test('LDO', [
+    '0123456789ABCDEF',
+    '0123456789ABCDEF',
+  ]);
+
+  test('LDBU', [
+    '0000000000000045',
+    '00000000000000AB',
+  ]);
+
+  test('LDWU', [
+    '0000000000004567',
+    '00000000000089AB',
+  ]);
+
+  test('LDTU', [
+    '0000000001234567',
+    '0000000089ABCDEF',
+  ]);
+
+  test('LDOU', [
     '0123456789ABCDEF',
     '0123456789ABCDEF',
   ]);

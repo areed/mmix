@@ -58,7 +58,7 @@ function MMIX() {
   this.registers = {};
 }
 
-var LD = function(byteWidth) {
+var LD = function(byteWidth, unsigned) {
   return function(X, Y, Z) {
     if (typeof registers[X] === 'undefined') {
       throw new Error('The machine does not have a register named ' + X);
@@ -78,13 +78,14 @@ var LD = function(byteWidth) {
       bytes.push(this.memory[address(startAddress.add(i))]);
     }
     var data = bytes.join('');
-    var isNegative = /^[89ABCDEF]/.test(data);
+    var isNegative = unsigned ? false : /^[89ABCDEF]/.test(data);
     this.registers[X] = isNegative ? padSignedOcta(data) : padOcta(data);
   };
 };
 
 /**
- * Load the byte at memory address Y + Z into register X.
+ * Load the byte at memory address Y + Z, sign-extend to octa, and put in
+ * register X.
  * @param {Register} X
  * @param {Octabyte} Y
  * @param {Octabyte} Z
@@ -92,7 +93,8 @@ var LD = function(byteWidth) {
 MMIX.prototype.LDB = LD(1);
 
 /**
- * Load the wyde at memory address Y + Z into register X.
+ * Load the wyde at memory address Y + Z, sign-extend to octa, and put in
+ * register X.
  * @param {Register} X
  * @param {Octabyte} Y
  * @param {Octabyte} Z
@@ -100,7 +102,8 @@ MMIX.prototype.LDB = LD(1);
 MMIX.prototype.LDW = LD(2);
 
 /**
- * Load the tetra at memory address Y + Z into register X.
+ * Load the tetra at memory address Y + Z, sign-extend to octa, and put in
+ * register X.
  * @param {Register} X
  * @param {Octabyte} Y
  * @param {Octabyte} Z
@@ -108,11 +111,43 @@ MMIX.prototype.LDW = LD(2);
 MMIX.prototype.LDT = LD(4);
 
 /**
- * Load the tetra at memory address Y + Z into register X.
+ * Load the octabyte at memory address Y + Z into register X.
  * @param {Register} X
  * @param {Octabyte} Y
  * @param {Octabyte} Z
  */
 MMIX.prototype.LDO = LD(8);
+
+/**
+ * Load the byte at memory address Y + Z into register X.
+ * @param {Register} X
+ * @param {Octabyte} Y
+ * @param {Octabyte} Z
+ */
+MMIX.prototype.LDBU = LD(1, true);
+
+/**
+ * Load the wyde at memory address Y + Z into register X.
+ * @param {Register} X
+ * @param {Octabyte} Y
+ * @param {Octabyte} Z
+ */
+MMIX.prototype.LDWU = LD(2, true);
+
+/**
+ * Load the tetra at memory address Y + Z into register X.
+ * @param {Register} X
+ * @param {Octabyte} Y
+ * @param {Octabyte} Z
+ */
+MMIX.prototype.LDTU = LD(4, true);
+
+/**
+ * Load the octabyte at memory address Y + Z into register X.
+ * @param {Register} X
+ * @param {Octabyte} Y
+ * @param {Octabyte} Z
+ */
+MMIX.prototype.LDOU = MMIX.prototype.LDO;
 
 module.exports = MMIX;

@@ -43,4 +43,10 @@ describe('Load Signed Operations', function() {
     '0000000000004567',
     'FFFFFFFFFFFF89AB',
   ]);
+
+  test('LDT', [
+    '0000000001234567',
+    'FFFFFFFF89ABCDEF',
+  ]);
+
 });

@@ -5,26 +5,27 @@ var MMIX = require('../');
 describe('LDB', function() {
   var mmix = new MMIX();
   var tests = [
-    //register, operand, operand, address, data
-    ['$1', 'FF', '01', '0000000000000100', '0F'],
-    ['$0', '00', '00', '0000000000000000', '7F'],
+    //register, Y operand, Z operand, M8 address, octabyte data, correct register value
+    ['$1', '00', '02', '0000000000000002', '0123456789ABCDEF', '0000000000000045'],
+    ['$1', '00', '05', '0000000000000005', '0123456789ABCDEF', 'FFFFFFFFFFFFFFAB'],
   ];
   var X = nth(0);
   var Y = nth(1);
   var Z = nth(2);
   var address = nth(3);
   var data = nth(4);
+  var answer = nth(5);
 
   tests.forEach(function(t) {
-    describe('given memory address 0x' + address(t) + ' holds the byte ' + data(t), function() {
+    describe(['Memory8[', address(t), '] = ', data(t)].join(''), function() {
       before(function() {
-        mmix.memory[address(t)] = data(t);
+        mmix.memory.setOcta(data(t), address(t));
       });
 
       describe(['LDB', X(t), Y(t), Z(t)].join(' '), function() {
-        it(['should set register', X(t), 'to', data(t)].join(' '), function() {
+        it(['should set register', X(t), 'to', answer(t)].join(' '), function() {
           mmix.LDB(X(t), Y(t), Z(t));
-          expect(mmix.registers[X(t)]).to.equal(data(t));
+          expect(mmix.registers[X(t)]).to.equal(answer(t));
         });
       });
     });

@@ -77,8 +77,9 @@ MMIX.prototype.LDB = function(X, Y, Z) {
  
   var y = uint64(Y);
   var z = uint64(Z);
-  var A = address(y.add(z));
-  this.registers[X] = this.memory[A];
+  var data = this.memory[address(y.add(z))];
+  var isNegative = /^[89ABCDEF]/.test(data);
+  this.registers[X] = isNegative ? padSignedOcta(data) : padOcta(data);
 };
 
 /**

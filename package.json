@@ -1,0 +1,33 @@
+{
+  "name": "mmix",
+  "version": "0.0.1",
+  "description": "MMIX machine emulator",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "long": "^2.2.3"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "highlandx": "^1.10.0",
+    "mocha": "^2.0.1"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/areed/mmix.git"
+  },
+  "keywords": [
+    "mmix"
+  ],
+  "author": "Andrew Reed",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/areed/mmix/issues"
+  },
+  "homepage": "https://github.com/areed/mmix"
+}

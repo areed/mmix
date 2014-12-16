@@ -7,28 +7,29 @@ describe('Load From Memory Operations', function() {
   var memory = new Memory();
   var mmix = new MMIX(memory);
   var tests = [
-    //register, Y operand, Z operand, address, octabyte at the memory address
-    ['$1', '00', '02', '0000000000000002', '0123456789ABCDEF', '0000000000000045'],
-    ['$1', '00', '05', '0000000000000005', '0123456789ABCDEF', 'FFFFFFFFFFFFFFAB'],
+    //value in $2, value in $3, address, octabyte at the memory address
+    ['00000000000003E8', '0000000000000002', '00000000000003EA', '0123456789ABCDEF'],
+    ['00000000000003E8', '0000000000000005', '00000000000003ED', '0123456789ABCDEF'],
   ];
-  var X = nth(0);
-  var Y = nth(1);
-  var Z = nth(2);
-  var address = nth(3);
-  var data = nth(4);
+  var Y = nth(0);
+  var Z = nth(1);
+  var address = nth(2);
+  var data = nth(3);
 
   function test(op, answers) {
     describe(op, function() {
       tests.forEach(function(t, i) {
-        describe(['Memory8[', address(t), '] = ', data(t)].join(''), function() {
+        describe(['$2 = ', Y(t), ', $3 = ', Z(t), ', M_8[', address(t), '] = ', data(t)].join(''), function() {
           before(function() {
+            mmix.registers.$2 = Y(t);
+            mmix.registers.$3 = Z(t);
             memory.setOcta(data(t), address(t));
           });
 
-          describe([op, X(t), Y(t), Z(t)].join(' '), function() {
-            it(['should set register', X(t), 'to', answers[i]].join(' '), function() {
-              mmix[op](X(t), Y(t), Z(t));
-              expect(mmix.registers[X(t)]).to.equal(answers[i]);
+          describe([op, '$1,$2,$3'].join(' '), function() {
+            it(['should set register $1 to', answers[i]].join(' '), function() {
+              mmix[op]('$1', '$2', '$3');
+              expect(mmix.registers.$1).to.equal(answers[i]);
             });
           });
         });

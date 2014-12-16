@@ -19,26 +19,28 @@ function MMIX(memory) {
  * @return {function}
  */
 var LD = function(byteWidth, unsigned) {
-  return function(X, Y, Z) {
-    if (typeof registers[X] === 'undefined') {
-      throw new Error('The machine does not have a register named ' + X);
+  return function($X, $Y, $Z) {
+    if (typeof registers[$X] === 'undefined') {
+      throw new Error('The machine does not have a register named ' + $X);
     }
-    if (typeof Y !== 'string' || Y.length !== 2) {
-      throw new Error(Y + ' should be a single byte hex string.');
+    if (typeof registers[$Y] === 'undefined') {
+      throw new Error('MMIX does not have a register ' + $Y);
     }
-    if (typeof Z !== 'string' || Z.length !== 2) {
-      throw new Error(Z + ' should be a single byte hex string.');
+    if (typeof registers[$Z] === 'undefined') {
+      throw new Error('MMIX does not have a register ' + $Z);
     }
 
-    var A = utils.uint64(Y).add(utils.uint64(Z));
-    var start = Memory.effectiveAddress(byteWidth, A);
+    var Y = utils.uint64(this.registers[$Y]);
+    var Z = utils.uint64(this.registers[$Z]);
+    var A = Y.add(Z);
+    var start = utils.effectiveAddress(byteWidth, A);
     var bytes = [];
     for (var i = 0; i < byteWidth; i++) {
       bytes.push(this.memory.getByte(start.add(i)));
     }
     var data = bytes.join('');
     var isNegative = unsigned ? false : /^[89ABCDEF]/.test(data);
-    this.registers[X] = isNegative ? utils.padSignedOcta(data) : utils.padOcta(data);
+    this.registers[$X] = isNegative ? utils.padSignedOcta(data) : utils.padOcta(data);
   };
 };
 

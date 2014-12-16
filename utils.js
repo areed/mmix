@@ -42,3 +42,12 @@ exports.padSignedOcta = (function() {
     return d.split('').concat(s.split('')).slice(s.length).join('');
   };
 })();
+
+/**
+ * @param {number} byteWidth - 1, 2, 4, or 8
+ * @param {Uint64} addr
+ * @return {Uint64}
+ */
+exports.effectiveAddress = function(byteWidth, addr) {
+  return addr.subtract(addr.modulo(byteWidth));
+};

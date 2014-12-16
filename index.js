@@ -4,10 +4,6 @@ var utils = require('./utils');
 var Memory = require('./Memory');
 
 /**
- * @typedef {string} Octabyte - Hex
- */
-
-/**
  * @constructor
  * @alias module:mmix
  */
@@ -16,6 +12,12 @@ function MMIX(memory) {
   this.registers = {};
 }
 
+/**
+ * Core logic for all LD__ functions.
+ * @param {number} byteWidth - 1, 2, 4, or 8
+ * @param {boolean} [unsigned]
+ * @return {function}
+ */
 var LD = function(byteWidth, unsigned) {
   return function(X, Y, Z) {
     if (typeof registers[X] === 'undefined') {

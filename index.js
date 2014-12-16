@@ -1,33 +1,7 @@
 /** @module mmix */
-var Long = require('long');
 var registers = require('./registers');
-
-var int64 = function(hex) {
-  return Long.fromString(hex, false, 16);
-};
-var uint64 = function(hex) {
-  return Long.fromString(hex, true, 16);
-};
-
-var padOcta = (function() {
-  var d = '0000000000000000';
-
-  return function(s) {
-    return d.split('').concat(s.split('')).slice(s.length).join('');
-  };
-})();
-
-var padSignedOcta = (function() {
-  var d = 'FFFFFFFFFFFFFFFF';
-
-  return function(s) {
-    return d.split('').concat(s.split('')).slice(s.length).join('');
-  };
-})();
-
-var address = function(l) {
-  return padOcta(l.toString(16).toUpperCase());
-};
+var utils = require('./utils');
+var Memory = require('./Memory');
 
 /**
  * @typedef {string} Octabyte - Hex
@@ -37,24 +11,8 @@ var address = function(l) {
  * @constructor
  * @alias module:mmix
  */
-function MMIX() {
-  var memory = this.memory = {};
-  this.memory.setByte = function(data, addr) {
-    if (data.length !== 2) {
-      throw new Error('Setting a byte memory requires a 1 byte valute.');
-    }
-    memory[addr] = data;
-  };
-  this.memory.setOcta = function(data, addr) {
-    data = padOcta(data);
-    var l = uint64(addr);
-    var offset = l.modulo(8);
-    var effective = l.subtract(offset);
-    for (var i = 0; i < 8; i++) {
-      var d = data.substring(i*2, (i*2) + 2);
-      memory.setByte(d, address(effective.add(i)));
-    }
-  };
+function MMIX(memory) {
+  this.memory = memory;
   this.registers = {};
 }
 
@@ -70,16 +28,15 @@ var LD = function(byteWidth, unsigned) {
       throw new Error(Z + ' should be a single byte hex string.');
     }
 
-    var A = uint64(Y).add(uint64(Z));
-    var offset = A.modulo(byteWidth);
-    var startAddress = A.subtract(offset);
+    var A = utils.uint64(Y).add(utils.uint64(Z));
+    var start = Memory.effectiveAddress(byteWidth, A);
     var bytes = [];
     for (var i = 0; i < byteWidth; i++) {
-      bytes.push(this.memory[address(startAddress.add(i))]);
+      bytes.push(this.memory.getByte(start.add(i)));
     }
     var data = bytes.join('');
     var isNegative = unsigned ? false : /^[89ABCDEF]/.test(data);
-    this.registers[X] = isNegative ? padSignedOcta(data) : padOcta(data);
+    this.registers[X] = isNegative ? utils.padSignedOcta(data) : utils.padOcta(data);
   };
 };
 
@@ -178,7 +135,7 @@ MMIX.prototype.LDA = function(X, Y, Z) {
     throw new Error(Z + ' should be a single byte hex string.');
   }
 
-  this.registers[X] = address(uint64(Y).add(uint64(Z)));
+  this.registers[X] = utils.padOcta(utils.uint64(Y).add(utils.uint64(Z)).toString(16).toUpperCase());
 };
 
 

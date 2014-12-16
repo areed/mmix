@@ -1,9 +1,11 @@
 var expect = require('chai').expect;
 var nth = require('highlandx/nth');
 var MMIX = require('../');
+var Memory = require('../memory');
 
 describe('Load From Memory Operations', function() {
-  var mmix = new MMIX();
+  var memory = new Memory();
+  var mmix = new MMIX(memory);
   var tests = [
     //register, Y operand, Z operand, address, octabyte at the memory address
     ['$1', '00', '02', '0000000000000002', '0123456789ABCDEF', '0000000000000045'],
@@ -20,7 +22,7 @@ describe('Load From Memory Operations', function() {
       tests.forEach(function(t, i) {
         describe(['Memory8[', address(t), '] = ', data(t)].join(''), function() {
           before(function() {
-            mmix.memory.setOcta(data(t), address(t));
+            memory.setOcta(data(t), address(t));
           });
 
           describe([op, X(t), Y(t), Z(t)].join(' '), function() {

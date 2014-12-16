@@ -142,5 +142,75 @@ MMIX.prototype.LDA = function(X, Y, Z) {
   this.registers[X] = utils.padOcta(utils.uint64(Y).add(utils.uint64(Z)).toString(16).toUpperCase());
 };
 
+/**
+ * Stores the low byte from the value in register $X at the memory address
+ * obtained by adding the values in registers $Y and $Z interpreted as unsigned
+ * integers.
+ */
+MMIX.prototype.STB = function($X, $Y, $Z) {
+  if (typeof registers[$X] === 'undefined') {
+    throw new Error('MMIX does not have a register ' + $X);
+  }
+  if (typeof registers[$Y] === 'undefined') {
+    throw new Error('MMIX does not have a register ' + $Y);
+  }
+  if (typeof registers[$Z] === 'undefined') {
+    throw new Error('MMIX does not have a register ' + $Z);
+  }
+
+  var X = this.registers[$X];
+  var Y = this.registers[$Y];
+  var Z = this.registers[$Z];
+  var data = X.substring(14, 16);
+  var A = utils.uint64(Y).add(utils.uint64(Z));
+  this.memory.setByte(data, A);
+};
+
+/**
+ * Stores the low wyde from the data in register $X at the memory address
+ * obtained by casting the data in $Y and $Z as uint64's and summing them.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.STW = function($X, $Y, $Z) {
+  var X = resolve($X, this);
+  var Y = resolve($Y, this);
+  var Z = resolve($Z, this);
+
+  var data = X.substring(12);
+  var A = utils.uint64(Y).add(utils.uint64(Z));
+  this.memory.setWyde(data, A);
+};
+
+/**
+ * Stores the low tetra from the data in the register $X at the memory address
+ * obtained by casting the data in $Y and $Z as uint64's and summing them.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.STT = function($X, $Y, $Z) {
+  var X = resolve($X, this);
+  var Y = resolve($Y, this);
+  var Z = resolve($Z, this);
+
+  var data = X.substring(8);
+  var A = utils.uint64(Y).add(utils.uint64(Z));
+  this.memory.setTetra(data, A);
+};
+
+/**
+ * Checks that the register is valid then returns the data held in the register.
+ * @param {Register} $X
+ * @param {Object} mmix - the machine to check
+ * @return {Hex}
+ */
+function resolve($X, mmix) {
+  if (typeof registers[$X] === 'undefined') {
+    throw new Error('MMIX does not have a register ' + $X);
+  }
+  return mmix.registers[$X];
+}
 
 module.exports = MMIX;

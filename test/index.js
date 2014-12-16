@@ -83,7 +83,7 @@ describe('Load From Memory Operations', function() {
   ]);
 });
 
-describe('Load Address operation', function() {
+describe('Load Address Operation', function() {
   var mmix = new MMIX();
   var tests = [
     ['$1', 'F4', '9C', '0000000000000190']
@@ -97,4 +97,53 @@ describe('Load Address operation', function() {
       });
     });
   });
+});
+
+describe.only('Store Operations', function() {
+  var memory = new Memory();
+  var mmix = new MMIX(memory);
+  var tests = [
+    //$1 data, $2 data, $3 data, address, octa at address
+    ['FFFFFFFFFFFF0000', '00000000000003E8', '0000000000000002', '00000000000003EA', '0123456789ABCDEF'],
+  ];
+  var $1 = nth(0);
+  var $2 = nth(1);
+  var $3 = nth(2);
+  var addr = nth(3);
+  var memOcta = nth(4);
+
+  function test(op, answers) {
+    describe(op, function() {
+      tests.forEach(function(t, i) {
+        describe(['$1 = ', $1(t), ', $2 = ', $2(t), ', $3 = ', $3(t), ', M_8[', addr(t), '] = ', memOcta(t)].join(''), function() {
+          before(function() {
+            memory.setOcta(memOcta(t), addr(t));
+            mmix.registers.$1 = $1(t);
+            mmix.registers.$2 = $2(t);
+            mmix.registers.$3 = $3(t);
+          });
+
+          describe([op, '$1,$2,$3'].join(' '), function() {
+            it(['should set the octabyte at M_8[', addr(t), '] to ', answers[i]].join(''), function() {
+              mmix[op]('$1', '$2', '$3');
+              var octa = memory.getOcta(addr(t));
+              expect(octa).to.equal(answers[i]);
+            });
+          });
+        });
+      });
+    });
+  }
+
+  test('STB', [
+    '0123006789ABCDEF'
+  ]);
+
+  test('STW', [
+    '0123000089ABCDEF'
+  ]);
+
+  test('STT', [
+    'FFFF000089ABCDEF'
+  ]);
 });

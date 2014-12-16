@@ -35,6 +35,75 @@ Memory.prototype.setByte = function(data, addr) {
 };
 
 /**
+ * Returns the wyde that contains the byte at the given address.
+ * @param {Uint64} addr
+ * @return {Hex}
+ */
+Memory.prototype.getWyde = function(addr) {
+  var start = utils.effectiveAddress(2, addr);
+  var bytes = [];
+  for (var i = 0; i < 2; i++) {
+    bytes.push(this.getByte(start.add(i)));
+  }
+  return bytes.join('');
+};
+
+/**
+ * Stores a wyde at the M_2 address containing the given address.
+ * @param {Hex} data
+ * @param {Uint64} addr
+ */
+Memory.prototype.setWyde = function(data, addr) {
+  var start = utils.effectiveAddress(2, addr);
+
+  for (var i = 0; i < 2; i++) {
+    this.setByte(data.substring(i*2, (i*2) + 2), start.add(i));
+  }
+};
+
+/**
+ * Returns the tetra that contains the byte at the given address.
+ * @param {Uint64} addr
+ * @return {Hex}
+ */
+Memory.prototype.getTetra = function(addr) {
+  var start = utils.effectiveAddress(4, addr);
+  var bytes = [];
+  for (var i = 0; i < 4; i++) {
+    bytes.push(this.getByte(start.add(i)));
+  }
+  return bytes.join('');
+};
+
+/**
+ * Stores a tetra at the M-4 address containing the byte at the given address.
+ * @param {Hex} data
+ * @param {Uint64} addr
+ */
+Memory.prototype.setTetra = function(data, addr) {
+  var start = utils.effectiveAddress(4, addr);
+  
+  for (var i = 0; i < 4; i++) {
+    this.setByte(data.substring(i*2, (i*2) + 2), start.add(i));
+  }
+};
+
+/**
+ * Returns an octabyte of data from the Mem8 address holding the given address.
+ * @param {Uint64} addr
+ * @return {Hex}
+ */
+Memory.prototype.getOcta = function(addr) {
+  var start = utils.effectiveAddress(8, utils.uint64(addr));
+
+  var bytes = [];
+  for (var i = 0; i < 8; i++) {
+    bytes.push(this.getByte(start.add(i)));
+  }
+  return bytes.join('');
+};
+
+/**
  * Stores an octabyte at the Mem8 address holding the given address.
  * @param {Hex} data
  * @param {Uint64} addr

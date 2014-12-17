@@ -81,6 +81,6 @@ exports.hexify = function(l) {
   if (!(l instanceof Long)) {
     throw new Error('hexify only operates on Longs');
   }
-  return this.padOcta(l.getHighBitsUnsigned().toString(16).toUpperCase() +
+  return padOcta(l.getHighBitsUnsigned().toString(16).toUpperCase() +
     l.getLowBitsUnsigned().toString(16).toUpperCase());
 };

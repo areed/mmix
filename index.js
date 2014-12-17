@@ -6,6 +6,10 @@ var registers = require('./registers');
 var utils = require('./utils');
 var Memory = require('./Memory');
 
+var hexify = utils.hexify;
+var int64 = utils.int64;
+var uint64 = utils.uint64;
+
 /**
  * @constructor
  * @alias module:mmix
@@ -302,7 +306,8 @@ MMIX.prototype.STCO = isByteRgstrRgstr(sum$Y$Z64U(function(X, A) {
 }));
 
 /**
- * Casts the octabytes in $Y and $Z as int64's and puts their sum in $X.
+ * Casts the octabytes in $Y and $Z to int64's and puts their sum in $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -312,13 +317,46 @@ MMIX.prototype.ADD = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
 }));
 
 /**
- * Casts the octabytes in $Y and $Z as int64's and returns the difference of Y-Z
+ * Casts the octabytes in $Y and $Z to int64's and puts the difference of Y - Z
+ * in $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
  */
 MMIX.prototype.SUB = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
   this.registers[$X] = utils.hexify(Y64.subtract(Z64));
+}));
+
+/**
+ * Casts the octabytes in $Y and $Z to int64's and puts their product in $X.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.MUL = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
+  this.registers[$X] = utils.hexify(Y64.multiply(Z64));
+}));
+
+/**
+ * Casts the octabytes in $Y and $Z to int64's and divides Y by Z. Puts the
+ * quotient in $X and the remainder in remainder register rR. If the divisor $Z
+ * is 0, set $X to 0 and put $Y in rR.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.DIV = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
+  if (Z64.toNumber() === 0) {
+    this.registers[$X] = hexify(Z64);
+    this.registers.rR = hexify(Y64);
+    //an "integer divide check" alos occurs at this point according to the spec
+    return;
+  }
+  this.registers[$X] = hexify(Y64.div(Z64));
+  this.registers.rR = hexify(Y64.modulo(Z64));
 }));
 
 /**

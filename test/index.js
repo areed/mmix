@@ -200,6 +200,7 @@ describe('Arithmetic Operations', function() {
     ['0000000000000002', 'FFFFFFFFFFFFFFFE'],
     ['FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF'],
     ['FFFFFFFFFFFFFFFF', '0000000000000002'],
+    ['0000000000000003', '0000000000000000'],
   ];
   var Y = nth(0);
   var Z = nth(1);
@@ -213,26 +214,51 @@ describe('Arithmetic Operations', function() {
         });
 
         describe([op, '$1,$2,$3'].join(' '), function() {
-          it(['should set $1 to', answers[i]].join(' '), function() {
+          it(['should set $1 to', answers[i][0]].join(' '), function() {
             mmix[op]('$1', '$2', '$3');
-            expect(mmix.registers.$1).to.equal(answers[i]);
+            expect(mmix.registers.$1).to.equal(answers[i][0]);
           });
+
+          if (op === 'DIV') {
+            it(['should set the remainder register to', answers[i][1]].join(' '), function() {
+              expect(mmix.registers.rR).to.equal(answers[i][1]);
+            });
+          }
         });
       });
     });
   };
 
   test('ADD', [
-    '0000000000000002',
-    '0000000000000000',
-    'FFFFFFFFFFFFFFFE',
-    '0000000000000001',
+    ['0000000000000002'],
+    ['0000000000000000'],
+    ['FFFFFFFFFFFFFFFE'],
+    ['0000000000000001'],
+    ['0000000000000003'],
   ]);
 
   test('SUB', [
-    '0000000000000000',
-    '0000000000000004',
-    '0000000000000000',
-    'FFFFFFFFFFFFFFFD',
+    ['0000000000000000'],
+    ['0000000000000004'],
+    ['0000000000000000'],
+    ['FFFFFFFFFFFFFFFD'],
+    ['0000000000000003'],
   ]);
+
+  test('MUL', [
+    ['0000000000000001'],
+    ['FFFFFFFFFFFFFFFC'],
+    ['0000000000000001'],
+    ['FFFFFFFFFFFFFFFE'],
+    ['0000000000000000'],
+  ]);
+
+  test('DIV', [
+    ['0000000000000001', '0000000000000000'],
+    ['FFFFFFFFFFFFFFFF', '0000000000000000'],
+    ['0000000000000001', '0000000000000000'],
+    ['0000000000000000', 'FFFFFFFFFFFFFFFF'],
+    ['0000000000000000', '0000000000000003'],
+  ]);
+
 });

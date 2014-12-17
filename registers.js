@@ -17,6 +17,7 @@ var Registers = {
   //Special Purpose
   'rA': 256,
   'rB': 257,
+  'rR': 258,
   //...
   'rZ': 281,
   'rBB': 282,

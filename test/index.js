@@ -171,4 +171,18 @@ describe('Store Operations', function() {
   test('STHT', [
     'FFFFFFFF89ABCDEF'
   ]);
+
+  describe('STCO', function() {
+    before(function() {
+      memory.setOcta('0123456789ABCDEF', utils.uint64('00000000000003EA'));
+      mmix.registers.$2 = '00000000000003EA';
+      mmix.registers.$3 = '0000000000000002';
+    });
+
+    it('should store an unsigned byte in a memory octabyte.', function() {
+      mmix.STCO('88', '$2', '$3');
+      var octa = memory.getOcta(utils.uint64('00000000000003E8'));
+      expect(octa).to.equal('0000000000000088');
+    });
+  });
 });

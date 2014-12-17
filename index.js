@@ -253,6 +253,21 @@ MMIX.prototype.STHT = function($X, $Y, $Z) {
 };
 
 /**
+ * Stores the constant byte X in the memory address obtained by casting the data
+ * in $Y and $Z as uint64's and summing them.
+ * @param {Hex} X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.STCO = function(X, $Y, $Z) {
+  var data = utils.padOcta(X);
+  var Y = resolve($Y, this);
+  var Z = resolve($Z, this);
+  var A = utils.uint64(Y).add(utils.uint64(Z));
+  this.memory.setOcta(data, A);
+};
+
+/**
  * Checks that the register is valid then returns the data held in the register.
  * @param {Register} $X
  * @param {Object} mmix - the machine to check

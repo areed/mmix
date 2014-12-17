@@ -167,4 +167,8 @@ describe('Store Operations', function() {
   test('STOU', [
     'FFFFFFFFFFFF0000'
   ]);
+
+  test('STHT', [
+    'FFFFFFFF89ABCDEF'
+  ]);
 });

@@ -236,6 +236,23 @@ MMIX.prototype.STTU = MMIX.prototype.STT;
 MMIX.prototype.STOU = MMIX.prototype.STO;
 
 /**
+ * Stores the high tetra from the data in the register $X at the memory address
+ * obtained by casting the data in $Y and $Z as uint64's and summing them.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.STHT = function($X, $Y, $Z) {
+  var X = resolve($X, this);
+  var Y = resolve($Y, this);
+  var Z = resolve($Z, this);
+
+  var data = X.substring(0,8);
+  var A = utils.uint64(Y).add(utils.uint64(Z));
+  this.memory.setTetra(data, A);
+};
+
+/**
  * Checks that the register is valid then returns the data held in the register.
  * @param {Register} $X
  * @param {Object} mmix - the machine to check

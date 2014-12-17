@@ -22,7 +22,7 @@ exports.uint64 = function(hex) {
  * @param {Hex} hex
  * @return {Hex}
  */
-exports.padOcta = (function() {
+var padOcta = exports.padOcta = (function() {
   var d = '0000000000000000';
 
   return function(s) {
@@ -35,7 +35,7 @@ exports.padOcta = (function() {
  * @param {Hex} hex
  * @return {Hex}
  */
-exports.padSignedOcta = (function() {
+var padNegativeOcta = exports.padNegativeOcta = (function() {
   var d = 'FFFFFFFFFFFFFFFF';
 
   return function(s) {
@@ -44,10 +44,30 @@ exports.padSignedOcta = (function() {
 })();
 
 /**
+ * Sign-extends a byte, wyde, or tetra to an octa.
+ * @param {Hex} hex
+ * @return {Hex}
+ */
+exports.signExtend = function(byteWidth, h) {
+  var padded = padOcta(h).toUpperCase();
+  var fixed = padded.substring(16 - (byteWidth * 2));
+  return /^[89ABCDEF]/.test(fixed) ? padNegativeOcta(fixed) : padded;
+};
+
+/**
  * @param {number} byteWidth - 1, 2, 4, or 8
  * @param {Uint64} addr
  * @return {Uint64}
  */
 exports.effectiveAddress = function(byteWidth, addr) {
   return addr.subtract(addr.modulo(byteWidth));
+};
+
+/**
+ * Stringifies a Uint64 to a standard format.
+ * @param {Uint64} addr
+ * @return {Hex}
+ */
+exports.addressKey = function(addr) {
+  return addr.toString(16).toUpperCase();
 };

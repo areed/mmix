@@ -32,4 +32,30 @@ describe('Utils', function() {
       });
     });
   });
+
+  describe('signExtend', function() {
+    var tests = [
+      //byte width, in, out
+      [1, 'FF', 'FFFFFFFFFFFFFFFF'],
+      [1, '60', '0000000000000060'],
+      [2, 'FFFF', 'FFFFFFFFFFFFFFFF'],
+      [2, '7FFF', '0000000000007FFF'],
+      [4, '80000000', 'FFFFFFFF80000000'],
+      [4, '76543210', '0000000076543210'],
+      [8, 'FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF'],
+      [8, '0000000000000000', '0000000000000000'],
+    ];
+    var width = nth(0);
+    var input = nth(1);
+    var output = nth(2);
+
+    tests.forEach(function(t) {
+      describe(['(', width(t), ', ', input(t), ')'].join(''), function() {
+        it(['=>', output(t)].join(' '), function() {
+          var actual = utils.signExtend(width(t), input(t));
+          expect(actual).to.equal(output(t));
+        });
+      });
+    });
+  });
 });

@@ -39,8 +39,7 @@ var LD = function(byteWidth, unsigned) {
       bytes.push(this.memory.getByte(start.add(i)));
     }
     var data = bytes.join('');
-    var isNegative = unsigned ? false : /^[89ABCDEF]/.test(data);
-    this.registers[$X] = isNegative ? utils.padSignedOcta(data) : utils.padOcta(data);
+    this.registers[$X] = unsigned ? utils.padOcta(data) : utils.signExtend(byteWidth, data);
   };
 };
 

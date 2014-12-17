@@ -99,7 +99,7 @@ describe('Load Address Operation', function() {
   });
 });
 
-describe.only('Store Operations', function() {
+describe('Store Operations', function() {
   var memory = new Memory();
   var mmix = new MMIX(memory);
   var tests = [

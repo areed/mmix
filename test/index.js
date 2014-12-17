@@ -192,7 +192,7 @@ describe('Store Operations', function() {
   });
 });
 
-describe.only('Arithmetic Operations', function() {
+describe('Arithmetic Operations', function() {
   var mmix = new MMIX();
   var tests = [
     //Y, Z
@@ -227,5 +227,12 @@ describe.only('Arithmetic Operations', function() {
     '0000000000000000',
     'FFFFFFFFFFFFFFFE',
     '0000000000000001',
+  ]);
+
+  test('SUB', [
+    '0000000000000000',
+    '0000000000000004',
+    '0000000000000000',
+    'FFFFFFFFFFFFFFFD',
   ]);
 });

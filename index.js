@@ -40,7 +40,7 @@ var arg0IsByte = validator('The first argument is not a single-byte hex string.'
 var isRgstrRgstrRgstr = _.ncurry(4, conditions(arg0IsRegister, arg1IsRegister, arg2IsRegister));
 var isByteRgstrRgstr = _.ncurry(4, conditions(arg0IsByte, arg1IsRegister, arg2IsRegister));
 
-/* Operations */
+/* Adapters */
 
 /**
  * Accepts a function that expects two arguments of type Register and Uint64 and
@@ -55,6 +55,24 @@ var sum$Y$Z64U = function(fn) {
     fn.apply(this, [$X, sum$X64U(this, $Y, $Z)]);
   };
 };
+
+/**
+ * Accepts a function that expects one argument of type Register and two
+ * arguments of type Int64 and returns a function that takes three Register
+ * arguments.
+ * @param {function} fn
+ * @return {function}
+ */
+var int64$Y$Z = function(fn) {
+  return function($X, $Y, $Z) {
+    var Y64 = utils.int64(resolve($Y, this));
+    var Z64 = utils.int64(resolve($Z, this));
+
+    fn.apply(this, [$X, Y64, Z64]);
+  };
+};
+
+/* Operations */
 
 /**
  * Core logic for all LD__ functions.
@@ -289,15 +307,19 @@ MMIX.prototype.STCO = isByteRgstrRgstr(sum$Y$Z64U(function(X, A) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.ADD = isRgstrRgstrRgstr(function($X, $Y, $Z) {
-  var Y = resolve($Y, this);
-  var Z = resolve($Z, this);
-  var Y64 = utils.int64(Y);
-  var Z64 = utils.int64(Z);
-  var sum = Y64.add(Z64);
+MMIX.prototype.ADD = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
+  this.registers[$X] = utils.hexify(Y64.add(Z64));
+}));
 
-  this.registers[$X] = utils.hexify(sum);
-});
+/**
+ * Casts the octabytes in $Y and $Z as int64's and returns the difference of Y-Z
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.SUB = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
+  this.registers[$X] = utils.hexify(Y64.subtract(Z64));
+}));
 
 /**
  * Checks that the register is valid then returns the data held in the register.

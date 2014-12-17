@@ -1,4 +1,8 @@
 /** @module mmix */
+var _ = require('highland');
+var validator = require('highlandx/validator');
+var conditions = require('highlandx/conditions');
+
 var registers = require('./registers');
 var utils = require('./utils');
 var Memory = require('./Memory');
@@ -12,6 +16,21 @@ function MMIX(memory) {
   this.registers = {};
 }
 
+var isRegister = function($X) {
+  return typeof registers[$X] !== 'undefined';
+};
+var arg0IsRegister = validator('The first argument is not a register in MMIX.', isRegister);
+var arg1IsRegister = validator('The second argument is not a register in MMIX.', function(x, $Y) {
+  return isRegister($Y);
+});
+var arg2IsRegister = validator('The third argument is not a register in MMIX.', function(x, y, $Z) {
+  return isRegister($Z);
+});
+var validWidth = validator('Byte width must be 1, 2, 4, or 8.', function(w) {
+  return w === 1 || w === 2 || w === 4 || w === 8;
+});
+var isRgstrRgstrRgstr = _.ncurry(4, conditions(arg0IsRegister, arg1IsRegister, arg2IsRegister));
+
 /**
  * Core logic for all LD__ functions.
  * @param {number} byteWidth - 1, 2, 4, or 8
@@ -19,17 +38,7 @@ function MMIX(memory) {
  * @return {function}
  */
 var LD = function(byteWidth, unsigned) {
-  return function($X, $Y, $Z) {
-    if (typeof registers[$X] === 'undefined') {
-      throw new Error('The machine does not have a register named ' + $X);
-    }
-    if (typeof registers[$Y] === 'undefined') {
-      throw new Error('MMIX does not have a register ' + $Y);
-    }
-    if (typeof registers[$Z] === 'undefined') {
-      throw new Error('MMIX does not have a register ' + $Z);
-    }
-
+  return isRgstrRgstrRgstr(function($X, $Y, $Z) {
     var Y = utils.uint64(this.registers[$Y]);
     var Z = utils.uint64(this.registers[$Z]);
     var A = Y.add(Z);
@@ -40,7 +49,7 @@ var LD = function(byteWidth, unsigned) {
     }
     var data = bytes.join('');
     this.registers[$X] = unsigned ? utils.padOcta(data) : utils.signExtend(byteWidth, data);
-  };
+  });
 };
 
 /**
@@ -112,34 +121,27 @@ MMIX.prototype.LDOU = MMIX.prototype.LDO;
 
 /**
  * Load the tetra at memory address Y + Z into the high bits of register X.
- * @param {Register} X
- * @param {Octabyte} Y
- * @param {Octabyte} Z
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
  */
-MMIX.prototype.LDTH = function(X, Y, Z) {
-  this.LDTU(X, Y, Z);
-  this.registers[X] = this.registers[X].substring(8,16) + '00000000';
+MMIX.prototype.LDTH = function($X, $Y, $Z) {
+  this.LDTU($X, $Y, $Z);
+  this.registers[$X] = this.registers[$X].substring(8,16) + '00000000';
 };
 
 /**
  * Load the memory address Y + Z into register X.
- * @param {Register} X
- * @param {Octabyte} Y
- * @param {Octabyte} Z
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
  */
-MMIX.prototype.LDA = function(X, Y, Z) {
-  if (typeof registers[X] === 'undefined') {
-    throw new Error('The machine does not have a register named ' + X);
-  }
-  if (typeof Y !== 'string' || Y.length !== 2) {
-    throw new Error(Y + ' should be a single byte hex string.');
-  }
-  if (typeof Z !== 'string' || Z.length !== 2) {
-    throw new Error(Z + ' should be a single byte hex string.');
-  }
+MMIX.prototype.LDA = isRgstrRgstrRgstr(function($X, $Y, $Z) {
+  var Y = utils.uint64(resolve($Y, this));
+  var Z = utils.uint64(resolve($Z, this));
 
-  this.registers[X] = utils.padOcta(utils.uint64(Y).add(utils.uint64(Z)).toString(16).toUpperCase());
-};
+  this.registers[$X] = utils.padOcta(Y.add(Z).toString(16).toUpperCase());
+});
 
 /**
  * Stores the low byte from the value in register $X at the memory address
@@ -278,6 +280,27 @@ function resolve($X, mmix) {
     throw new Error('MMIX does not have a register ' + $X);
   }
   return mmix.registers[$X];
+}
+
+/**
+ * Return the sum of all register arguments when their data is cast as uint64's.
+ * @param {Object} mmix - a machine
+ * @param {Register...} registers
+ * @return {Uint64}
+ */
+function sum$XU(mmix) {
+  var registers = [].slice.call(arguments, 1);
+
+  return registers
+    .map(function($X) {
+      return resolve($X, mmix);
+    })
+    .map(function(X) {
+      return utils.uint64(X);
+    })
+    .reduce(function(sum, X64U) {
+      return X64U.add(sum);
+    }, 0);
 }
 
 module.exports = MMIX;

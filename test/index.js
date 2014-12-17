@@ -86,15 +86,20 @@ describe('Load From Memory Operations', function() {
 
 describe('Load Address Operation', function() {
   var mmix = new MMIX();
-  var tests = [
-    ['$1', 'F4', '9C', '0000000000000190']
-  ];
+  var $1 = '0000000000000190';
+  var $2 = '00000000000000F4';
+  var $3 = '000000000000009C';
 
-  tests.forEach(function(t) {
-    describe(['LDA', t[0], t[1], t[2]].join(' '), function() {
-      it(['should set', t[0], ' to ', t[3]].join(' '), function() {
-        mmix.LDA(t[0], t[1], t[2]);
-        expect(mmix.registers[t[0]]).to.equal(t[3]);
+  describe(['$2 =', $2, '$3 =', $3].join(' '), function() {
+    before(function() {
+      mmix.registers.$2 = $2;
+      mmix.registers.$3 = $3;
+    });
+
+    describe('LDA $X, $Y, $Z', function() {
+      it(['should set $1 to', $1].join(' '), function() {
+        mmix.LDA('$1', '$2', '$3');
+        expect(mmix.registers.$1).to.equal($1);
       });
     });
   });

@@ -1,4 +1,3 @@
-/** @module mmix */
 var _ = require('highland');
 var validator = require('highlandx/validator');
 var conditions = require('highlandx/conditions');
@@ -283,6 +282,22 @@ MMIX.prototype.STCO = isByteRgstrRgstr(sum$Y$Z64U(function(X, A) {
   var data = utils.padOcta(X);
   this.memory.setOcta(data, A);
 }));
+
+/**
+ * Casts the octabytes in $Y and $Z as int64's and puts their sum in $X.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ADD = isRgstrRgstrRgstr(function($X, $Y, $Z) {
+  var Y = resolve($Y, this);
+  var Z = resolve($Z, this);
+  var Y64 = utils.int64(Y);
+  var Z64 = utils.int64(Z);
+  var sum = Y64.add(Z64);
+
+  this.registers[$X] = utils.hexify(sum);
+});
 
 /**
  * Checks that the register is valid then returns the data held in the register.

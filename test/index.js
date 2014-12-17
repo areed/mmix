@@ -191,3 +191,41 @@ describe('Store Operations', function() {
     });
   });
 });
+
+describe.only('Arithmetic Operations', function() {
+  var mmix = new MMIX();
+  var tests = [
+    //Y, Z
+    ['0000000000000001', '0000000000000001'],
+    ['0000000000000002', 'FFFFFFFFFFFFFFFE'],
+    ['FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF'],
+    ['FFFFFFFFFFFFFFFF', '0000000000000002'],
+  ];
+  var Y = nth(0);
+  var Z = nth(1);
+
+  var test = function(op, answers) {
+    tests.forEach(function(t, i) {
+      describe(['$2 ==', Y(t), '&& $3 ==', Z(t)].join(' '), function() {
+        before(function() {
+          mmix.registers.$2 = Y(t);
+          mmix.registers.$3 = Z(t);
+        });
+
+        describe([op, '$1,$2,$3'].join(' '), function() {
+          it(['should set $1 to', answers[i]].join(' '), function() {
+            mmix[op]('$1', '$2', '$3');
+            expect(mmix.registers.$1).to.equal(answers[i]);
+          });
+        });
+      });
+    });
+  };
+
+  test('ADD', [
+    '0000000000000002',
+    '0000000000000000',
+    'FFFFFFFFFFFFFFFE',
+    '0000000000000001',
+  ]);
+});

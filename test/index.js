@@ -151,4 +151,20 @@ describe('Store Operations', function() {
   test('STO', [
     'FFFFFFFFFFFF0000'
   ]);
+
+  test('STBU', [
+    '0123006789ABCDEF'
+  ]);
+
+  test('STWU', [
+    '0123000089ABCDEF'
+  ]);
+
+  test('STTU', [
+    'FFFF000089ABCDEF'
+  ]);
+
+  test('STOU', [
+    'FFFFFFFFFFFF0000'
+  ]);
 });

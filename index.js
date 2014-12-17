@@ -216,6 +216,26 @@ MMIX.prototype.STO = function($X, $Y, $Z) {
 };
 
 /**
+ * Has the same effect on memory as STB, but overflow never occurs.
+ */
+MMIX.prototype.STBU = MMIX.prototype.STB;
+
+/**
+ * Has the same effect on memory as STW, but overflow never occurs.
+ */
+MMIX.prototype.STWU = MMIX.prototype.STW;
+
+/**
+ * Has the same effect on memory as STT, but overflow never occurs.
+ */
+MMIX.prototype.STTU = MMIX.prototype.STT;
+
+/**
+ * Has the same effect on memory as STOU, but overflow never occurs.
+ */
+MMIX.prototype.STOU = MMIX.prototype.STO;
+
+/**
  * Checks that the register is valid then returns the data held in the register.
  * @param {Register} $X
  * @param {Object} mmix - the machine to check

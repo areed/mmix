@@ -1,6 +1,5 @@
 /**
  * @readonly
- * @enum {number}
  */
 var Registers = {
   //General Purpose

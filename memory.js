@@ -11,7 +11,7 @@ function Memory() {
 }
 
 /**
- * Returns the byte stored at a given address.
+ * Returns the byte stored at the address.
  * @param {Uint64} addr
  * @return {Hex}
  */
@@ -49,7 +49,7 @@ Memory.prototype.getWyde = function(addr) {
 };
 
 /**
- * Stores a wyde at the M_2 address containing the given address.
+ * Stores a wyde at the M_2 address containing the given byte address.
  * @param {Hex} data
  * @param {Uint64} addr
  */
@@ -76,7 +76,7 @@ Memory.prototype.getTetra = function(addr) {
 };
 
 /**
- * Stores a tetra at the M-4 address containing the byte at the given address.
+ * Stores a tetra at the M_4 address containing the given byte address.
  * @param {Hex} data
  * @param {Uint64} addr
  */
@@ -89,7 +89,7 @@ Memory.prototype.setTetra = function(data, addr) {
 };
 
 /**
- * Returns an octabyte of data from the Mem8 address holding the given address.
+ * Returns the octabyte that contains the byte at the given address.
  * @param {Uint64} addr
  * @return {Hex}
  */
@@ -104,7 +104,7 @@ Memory.prototype.getOcta = function(addr) {
 };
 
 /**
- * Stores an octabyte at the Mem8 address holding the given address.
+ * Stores an octabyte at the M_8 address containing the given byte address.
  * @param {Hex} data
  * @param {Uint64} addr
  */
@@ -119,7 +119,7 @@ Memory.prototype.setOcta = function(data, addr) {
 };
 
 /**
- * @param {number} byteWidth - 1, 2, 4, or 8
+ * @param {ByteWidth} byteWidth
  * @param {Uint64} addr
  * @return {Uint64}
  */
@@ -129,7 +129,7 @@ Memory.effectiveAddress = function(byteWidth, addr) {
 
 /**
  * @param {Uint64} addr
- * @return {Octabyte}
+ * @return {Hex}
  */
 Memory.addressKey = function(addr) {
   return addr.toString(16).toUpperCase();

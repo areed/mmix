@@ -10,6 +10,7 @@ var Memory = require('./Memory');
 /**
  * @constructor
  * @alias module:mmix
+ * @param {Memory} memory
  */
 function MMIX(memory) {
   this.memory = memory;
@@ -43,7 +44,12 @@ var isByteRgstrRgstr = _.ncurry(4, conditions(arg0IsByte, arg1IsRegister, arg2Is
 /* Operations */
 
 /**
- * Transforms $Y and $Z args into their Uint64 sum.
+ * Accepts a function that expects two arguments of type Register and Uint64 and
+ * returns a function that expects three arguments of type Register.  The Uint64
+ * argument is calculated from the values in the last two register arguments of
+ * the returned function.
+ * @param {function} fn
+ * @return {function}
  */
 var sum$Y$Z64U = function(fn) {
   return function($X, $Y, $Z) {
@@ -53,8 +59,8 @@ var sum$Y$Z64U = function(fn) {
 
 /**
  * Core logic for all LD__ functions.
- * @param {number} byteWidth - 1, 2, 4, or 8
- * @param {boolean} [unsigned]
+ * @param {ByteWidth} byteWidth
+ * @param {boolean} [unsigned] - flag to use sign extension
  * @return {function}
  */
 var LD = function(byteWidth, unsigned) {
@@ -70,8 +76,9 @@ var LD = function(byteWidth, unsigned) {
 };
 
 /**
- * Load the byte at memory address Y + Z, sign-extend to octa, and put in
- * register X.
+ * Calculate a memory address by casting the octabytes in $Y and $Z as Uint64's
+ * and summing them. Load and sign-extend the byte at that address into register $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -79,8 +86,8 @@ var LD = function(byteWidth, unsigned) {
 MMIX.prototype.LDB = LD(1);
 
 /**
- * Load the wyde at memory address Y + Z, sign-extend to octa, and put in
- * register X.
+ * Same as LDB but loads the wyde at the calculated address into $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -88,8 +95,8 @@ MMIX.prototype.LDB = LD(1);
 MMIX.prototype.LDW = LD(2);
 
 /**
- * Load the tetra at memory address Y + Z, sign-extend to octa, and put in
- * register X.
+ * Same as LDB but loads the tetra at the calculated address into $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -97,7 +104,8 @@ MMIX.prototype.LDW = LD(2);
 MMIX.prototype.LDT = LD(4);
 
 /**
- * Load the octabyte at memory address Y + Z into register X.
+ * Sames as LDB but loads the octa at the calculated address into $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -105,7 +113,8 @@ MMIX.prototype.LDT = LD(4);
 MMIX.prototype.LDO = LD(8);
 
 /**
- * Load the byte at memory address Y + Z into register X.
+ * Same as LDB but without sign-extension.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -113,7 +122,8 @@ MMIX.prototype.LDO = LD(8);
 MMIX.prototype.LDBU = LD(1, true);
 
 /**
- * Load the wyde at memory address Y + Z into register X.
+ * Same as LDW but without sign-extension.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -121,7 +131,8 @@ MMIX.prototype.LDBU = LD(1, true);
 MMIX.prototype.LDWU = LD(2, true);
 
 /**
- * Load the tetra at memory address Y + Z into register X.
+ * Same as LDT but without sign-extension.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -129,7 +140,8 @@ MMIX.prototype.LDWU = LD(2, true);
 MMIX.prototype.LDTU = LD(4, true);
 
 /**
- * Load the octabyte at memory address Y + Z into register X.
+ * Same as LDO but should be preferred in unsigned contexts.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -137,7 +149,8 @@ MMIX.prototype.LDTU = LD(4, true);
 MMIX.prototype.LDOU = MMIX.prototype.LDO;
 
 /**
- * Load the tetra at memory address Y + Z into the high bits of register X.
+ * Load the tetra at the memory address calculated from $Y and $Z into the high
+ * bits of register X.
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -148,7 +161,8 @@ MMIX.prototype.LDTH = function($X, $Y, $Z) {
 };
 
 /**
- * Load the memory address Y + Z into register X.
+ * Load the sum of the unsigned octabytes in $Y and $Z into $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -159,6 +173,9 @@ MMIX.prototype.LDA = isRgstrRgstrRgstr(sum$Y$Z64U(function($X, A) {
 
 /**
  * Core logic for all ST_ methods.
+ * @param {ByteWidth} byteWidth
+ * @param {string} memMethodName - getByte, getWyde, getTetra, getOcta
+ * @return {function}
  */
 var ST = function(byteWidth, memMethodName) {
   return isRgstrRgstrRgstr(sum$Y$Z64U(function($X, A) {
@@ -171,12 +188,16 @@ var ST = function(byteWidth, memMethodName) {
  * Stores the low byte from the value in register $X at the memory address
  * obtained by adding the values in registers $Y and $Z interpreted as unsigned
  * integers.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
  */
 MMIX.prototype.STB = ST(1, 'setByte');
 
 /**
- * Stores the low wyde from the data in register $X at the memory address
- * obtained by casting the data in $Y and $Z as uint64's and summing them.
+ * Same as STB but stores the low wyde from register $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -184,8 +205,8 @@ MMIX.prototype.STB = ST(1, 'setByte');
 MMIX.prototype.STW = ST(2, 'setWyde');
 
 /**
- * Stores the low tetra from the data in the register $X at the memory address
- * obtained by casting the data in $Y and $Z as uint64's and summing them.
+ * Same as STB but stores the low tetra from register $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -193,8 +214,8 @@ MMIX.prototype.STW = ST(2, 'setWyde');
 MMIX.prototype.STT = ST(4, 'setTetra');
 
 /**
- * Stores the octabyte in register $X at the memory address obtained by
- * casting the octabytes in $Y and $Z as uint64's and summing them.
+ * Same as STB but stores the entire octabyte from register $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -203,27 +224,43 @@ MMIX.prototype.STO = ST(8, 'setOcta');
 
 /**
  * Has the same effect on memory as STB, but overflow never occurs.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
  */
 MMIX.prototype.STBU = MMIX.prototype.STB;
 
 /**
  * Has the same effect on memory as STW, but overflow never occurs.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
  */
 MMIX.prototype.STWU = MMIX.prototype.STW;
 
 /**
  * Has the same effect on memory as STT, but overflow never occurs.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
  */
 MMIX.prototype.STTU = MMIX.prototype.STT;
 
 /**
  * Has the same effect on memory as STOU, but overflow never occurs.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
  */
 MMIX.prototype.STOU = MMIX.prototype.STO;
 
 /**
- * Stores the high tetra from the data in the register $X at the memory address
- * obtained by casting the data in $Y and $Z as uint64's and summing them.
+ * Same as STT but stores the high tetra from register $X.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -237,6 +274,7 @@ MMIX.prototype.STHT = isRgstrRgstrRgstr(sum$Y$Z64U(function($X, A) {
 /**
  * Stores the constant byte X in the memory address obtained by casting the data
  * in $Y and $Z as uint64's and summing them.
+ * @function
  * @param {Hex} X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -262,7 +300,7 @@ function resolve($X, mmix) {
 /**
  * Return the sum of all register arguments when their data is cast as uint64's.
  * @param {Object} mmix - a machine
- * @param {Register...} registers
+ * @param {...Register} registers
  * @return {Uint64}
  */
 function sum$X64U(mmix) {

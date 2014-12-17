@@ -16,7 +16,8 @@
     "mocha": "^2.0.1"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "document": "jsdoc --destination dist --recurse types.js index.js registers.js utils.js memory.js && go run server.go"
   },
   "repository": {
     "type": "git",

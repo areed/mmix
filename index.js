@@ -200,6 +200,22 @@ MMIX.prototype.STT = function($X, $Y, $Z) {
 };
 
 /**
+ * Stores the octabyte in register $X at the memory address obtained by
+ * casting the octabytes in $Y and $Z as uint64's and summing them.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.STO = function($X, $Y, $Z) {
+  var X = resolve($X, this);
+  var Y = resolve($Y, this);
+  var Z = resolve($Z, this);
+
+  var A = utils.uint64(Y).add(utils.uint64(Z));
+  this.memory.setOcta(X, A);
+};
+
+/**
  * Checks that the register is valid then returns the data held in the register.
  * @param {Register} $X
  * @param {Object} mmix - the machine to check

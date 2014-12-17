@@ -2,6 +2,7 @@ var expect = require('chai').expect;
 var nth = require('highlandx/nth');
 var MMIX = require('../');
 var Memory = require('../memory');
+var utils = require('../utils');
 
 describe('Load From Memory Operations', function() {
   var memory = new Memory();
@@ -23,7 +24,7 @@ describe('Load From Memory Operations', function() {
           before(function() {
             mmix.registers.$2 = Y(t);
             mmix.registers.$3 = Z(t);
-            memory.setOcta(data(t), address(t));
+            memory.setOcta(data(t), utils.uint64(address(t)));
           });
 
           describe([op, '$1,$2,$3'].join(' '), function() {
@@ -117,7 +118,7 @@ describe('Store Operations', function() {
       tests.forEach(function(t, i) {
         describe(['$1 = ', $1(t), ', $2 = ', $2(t), ', $3 = ', $3(t), ', M_8[', addr(t), '] = ', memOcta(t)].join(''), function() {
           before(function() {
-            memory.setOcta(memOcta(t), addr(t));
+            memory.setOcta(memOcta(t), utils.uint64(addr(t)));
             mmix.registers.$1 = $1(t);
             mmix.registers.$2 = $2(t);
             mmix.registers.$3 = $3(t);
@@ -126,7 +127,7 @@ describe('Store Operations', function() {
           describe([op, '$1,$2,$3'].join(' '), function() {
             it(['should set the octabyte at M_8[', addr(t), '] to ', answers[i]].join(''), function() {
               mmix[op]('$1', '$2', '$3');
-              var octa = memory.getOcta(addr(t));
+              var octa = memory.getOcta(utils.uint64(addr(t)));
               expect(octa).to.equal(answers[i]);
             });
           });
@@ -145,5 +146,9 @@ describe('Store Operations', function() {
 
   test('STT', [
     'FFFF000089ABCDEF'
+  ]);
+
+  test('STO', [
+    'FFFFFFFFFFFF0000'
   ]);
 });

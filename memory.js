@@ -94,7 +94,7 @@ Memory.prototype.setTetra = function(data, addr) {
  * @return {Hex}
  */
 Memory.prototype.getOcta = function(addr) {
-  var start = utils.effectiveAddress(8, utils.uint64(addr));
+  var start = utils.effectiveAddress(8, addr);
 
   var bytes = [];
   for (var i = 0; i < 8; i++) {
@@ -109,7 +109,7 @@ Memory.prototype.getOcta = function(addr) {
  * @param {Uint64} addr
  */
 Memory.prototype.setOcta = function(data, addr) {
-  var start = Memory.effectiveAddress(8, utils.uint64(addr));
+  var start = Memory.effectiveAddress(8, addr);
 
   data = utils.padOcta(data);
 

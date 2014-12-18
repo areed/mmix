@@ -12,6 +12,7 @@ var uint64 = utils.uint64;
 var hexify = utils.hexify;
 var decify = utils.decify;
 var toHex = utils.toHex;
+var padOcta = utils.padOcta;
 
 /**
  * @constructor
@@ -439,6 +440,44 @@ MMIX.prototype.MULU = isRgstrRgstrRgstr(octaYZ(function($X, Y, Z) {
   this.registers[$X] = prod.substring(sp);
   this.registers.rH = utils.padOcta(prod.substring(0, sp));
 }));
+
+/* Casts the octabytes in $Z and rD to Uint64's. If Z64U > rD64U, concatenate
+ * the octabytes in rD and $Y, cast it to a Uint128, divide it by Z64U,
+ * and put the quotient in $X and the remainder in rR. Otherwise copy the
+ * octabyte from rD into $X and the octabyte from $Y into rR.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.DIVU = isRgstrRgstrRgstr(function($X, $Y, $Z) {
+  var Y = resolve($Y, this);
+  var Z = resolve($Z, this);
+  var rD = resolve('rD', this);
+  var rDY = rD + Y;
+  console.log(Y, Z, rD, rDY);
+
+  var Ydeci = decify(Y);
+  var Zdeci = decify(Z);
+  var rDdeci = decify(rD);
+  var rDYdeci = decify(rDY);
+  console.log(Ydeci, Zdeci, rDdeci, rDYdeci);
+
+  var Y64U = Big(Ydeci);
+  var Z64U = Big(Zdeci);
+  var rD64U = Big(rDdeci);
+  var rDY128U = Big(rDYdeci);
+  console.log(Y64U.valueOf(), Z64U.valueOf(), rD64U.valueOf(), rDY128U.valueOf());
+
+  if (Z64U.cmp(rD64U) === 1) {
+    console.log('if calculation the hard way');
+    this.registers[$X] = padOcta(toHex(rDY128U.div(Z64U).round(0, 0).toString()));
+    this.registers.rR = padOcta(toHex(rDY128U.mod(Z64U).toString()));
+    return;
+  }
+  console.log('shortcutting');
+  this.registers[$X] = rD;
+  this.registers.rR = Y;
+});
 
 /**
  * Checks that the register is valid then returns the data held in the register.

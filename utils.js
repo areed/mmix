@@ -92,32 +92,33 @@ exports.hexify = function(l) {
  * @param {string}
  */
 exports.decify = (function() {
-  var h2n = {
-    '0': 0,
-    '1': 1,
-    '2': 2,
-    '3': 3,
-    '4': 4,
-    '5': 5,
-    '6': 6,
-    '7': 7,
-    '8': 8,
-    '9': 9,
-    'A': 10,
-    'B': 11,
-    'C': 12,
-    'D': 13,
-    'E': 14,
-    'F': 15,
+  var h2d = {
+    '0': '0',
+    '1': '1',
+    '2': '2',
+    '3': '3',
+    '4': '4',
+    '5': '5',
+    '6': '6',
+    '7': '7',
+    '8': '8',
+    '9': '9',
+    'A': '10',
+    'B': '11',
+    'C': '12',
+    'D': '13',
+    'E': '14',
+    'F': '15',
   };
   var sexa = new Big('16');
 
   return function(hex) {
     var length = hex.length;
     return hex
+      .toUpperCase()
       .split('')
       .map(function(h, i) {
-        return Big(h2n[h]).times(sexa.pow(length - i - 1));
+        return Big(h2d[h]).times(sexa.pow(length - i - 1));
       })
       .reduce(function(sum, n) {
         return n.plus(sum);

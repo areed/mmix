@@ -195,15 +195,27 @@ describe('Store Operations', function() {
 describe('Arithmetic Operations', function() {
   var mmix = new MMIX();
   var tests = [
-    //Y, Z
-    ['0000000000000001', '0000000000000001'],
-    ['0000000000000002', 'FFFFFFFFFFFFFFFE'],
-    ['FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF'],
-    ['FFFFFFFFFFFFFFFF', '0000000000000002'],
-    ['0000000000000003', '0000000000000000'],
+    //Y, Z, rD
+    ['0000000000000001', '0000000000000001', '0000000000000001'],
+    ['0000000000000002', 'FFFFFFFFFFFFFFFE', '8765432109ABCDEF'],
+    ['FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF', '0000000000000000'],
+    ['FFFFFFFFFFFFFFFF', '0000000000000002', '0000000001111111'],
+    ['0000000000000003', '0000000000000000', '0000000000000003'],
+    ['9e3779b97f4a7c16', '9e3779b97f4a7c16', '9e3779b97f4a7c16'],
   ];
   var Y = nth(0);
   var Z = nth(1);
+  var rD = nth(2);
+
+  var DIVUanswers = [
+    //$X, rR
+    ['0000000000000001', '0000000000000001'],
+    ['8765432109ABCDF0', '0ECA864213579BE2'],
+    ['0000000000000001', '0000000000000000'],
+    ['0000000001111111', 'FFFFFFFFFFFFFFFF'],
+    ['0000000000000003', '0000000000000003'],
+    ['9e3779b97f4a7c16', '9e3779b97f4a7c16'],
+  ];
 
   var test = function(op, answers) {
     tests.forEach(function(t, i) {
@@ -211,6 +223,7 @@ describe('Arithmetic Operations', function() {
         before(function() {
           mmix.registers.$2 = Y(t);
           mmix.registers.$3 = Z(t);
+          mmix.registers.rD = rD(t);
         });
 
         describe([op, '$1,$2,$3'].join(' '), function() {
@@ -219,7 +232,7 @@ describe('Arithmetic Operations', function() {
             expect(mmix.registers.$1).to.equal(answers[i][0]);
           });
 
-          if (op === 'DIV') {
+          if (op === 'DIV' || op === 'DIVU') {
             it(['should set the remainder register to', answers[i][1]].join(' '), function() {
               expect(mmix.registers.rR).to.equal(answers[i][1]);
             });
@@ -241,6 +254,7 @@ describe('Arithmetic Operations', function() {
     ['FFFFFFFFFFFFFFFE'],
     ['0000000000000001'],
     ['0000000000000003'],
+    ['3C6EF372FE94F82C'],
   ]);
 
   test('SUB', [
@@ -249,6 +263,7 @@ describe('Arithmetic Operations', function() {
     ['0000000000000000'],
     ['FFFFFFFFFFFFFFFD'],
     ['0000000000000003'],
+    ['0000000000000000'],
   ]);
 
   test('MUL', [
@@ -257,6 +272,7 @@ describe('Arithmetic Operations', function() {
     ['0000000000000001'],
     ['FFFFFFFFFFFFFFFE'],
     ['0000000000000000'],
+    ['1BB32095CCDD51E4'],
   ]);
 
   test('DIV', [
@@ -265,6 +281,7 @@ describe('Arithmetic Operations', function() {
     ['0000000000000001', '0000000000000000'],
     ['0000000000000000', 'FFFFFFFFFFFFFFFF'],
     ['0000000000000000', '0000000000000003'],
+    ['0000000000000001', '0000000000000000'],
   ]);
 
   test('ADDU', [
@@ -273,6 +290,7 @@ describe('Arithmetic Operations', function() {
     ['FFFFFFFFFFFFFFFE'],
     ['0000000000000001'],
     ['0000000000000003'],
+    ['3C6EF372FE94F82C'],
   ]);
 
   test('SUBU', [
@@ -281,6 +299,7 @@ describe('Arithmetic Operations', function() {
     ['0000000000000000'],
     ['FFFFFFFFFFFFFFFD'],
     ['0000000000000003'],
+    ['0000000000000000'],
   ]);
 
   test('MULU', [
@@ -289,6 +308,8 @@ describe('Arithmetic Operations', function() {
     ['0000000000000001', 'FFFFFFFFFFFFFFFE'],
     ['FFFFFFFFFFFFFFFE', '0000000000000001'],
     ['0000000000000000', '0000000000000000'],
+    ['1BB32095CCDD51E4', '61C8864680B583EA'],
   ]);
 
+  test('DIVU', DIVUanswers);
 });

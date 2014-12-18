@@ -58,4 +58,35 @@ describe('Utils', function() {
       });
     });
   });
+
+  (function() {
+    var tests = [
+      //hex, decimal
+      ['0', '0'],
+      ['A', '10'],
+      ['FF', '255'],
+      ['2B1', '689'],
+      ['830C', '33548'],
+    ];
+    var hexa = nth(0);
+    var deci = nth(1);
+
+    describe('decify', function() {
+      tests.forEach(function(t) {
+        it([hexa(t), '=>', deci(t)].join(' '), function() {
+          var d = utils.decify(hexa(t));
+          expect(d).to.equal(deci(t));
+        });
+      });
+    });
+
+    describe('toHex', function() {
+      tests.forEach(function(t) {
+        it([deci(t), '=>', hexa(t)].join(' '), function() {
+          var h = utils.toHex(deci(t));
+          expect(h).to.equal(hexa(t));
+        });
+      });
+    });
+  })();
 });

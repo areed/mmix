@@ -7,8 +7,9 @@
     "test": "test"
   },
   "dependencies": {
-    "long": "^2.2.3",
-    "highland": "2.2.0"
+    "big.js": "^3.0.0",
+    "highland": "2.2.0",
+    "long": "^2.2.3"
   },
   "devDependencies": {
     "chai": "^1.10.0",

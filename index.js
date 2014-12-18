@@ -6,9 +6,10 @@ var registers = require('./registers');
 var utils = require('./utils');
 var Memory = require('./Memory');
 
-var hexify = utils.hexify;
 var int64 = utils.int64;
 var uint64 = utils.uint64;
+var hexify = utils.hexify;
+var decify = utils.decify;
 
 /**
  * @constructor
@@ -87,6 +88,20 @@ var uint64$Y$Z = function(fn) {
     var Z64U = uint64(resolve($Z, this));
 
     fn.apply(this, [$X, Y64U, Z64U]);
+  };
+};
+
+/**
+ * Resolves $Y and $Z to their octabytes before calling the passed function.
+ * @param {function} fn
+ * @param {function}
+ */
+var octaYZ = function(fn) {
+  return function($X, $Y, $Z) {
+    var Y = resolve($Y, this);
+    var Z = resolve($Z, this);
+
+    fn.apply(this, [$X, Y, Z]);
   };
 };
 
@@ -395,6 +410,19 @@ MMIX.prototype.ADDU = isRgstrRgstrRgstr(uint64$Y$Z(function($X, Y64U, Z64U) {
  */
 MMIX.prototype.SUBU = isRgstrRgstrRgstr(uint64$Y$Z(function($X, Y64U, Z64U) {
   this.registers[$X] = hexify(Y64U.subtract(Z64U));
+}));
+
+/**
+ * Casts the octabytes in $Y and $Z to uint64's and puts the low 8 bytes of
+ * their product in $X and the high 8 bytes into the himult register rH.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.MULU = isRgstrRgstrRgstr(octaYZ(function($X, Y, Z) {
+  var Yd = decify(Y);
+  var Zd = decify(Z);
 }));
 
 /**

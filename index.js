@@ -376,12 +376,25 @@ MMIX.prototype.DIV = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
 /**
  * Casts the octabytes in $Y and $Z to uint64's and puts their sum in $X.
  * Same as LDA.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
  */
 MMIX.prototype.ADDU = isRgstrRgstrRgstr(uint64$Y$Z(function($X, Y64U, Z64U) {
   this.registers[$X] = hexify(Y64U.add(Z64U));
+}));
+
+/**
+ * Casts the octabytes in $Y and $Z to uint64's and puts the difference of Y - Z
+ * in $X.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.SUBU = isRgstrRgstrRgstr(uint64$Y$Z(function($X, Y64U, Z64U) {
+  this.registers[$X] = hexify(Y64U.subtract(Z64U));
 }));
 
 /**

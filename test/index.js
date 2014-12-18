@@ -313,3 +313,57 @@ describe('Arithmetic Operations', function() {
 
   test('DIVU', DIVUanswers);
 });
+
+describe('_ADDU Operations', function() {
+  var mmix = new MMIX();
+  var tests = [
+    ['0000000000000000', '0000000000000000'],
+    ['0000000000000000', '0000000000000001'],
+    ['2000000000000000', '0000000000000008'],
+  ];
+  var $2 = nth(0);
+  var $3 = nth(1);
+
+  test('2ADDU', [
+    '0000000000000000',
+    '0000000000000001',
+    '4000000000000008',
+  ]);
+
+  test('4ADDU', [
+    '0000000000000000',
+    '0000000000000001',
+    '8000000000000008',
+  ]);
+
+  test('8ADDU', [
+    '0000000000000000',
+    '0000000000000001',
+    '0000000000000008',
+  ]);
+
+  test('16ADDU', [
+    '0000000000000000',
+    '0000000000000001',
+    '0000000000000008',
+  ]);
+
+  function test(op, answers) {
+    tests.forEach(function(t, i) {
+      describe(['$2 ==', $2(t), '&& $3 ==', $3(t)].join(' '), function() {
+        before(function() {
+          mmix.registers.$1 = '0000000000000000';
+          mmix.registers.$2 = $2(t);
+          mmix.registers.$3 = $3(t);
+        });
+
+        describe([op, '$1,$2,$3'].join(' '), function() {
+          it(['should set $1 ==', answers[i]].join(' '), function() {
+            mmix[op]('$1', '$2', '$3');
+            expect(mmix.registers.$1).to.equal(answers[i]);
+          });
+        });
+      });
+    });
+  }
+});

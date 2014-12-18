@@ -454,30 +454,68 @@ MMIX.prototype.DIVU = isRgstrRgstrRgstr(function($X, $Y, $Z) {
   var Z = resolve($Z, this);
   var rD = resolve('rD', this);
   var rDY = rD + Y;
-  console.log(Y, Z, rD, rDY);
 
-  var Ydeci = decify(Y);
   var Zdeci = decify(Z);
   var rDdeci = decify(rD);
   var rDYdeci = decify(rDY);
-  console.log(Ydeci, Zdeci, rDdeci, rDYdeci);
 
-  var Y64U = Big(Ydeci);
   var Z64U = Big(Zdeci);
   var rD64U = Big(rDdeci);
   var rDY128U = Big(rDYdeci);
-  console.log(Y64U.valueOf(), Z64U.valueOf(), rD64U.valueOf(), rDY128U.valueOf());
 
   if (Z64U.cmp(rD64U) === 1) {
-    console.log('if calculation the hard way');
     this.registers[$X] = padOcta(toHex(rDY128U.div(Z64U).round(0, 0).toString()));
     this.registers.rR = padOcta(toHex(rDY128U.mod(Z64U).toString()));
     return;
   }
-  console.log('shortcutting');
   this.registers[$X] = rD;
   this.registers.rR = Y;
 });
+
+function XADDU(scale) {
+  return function($X, $Y, $Z) {
+    var Y = resolve($Y, this);
+    var Z = resolve($Z, this);
+    var YBigU = Big(decify(Y));
+    var ZBigU = Big(decify(Z));
+    this.registers[$X] = padOcta(toHex(YBigU.times(scale).plus(ZBigU).toString()));
+  };
+}
+
+/** Casts the octabytes in $Y and $Z to UIntBig's and set $X to (2Y + Z) mod 2^64.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype['2ADDU'] = isRgstrRgstrRgstr(XADDU(2));
+
+/**
+ * Same as 2ADDU but scales Y by 4.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype['4ADDU'] = isRgstrRgstrRgstr(XADDU(4));
+
+/**
+ * Same as 2ADDU but scales Y by 8.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype['8ADDU'] = isRgstrRgstrRgstr(XADDU(8));
+
+/**
+ * Same as 2ADDU but scales Y by 16.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype['16ADDU'] = isRgstrRgstrRgstr(XADDU(16));
 
 /**
  * Checks that the register is valid then returns the data held in the register.

@@ -76,6 +76,20 @@ var int64$Y$Z = function(fn) {
   };
 };
 
+/**
+ * Same as int64$Y$Z but casts the octabytes to Uint64's.
+ * @param {function} fn
+ * @param {function}
+ */
+var uint64$Y$Z = function(fn) {
+  return function($X, $Y, $Z) {
+    var Y64U = uint64(resolve($Y, this));
+    var Z64U = uint64(resolve($Z, this));
+
+    fn.apply(this, [$X, Y64U, Z64U]);
+  };
+};
+
 /* Operations */
 
 /**
@@ -352,11 +366,22 @@ MMIX.prototype.DIV = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
   if (Z64.toNumber() === 0) {
     this.registers[$X] = hexify(Z64);
     this.registers.rR = hexify(Y64);
-    //an "integer divide check" alos occurs at this point according to the spec
+    //an "integer divide check" also occurs at this point according to the spec
     return;
   }
   this.registers[$X] = hexify(Y64.div(Z64));
   this.registers.rR = hexify(Y64.modulo(Z64));
+}));
+
+/**
+ * Casts the octabytes in $Y and $Z to uint64's and puts their sum in $X.
+ * Same as LDA.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ADDU = isRgstrRgstrRgstr(uint64$Y$Z(function($X, Y64U, Z64U) {
+  this.registers[$X] = hexify(Y64U.add(Z64U));
 }));
 
 /**

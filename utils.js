@@ -110,18 +110,19 @@ exports.decify = (function() {
     'E': 14,
     'F': 15,
   };
+  var sexa = new Big('16');
 
   return function(hex) {
     var length = hex.length;
     return hex
       .split('')
       .map(function(h, i) {
-        return new Long(h2n[h] * Math.pow(16, length - i - 1));
+        return Big(h2n[h]).times(sexa.pow(length - i - 1));
       })
       .reduce(function(sum, n) {
-        return n.add(sum);
+        return n.plus(sum);
       })
-      .toString(10);
+      .toFixed();
   };
 })();
 

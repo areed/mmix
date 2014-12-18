@@ -224,6 +224,12 @@ describe('Arithmetic Operations', function() {
               expect(mmix.registers.rR).to.equal(answers[i][1]);
             });
           }
+
+          if (op === 'MULU') {
+            it(['should set the himult register to', answers[i][1]].join(' '), function() {
+              expect(mmix.registers.rH).to.equal(answers[i][1]);
+            });
+          }
         });
       });
     });
@@ -276,4 +282,13 @@ describe('Arithmetic Operations', function() {
     ['FFFFFFFFFFFFFFFD'],
     ['0000000000000003'],
   ]);
+
+  test('MULU', [
+    ['0000000000000001', '0000000000000000'],
+    ['FFFFFFFFFFFFFFFC', '0000000000000001'],
+    ['0000000000000001', 'FFFFFFFFFFFFFFFE'],
+    ['FFFFFFFFFFFFFFFE', '0000000000000001'],
+    ['0000000000000000', '0000000000000000'],
+  ]);
+
 });

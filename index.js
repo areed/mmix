@@ -1,3 +1,4 @@
+var Big = require('big.js');
 var _ = require('highland');
 var validator = require('highlandx/validator');
 var conditions = require('highlandx/conditions');
@@ -10,6 +11,7 @@ var int64 = utils.int64;
 var uint64 = utils.uint64;
 var hexify = utils.hexify;
 var decify = utils.decify;
+var toHex = utils.toHex;
 
 /**
  * @constructor
@@ -423,6 +425,19 @@ MMIX.prototype.SUBU = isRgstrRgstrRgstr(uint64$Y$Z(function($X, Y64U, Z64U) {
 MMIX.prototype.MULU = isRgstrRgstrRgstr(octaYZ(function($X, Y, Z) {
   var Yd = decify(Y);
   var Zd = decify(Z);
+  var YBig = new Big(Yd);
+  var ZBig = new Big(Zd);
+  var prod = YBig.times(ZBig);
+
+  prod = toHex(prod.toString());
+  if (prod.length <= 16) {
+    this.registers[$X] = utils.padOcta(prod);
+    this.registers.rH = '0000000000000000';
+    return;
+  }
+  var sp = prod.length - 16;
+  this.registers[$X] = prod.substring(sp);
+  this.registers.rH = utils.padOcta(prod.substring(0, sp));
 }));
 
 /**

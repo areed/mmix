@@ -1,94 +1,37 @@
 var expect = require('chai').expect;
-var nth = require('highlandx/nth');
+var Big = require('big.js');
+
 var utils = require('../utils');
-var Long = require('long');
 
 describe('Utils', function() {
-  var intTests = [
-    //hex, signed, unsigned
-    ['0', new Long(0, 0), new Long(0, 0, true)],
-    ['1', new Long(1, 0), new Long(1, 0, true)],
-    ['FFFFFFFF', new Long(-1, 0), new Long(-1, 0, true)],
-    ['FFFFFFFFFFFFFFFF', new Long(-1, -1), new Long(-1, -1, true)]
-  ];
-  var hex = nth(0);
-  var signed = nth(1);
-  var unsigned = nth(2);
-
-  intTests.forEach(function(t) {
-    describe(['int64("', hex(t), '")'].join(''), function() {
-      it(['=> ', signed(t).toString(16)].join(''), function() {
-        var i = utils.int64(hex(t));
-        expect(i.compare(signed(t))).to.equal(0);
-      });
-    });
-  });
-
-  intTests.forEach(function(t) {
-    describe(['uint64("', hex(t), '")'].join(''), function() {
-      it(['=> ', unsigned(t).toString(16)].join(''), function() {
-        var u = utils.uint64(hex(t));
-        expect(u.compare(unsigned(t))).to.equal(0);
-      });
-    });
-  });
-
-  describe('signExtend', function() {
-    var tests = [
-      //byte width, in, out
-      [1, 'FF', 'FFFFFFFFFFFFFFFF'],
-      [1, '60', '0000000000000060'],
-      [2, 'FFFF', 'FFFFFFFFFFFFFFFF'],
-      [2, '7FFF', '0000000000007FFF'],
-      [4, '80000000', 'FFFFFFFF80000000'],
-      [4, '76543210', '0000000076543210'],
-      [8, 'FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF'],
-      [8, '0000000000000000', '0000000000000000'],
-    ];
-    var width = nth(0);
-    var input = nth(1);
-    var output = nth(2);
-
-    tests.forEach(function(t) {
-      describe(['(', width(t), ', ', input(t), ')'].join(''), function() {
-        it(['=>', output(t)].join(' '), function() {
-          var actual = utils.signExtend(width(t), input(t));
-          expect(actual).to.equal(output(t));
+  describe('effectiveAddress', function() {
+    var effective = utils.effectiveAddress;
+    [
+      //input, byte effective, wyde effective, tetra effective, octa effective
+      [1000, 1000, 1000, 1000, 1000],
+      [1001, 1001, 1000, 1000, 1000],
+      [1002, 1002, 1002, 1000, 1000],
+      [1003, 1003, 1002, 1000, 1000],
+      [1004, 1004, 1004, 1004, 1000],
+      [1005, 1005, 1004, 1004, 1000],
+      [1006, 1006, 1006, 1004, 1000],
+      [1007, 1007, 1006, 1004, 1000],
+      [1008, 1008, 1008, 1008, 1008],
+    ].forEach(function(t) {
+      var input = Big(t[0]);
+ 
+      [
+        [1, Big(t[1])],
+        [2, Big(t[2])],
+        [4, Big(t[3])],
+        [8, Big(t[4])],
+      ].forEach(function(r) {
+        var width = r[0];
+        var answer = r[1];
+        it(['(', width, input, ') =>', answer].join(' '), function() {
+          expect(effective(width, input).toString()).to.equal(answer.toString());
         });
       });
     });
   });
-
-  (function() {
-    var tests = [
-      //hex, decimal
-      ['0', '0'],
-      ['A', '10'],
-      ['FF', '255'],
-      ['2B1', '689'],
-      ['830C', '33548'],
-      ['FFFFFFFFFFFFFFFF', '18446744073709551615'],
-      ['1234567890ABCDEFEDCBA09876543210', '24197857200151252744792662746087043600'],
-    ];
-    var hexa = nth(0);
-    var deci = nth(1);
-
-    describe('decify', function() {
-      tests.forEach(function(t) {
-        it([hexa(t), '=>', deci(t)].join(' '), function() {
-          var d = utils.decify(hexa(t));
-          expect(d).to.equal(deci(t));
-        });
-      });
-    });
-
-    describe('toHex', function() {
-      tests.forEach(function(t) {
-        it([deci(t), '=>', hexa(t)].join(' '), function() {
-          var h = utils.toHex(deci(t));
-          expect(h).to.equal(hexa(t));
-        });
-      });
-    });
-  })();
 });

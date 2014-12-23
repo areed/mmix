@@ -551,6 +551,7 @@ MMIX.prototype.SLU = MMIX.prototype.SL;
 
 /**
  * Shift right signed.
+ * @param function
  * @param {Register} $X;
  * @param {Register} $Y;
  * @param {Register} $Z;
@@ -562,6 +563,7 @@ MMIX.prototype.SR = rgstrsYZ(function($X, $Y, $Z) {
 
 /**
  * Shift right unsigned.
+ * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
@@ -569,6 +571,46 @@ MMIX.prototype.SR = rgstrsYZ(function($X, $Y, $Z) {
 MMIX.prototype.SRU = rgstrsYZ(function($X, $Y, $Z) {
   var Z = parseInt(u($Z).toString(), 10);
   this.registers[$X] = _.hexify64U(_.quotient(two.pow(Z), u($Y)));
+});
+
+/**
+ * Compare signed.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.CMP = rgstrsYZ(function($X, $Y, $Z) {
+  var cmp = s($Y).cmp(s($Z));
+  if (cmp === -1) {
+    this.registers[$X] = 'FFFFFFFFFFFFFFFF';
+    return;
+  }
+  if (cmp === 0) {
+    this.registers[$X] = '0000000000000000';
+    return;
+  }
+  this.registers[$X] = '0000000000000001';
+});
+
+/**
+ * Compare unsigned.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.CMPU = rgstrsYZ(function($X, $Y, $Z) {
+  var cmp = u($Y).cmp(u($Z));
+  if (cmp === -1) {
+    this.registers[$X] = 'FFFFFFFFFFFFFFFF';
+    return;
+  }
+  if (cmp === 0) {
+    this.registers[$X] = '0000000000000000';
+    return;
+  }
+  this.registers[$X] = '0000000000000001';
 });
 
 module.exports = MMIX;

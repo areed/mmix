@@ -549,4 +549,26 @@ MMIX.prototype.SL = rgstrsYZ(function($X, $Y, $Z) {
  */
 MMIX.prototype.SLU = MMIX.prototype.SL;
 
+/**
+ * Shift right signed.
+ * @param {Register} $X;
+ * @param {Register} $Y;
+ * @param {Register} $Z;
+ */
+MMIX.prototype.SR = rgstrsYZ(function($X, $Y, $Z) {
+  var Z = parseInt(u($Z).toString(), 10);
+  this.registers[$X] = _.hexify64(_.quotient(two.pow(Z), s($Y)));
+});
+
+/**
+ * Shift right unsigned.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.SRU = rgstrsYZ(function($X, $Y, $Z) {
+  var Z = parseInt(u($Z).toString(), 10);
+  this.registers[$X] = _.hexify64U(_.quotient(two.pow(Z), u($Y)));
+});
+
 module.exports = MMIX;

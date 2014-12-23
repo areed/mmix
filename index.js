@@ -862,4 +862,17 @@ MMIX.prototype.XOR = function($X, $Y, $Z) {
   this.registers[$X] = extendUnsignedTo64(Y.xor(Z).toString(16).toUpperCase());
 };
 
+/**
+ * Bitwise and-not.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ANDN = function($X, $Y, $Z) {
+  var Y = Long.fromString(this.registers[$Y], true, 16);
+  var Z = Long.fromString(this.registers[$Z], true, 16);
+
+  this.registers[$X] = extendUnsignedTo64(Y.and(Z.not()).toString(16).toUpperCase());
+};
+
 module.exports = MMIX;

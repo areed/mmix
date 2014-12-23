@@ -1,4 +1,5 @@
 var Big = require('big.js');
+var Long = require('long');
 var hexa = require('hexa');
 
 var utils = require('./utils');
@@ -815,5 +816,22 @@ MMIX.prototype.ZSNP = rgstrsY(function($X, $Y, $Z) {
 MMIX.prototype.ZSEV = rgstrsY(function($X, $Y, $Z) {
   this.registers[$X] = s($Y).mod(2).cmp(0) === 0 ? this.registers[$Z] : zeros;
 });
+
+/**
+ * Bitwise and.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.AND = function($X, $Y, $Z) {
+  var y = this.registers[$Y];
+  var z = this.registers[$Z];
+  var Y = Long.fromString(y, true, 16);
+  var Z = Long.fromString(z, true, 16);
+  var x = Y.and(Z);
+
+  this.registers[$X] = extendUnsignedTo64(Y.and(Z).toString(16));
+};
 
 module.exports = MMIX;

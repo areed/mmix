@@ -225,4 +225,32 @@ describe('Bitwise Operations', function() {
       });
     });
   });
+
+  describe('SADD', function() {
+    [
+      ['0000000000000000', 'FFFFFFFFFFFFFFFF', '0000000000000000'],
+      ['FFFFFFFFFFFFFFFF', '0000000000000000', '0000000000000040'],
+      ['0101010101010101', '0000000000000000', '0000000000000008'],
+      ['0101010101010101', 'FFFFFFFFFFFFFFFF', '0000000000000000'],
+      ['AAAAAAAAAAAAAAAA', '3333333333333333', '0000000000000010'],
+      ['2222222222222222', 'DDDDDDDDDDDDDDDD', '0000000000000010'],
+      ['DDDDDDDDDDDDDDDD', '2222222222222222', '0000000000000030'],
+    ].forEach(function(t) {
+      var Y = t[0];
+      var Z = t[1];
+      var X = t[2];
+
+      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
+        before(function() {
+          mmix.registers.$2 = Y;
+          mmix.registers.$3 = Z;
+        });
+
+        it('SADD($1, $2, $3): $1 == ' + X, function() {
+          mmix.SADD('$1', '$2', '$3');
+          expect(mmix.registers.$1).to.equal(X);
+        });
+      });
+    });
+  });
 });

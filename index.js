@@ -939,4 +939,26 @@ MMIX.prototype.MUX = function($X, $Y, $Z) {
   this.registers[$X] = extendUnsignedTo64(a.or(b).toString(16).toUpperCase());
 };
 
+/**
+ * Sideways add. Counts the number of bit positions in which register $Y has a 1
+ * while register $Z has a 0.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.SADD = function($X, $Y, $Z) {
+  var Y = Long.fromString(this.registers[$Y], true, 16);
+  var Z = Long.fromString(this.registers[$Z], true, 16);
+  var x = Y
+    .and(Z.not())
+    .toString(2)
+    .toUpperCase()
+    .split('')
+    .reduce(function(n,m) {
+      return parseInt(n, 10) + parseInt(m, 10);
+    }, 0);
+
+  this.registers[$X] = hexify64(x + '');
+};
+
 module.exports = MMIX;

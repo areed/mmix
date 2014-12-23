@@ -13,6 +13,15 @@ var u = function($R) {
 var s = function($R) {
   return $R.signed();
 };
+var b = function($R) {
+  return $R.byte();
+};
+var w = function($R) {
+  return $R.wyde();
+};
+var t = function($R) {
+  return $R.tetra();
+};
 var hexify64 = function(deci) {
   if (deci instanceof Big) {
     return hexa.hexify(deci.toFixed(), 64);
@@ -128,6 +137,18 @@ Register.prototype.unsigned = function() {
 
 Register.prototype.signed = function() {
   return Big(decify(this.registers[this.name], 64, true));
+};
+
+Register.prototype.byte = function() {
+  return Big(decify(this.registers[this.name], 64)).mod(two.pow(8));
+};
+
+Register.prototype.wyde = function() {
+  return Big(decify(this.registers[this.name], 64)).mod(two.pow(16));
+};
+
+Register.prototype.tetra = function() {
+  return Big(decify(this.registers[this.name], 64)).mod(two.pow(32));
 };
 
 /**
@@ -955,10 +976,23 @@ MMIX.prototype.SADD = function($X, $Y, $Z) {
     .toUpperCase()
     .split('')
     .reduce(function(n,m) {
-      return parseInt(n, 10) + parseInt(m, 10);
+      return n + parseInt(m, 10);
     }, 0);
 
   this.registers[$X] = hexify64(x + '');
 };
+
+/**
+ * Byte difference.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.BDIF = rgstrsYZ(function($X, $Y, $Z) {
+  var diff = b($Y).minus(b($Z));
+
+  this.registers[$X] = diff.cmp(0) === 1 ? hexify64U(diff) : zeros;
+});
 
 module.exports = MMIX;

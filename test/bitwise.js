@@ -196,4 +196,33 @@ describe('Bitwise Operations', function() {
       });
     }); 
   });
+
+  describe('MUX', function() {
+    [
+      ['0000000000000000', 'FFFFFFFFFFFFFFFF', '8080808080808080', '7F7F7F7F7F7F7F7F'],
+      ['0101010101010101', '0000000000000000', '0101010101010101', '0101010101010101'],
+      ['0101010101010101', 'FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF', '0101010101010101'],
+      ['AAAAAAAAAAAAAAAA', '3333333333333333', 'BBBBBBBBBBBBBBBB', 'AAAAAAAAAAAAAAAA'],
+      ['2222222222222222', 'DDDDDDDDDDDDDDDD', 'FFFFFFFFFFFFFFFF', '2222222222222222'],
+      ['2222222222222222', 'DDDDDDDDDDDDDDDD', '0000000000000000', 'DDDDDDDDDDDDDDDD'],
+    ].forEach(function(t) {
+      var Y = t[0];
+      var Z = t[1];
+      var rM = t[2];
+      var X = t[3];
+
+      describe(['$2 ==', Y, '&& $3 ==', Z, '&& $rM ==', rM].join(' '), function() {
+        before(function() {
+          mmix.registers.$2 = Y;
+          mmix.registers.$3 = Z;
+          mmix.registers.rM = rM;
+        });
+
+        it('MUX($1, $2, $3): $1 == ' + X, function() {
+          mmix.MUX('$1', '$2', '$3');
+          expect(mmix.registers.$1).to.equal(X);
+        });
+      });
+    });
+  });
 });

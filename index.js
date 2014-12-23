@@ -922,4 +922,21 @@ MMIX.prototype.NXOR = function($X, $Y, $Z) {
   this.registers[$X] = extendUnsignedTo64(Long.fromString(this.registers[$X], true, 16).not().toString(16).toUpperCase());
 };
 
+/**
+ * Bitwise multiplex.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.MUX = function($X, $Y, $Z) {
+  var Y = Long.fromString(this.registers[$Y], true, 16);
+  var Z = Long.fromString(this.registers[$Z], true, 16);
+  var rM = Long.fromString(this.registers.rM, true, 16);
+  var a = Y.and(rM);
+  var b = Z.and(rM.not());
+
+  this.registers[$X] = extendUnsignedTo64(a.or(b).toString(16).toUpperCase());
+};
+
 module.exports = MMIX;

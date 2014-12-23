@@ -910,4 +910,16 @@ MMIX.prototype.NOR = function($X, $Y, $Z) {
   this.registers[$X] = extendUnsignedTo64(Long.fromString(this.registers[$X], true, 16).not().toString(16).toUpperCase());
 };
 
+/**
+ * Bitwise not-exclusive-or.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.NXOR = function($X, $Y, $Z) {
+  this.XOR($X, $Y, $Z);
+  this.registers[$X] = extendUnsignedTo64(Long.fromString(this.registers[$X], true, 16).not().toString(16).toUpperCase());
+};
+
 module.exports = MMIX;

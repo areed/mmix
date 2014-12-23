@@ -172,4 +172,28 @@ describe('Bitwise Operations', function() {
       });
     }); 
   });
+
+  describe('NXOR', function() {
+    [
+      ['0101010101010101', '0000000000000000', 'FEFEFEFEFEFEFEFE'],
+      ['0101010101010101', 'FFFFFFFFFFFFFFFF', '0101010101010101'],
+      ['AAAAAAAAAAAAAAAA', '3333333333333333', '6666666666666666'],
+    ].forEach(function(t) {
+      var Y = t[0];
+      var Z = t[1];
+      var X = t[2];
+
+      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
+        before(function() {
+          mmix.registers.$2 = Y;
+          mmix.registers.$3 = Z;
+        });
+
+        it('NXOR($1, $2, $3): $1 == ' + X, function() {
+          mmix.NXOR('$1', '$2', '$3');
+          expect(mmix.registers.$1).to.equal(X);
+        });
+      });
+    }); 
+  });
 });

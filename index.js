@@ -43,6 +43,7 @@ var signExtend32To64 = function(hex) {
 
 var two = new Big('2');
 var twoToThe64th = two.pow(64);
+var zeros = '0000000000000000';
 
 /**
  * @constructor
@@ -87,6 +88,16 @@ function rgstrsYZ(op) {
       $X,
       new Register(this.registers, $Y),
       new Register(this.registers, $Z),
+    ]);
+  };
+}
+
+function rgstrsY(op) {
+  return function($X, $Y, $Z) {
+    op.apply(this, [
+      $X,
+      new Register(this.registers, $Y),
+      $Z,
     ]);
   };
 }
@@ -611,6 +622,198 @@ MMIX.prototype.CMPU = rgstrsYZ(function($X, $Y, $Z) {
     return;
   }
   this.registers[$X] = '0000000000000001';
+});
+
+/**
+ * Conditional set if negative.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.CSN = rgstrsY(function($X, $Y, $Z) {
+  if (s($Y).cmp(0) === -1) {
+    this.registers[$X] = this.registers[$Z];
+  }
+});
+
+/**
+ * Conditional set if zero.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.CSZ = rgstrsY(function($X, $Y, $Z) {
+  if (s($Y).cmp(0) === 0) {
+    this.registers[$X] = this.registers[$Z];
+  }
+});
+
+/**
+ * Conditional set if positive.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.CSP = rgstrsY(function($X, $Y, $Z) {
+  if (s($Y).cmp(0) === 1) {
+    this.registers[$X] = this.registers[$Z];
+  }
+});
+
+/**
+ * Conditional set if odd.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.CSOD = rgstrsY(function($X, $Y, $Z) {
+  if (_.remainder(two, s($Y)).cmp(1) === 0) {
+    this.registers[$X] = this.registers[$Z];
+  }
+});
+
+/**
+ * Conditional set if nonnegative.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.CSNN = rgstrsY(function($X, $Y, $Z) {
+  if (s($Y).cmp(0) > -1) {
+    this.registers[$X] = this.registers[$Z];
+  }
+});
+
+/**
+ * Conditional set if nonzero.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.CSNZ = rgstrsY(function($X, $Y, $Z) {
+  if (s($Y).cmp(0) !== 0) {
+    this.registers[$X] = this.registers[$Z];
+  }
+});
+
+/**
+ * Conditional set if nonpositive.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.CSNP = rgstrsY(function($X, $Y, $Z) {
+  if (s($Y).cmp(0) <= 0) {
+    this.registers[$X] = this.registers[$Z];
+  }
+});
+
+/**
+ * Conditional set if even.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.CSEV = rgstrsY(function($X, $Y, $Z) {
+  if (s($Y).mod(2).cmp(0) === 0) {
+    this.registers[$X] = this.registers[$Z];
+  }
+});
+
+/**
+ * Zero or set if negative.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ZSN = rgstrsY(function($X, $Y, $Z) {
+  this.registers[$X] = s($Y).cmp(0) === -1 ? this.registers[$Z] : zeros;
+});
+
+/**
+ * Zero or set if zero.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ZSZ = rgstrsY(function($X, $Y, $Z) {
+  this.registers[$X] = s($Y).cmp(0) === 0 ? this.registers[$Z] : zeros;
+});
+
+/**
+ * Zero or set if positive.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ZSP = rgstrsY(function($X, $Y, $Z) {
+  this.registers[$X] = s($Y).cmp(0) === 1 ? this.registers[$Z] : zeros;
+});
+
+/**
+ * Zero or set if odd.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ZSOD = rgstrsY(function($X, $Y, $Z) {
+  this.registers[$X] = _.remainder(two, s($Y)).cmp(1) === 0 ? this.registers[$Z] : zeros;
+});
+
+/**
+ * Zero or set if nonnegative.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ZSNN = rgstrsY(function($X, $Y, $Z) {
+  this.registers[$X] = s($Y).cmp(0) > -1 ? this.registers[$Z] : zeros;
+});
+
+/**
+ * Zero or set if nonzero.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ZSNZ = rgstrsY(function($X, $Y, $Z) {
+  this.registers[$X] = s($Y).cmp(0) !== 0 ? this.registers[$Z] : zeros;
+});
+
+/**
+ * Zero or set if nonpositive.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ZSNP = rgstrsY(function($X, $Y, $Z) {
+  this.registers[$X] = s($Y).cmp(0) <= 0 ? this.registers[$Z] : zeros;
+});
+
+/**
+ * Zero or set if even.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ZSEV = rgstrsY(function($X, $Y, $Z) {
+  this.registers[$X] = s($Y).mod(2).cmp(0) === 0 ? this.registers[$Z] : zeros;
 });
 
 module.exports = MMIX;

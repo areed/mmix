@@ -124,4 +124,29 @@ describe('Bitwise Operations', function() {
       });
     }); 
   });
+
+  describe('NAND', function() {
+    [
+      ['0000000000000000', '0000000000000000', 'FFFFFFFFFFFFFFFF'],
+      ['0101010101010101', 'FFFFFFFFFFFFFFFF', 'FEFEFEFEFEFEFEFE'],
+      ['AAAAAAAAAAAAAAAA', '7777777777777777', 'DDDDDDDDDDDDDDDD'],
+    ].forEach(function(t) {
+      var Y = t[0];
+      var Z = t[1];
+      var X = t[2];
+
+      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
+        before(function() {
+          mmix.registers.$2 = Y;
+          mmix.registers.$3 = Z;
+        });
+
+        it('NAND($1, $2, $3): $1 == ' + X, function() {
+          mmix.NAND('$1', '$2', '$3');
+          expect(mmix.registers.$1).to.equal(X);
+        });
+      });
+    }); 
+  });
+
 });

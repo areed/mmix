@@ -1,6 +1,6 @@
 /** @module memory */
+var Big = require('big.js');
 var utils = require('./utils');
-var Long = require('long');
 
 /**
  * @constructor
@@ -28,8 +28,8 @@ Memory.prototype.setByte = function(data, addr) {
   if (data.length !== 2) {
     throw new Error('Setting a single memory cell requires 1 byte of data.');
   }
-  if (!(addr instanceof Long)) {
-    throw new Error('Address must be a Long');
+  if (!(addr instanceof Big)) {
+    throw new Error('Address must be a Big');
   }
   this.store[Memory.addressKey(addr)] = data;
 };
@@ -43,7 +43,7 @@ Memory.prototype.getWyde = function(addr) {
   var start = utils.effectiveAddress(2, addr);
   var bytes = [];
   for (var i = 0; i < 2; i++) {
-    bytes.push(this.getByte(start.add(i)));
+    bytes.push(this.getByte(start.plus(i)));
   }
   return bytes.join('');
 };
@@ -57,7 +57,7 @@ Memory.prototype.setWyde = function(data, addr) {
   var start = utils.effectiveAddress(2, addr);
 
   for (var i = 0; i < 2; i++) {
-    this.setByte(data.substring(i*2, (i*2) + 2), start.add(i));
+    this.setByte(data.substring(i*2, (i*2) + 2), start.plus(i));
   }
 };
 
@@ -70,7 +70,7 @@ Memory.prototype.getTetra = function(addr) {
   var start = utils.effectiveAddress(4, addr);
   var bytes = [];
   for (var i = 0; i < 4; i++) {
-    bytes.push(this.getByte(start.add(i)));
+    bytes.push(this.getByte(start.plus(i)));
   }
   return bytes.join('');
 };
@@ -84,7 +84,7 @@ Memory.prototype.setTetra = function(data, addr) {
   var start = utils.effectiveAddress(4, addr);
   
   for (var i = 0; i < 4; i++) {
-    this.setByte(data.substring(i*2, (i*2) + 2), start.add(i));
+    this.setByte(data.substring(i*2, (i*2) + 2), start.plus(i));
   }
 };
 
@@ -98,7 +98,7 @@ Memory.prototype.getOcta = function(addr) {
 
   var bytes = [];
   for (var i = 0; i < 8; i++) {
-    bytes.push(this.getByte(start.add(i)));
+    bytes.push(this.getByte(start.plus(i)));
   }
   return bytes.join('');
 };
@@ -109,22 +109,13 @@ Memory.prototype.getOcta = function(addr) {
  * @param {Uint64} addr
  */
 Memory.prototype.setOcta = function(data, addr) {
-  var start = Memory.effectiveAddress(8, addr);
+  var start = utils.effectiveAddress(8, addr);
 
-  data = utils.padOcta(data);
+  data = utils.extendUnsignedTo64(data);
 
   for (var i = 0; i < 8; i++) {
-    this.setByte(data.substring(i*2, (i*2) + 2), start.add(i));
+    this.setByte(data.substring(i*2, (i*2) + 2), start.plus(i));
   }
-};
-
-/**
- * @param {ByteWidth} byteWidth
- * @param {Uint64} addr
- * @return {Uint64}
- */
-Memory.effectiveAddress = function(byteWidth, addr) {
-  return addr.subtract(addr.modulo(byteWidth));
 };
 
 /**

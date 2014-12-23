@@ -1,18 +1,48 @@
 var Big = require('big.js');
-var _ = require('highland');
-var validator = require('highlandx/validator');
-var conditions = require('highlandx/conditions');
+var hexa = require('hexa');
 
-var registers = require('./registers');
 var utils = require('./utils');
+var _ = utils;
 var Memory = require('./Memory');
 
-var int64 = utils.int64;
-var uint64 = utils.uint64;
-var hexify = utils.hexify;
-var decify = utils.decify;
-var toHex = utils.toHex;
-var padOcta = utils.padOcta;
+var decify = hexa.decify;
+var u = function($R) {
+  return $R.unsigned();
+};
+var s = function($R) {
+  return $R.signed();
+};
+var hexify64 = function(deci) {
+  if (deci instanceof Big) {
+    return hexa.hexify(deci.toFixed(), 64);
+  }
+  return hexa.hexify(deci, 64);
+};
+var hexify64U = utils.hexify64U;
+var hexify128 = function(deci) {
+  if (deci instanceof Big) {
+    return hexa.hexify(deci.toFixed(), 64);
+  }
+  return hexa.hexify(deci, 128);
+};
+var extendUnsignedTo64 = function(hex) {
+  if (hex instanceof Big) {
+    return hexa.pad0Octa(hexify64(hex.toFixed()));
+  }
+  return hexa.pad0Octa(hex);
+};
+var signExtend8To64 = function(hex) {
+  return hexa.signExtend64(8, hex);
+};
+var signExtend16To64 = function(hex) {
+  return hexa.signExtend64(16, hex);
+};
+var signExtend32To64 = function(hex) {
+  return hexa.signExtend64(32, hex);
+};
+
+var two = new Big('2');
+var twoToThe64th = two.pow(64);
 
 /**
  * @constructor
@@ -21,122 +51,84 @@ var padOcta = utils.padOcta;
  */
 function MMIX(memory) {
   this.memory = memory;
-  this.registers = {};
+  var registers = this.registers = {};
+
+  for (var i = 0; i < 256; i++) {
+    addRegister(registers, '$' + i);
+  }
+  ('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    .split('')
+    .concat(['BB', 'TT', 'WW', 'XX', 'YY', 'ZZ'])
+    .forEach(function(x) {
+      addRegister(registers, 'r' + x);
+    });
 }
 
-/* Precondtion Validators */
-var isRegister = function($X) {
-  return typeof registers[$X] !== 'undefined';
-};
-var arg0IsRegister = validator('The first argument is not a register in MMIX.', isRegister);
-var arg1IsRegister = validator('The second argument is not a register in MMIX.', function(x, $Y) {
-  return isRegister($Y);
-});
-var arg2IsRegister = validator('The third argument is not a register in MMIX.', function(x, y, $Z) {
-  return isRegister($Z);
-});
+function addRegister(registers, name) {
+  var bits = '0000000000000000';
 
-var validWidth = validator('Byte width must be 1, 2, 4, or 8.', function(w) {
-  return w === 1 || w === 2 || w === 4 || w === 8;
-});
+  Object.defineProperty(registers, name, {
+    enumerable: true,
+    get: function() {
+      return bits;
+    },
+    set: function(hex) {
+      if (typeof hex !== 'string' || hex.length !== 16) {
+        throw new Error(['Register', name, 'requires 16 hex charcaters, got', hex].join(' '));
+      }
+      bits = hex;
+    },
+  });
+}
 
-var isByte = function(h) {
-  return typeof h === 'string' && h.length === 2;
-};
-var arg0IsByte = validator('The first argument is not a single-byte hex string.', isByte);
-
-var isRgstrRgstrRgstr = _.ncurry(4, conditions(arg0IsRegister, arg1IsRegister, arg2IsRegister));
-var isByteRgstrRgstr = _.ncurry(4, conditions(arg0IsByte, arg1IsRegister, arg2IsRegister));
-
-/* Adapters */
-
-/**
- * Accepts a function that expects two arguments of type Register and Uint64 and
- * returns a function that expects three arguments of type Register.  The Uint64
- * argument is calculated from the values in the last two register arguments of
- * the returned function.
- * @param {function} fn
- * @return {function}
- */
-var sum$Y$Z64U = function(fn) {
+function rgstrsYZ(op) {
   return function($X, $Y, $Z) {
-    fn.apply(this, [$X, sum$X64U(this, $Y, $Z)]);
+    op.apply(this, [
+      $X,
+      new Register(this.registers, $Y),
+      new Register(this.registers, $Z),
+    ]);
   };
+}
+
+function Register(registers, name) {
+  this.registers = registers;
+  this.name = name;
+}
+
+Register.prototype.hex = function() {
+  return this.registers[this.name];
+};
+
+Register.prototype.unsigned = function() {
+  return Big(decify(this.registers[this.name], 64));
+};
+
+Register.prototype.signed = function() {
+  return Big(decify(this.registers[this.name], 64, true));
 };
 
 /**
- * Accepts a function that expects one argument of type Register and two
- * arguments of type Int64 and returns a function that takes three Register
- * arguments.
- * @param {function} fn
- * @return {function}
+ * Used by the LD* operations to calculate a memory address.
+ * @param {Register} $Y
+ * @param {Register} $Z
+ * @return {Int}
  */
-var int64$Y$Z = function(fn) {
-  return function($X, $Y, $Z) {
-    var Y64 = utils.int64(resolve($Y, this));
-    var Z64 = utils.int64(resolve($Z, this));
-
-    fn.apply(this, [$X, Y64, Z64]);
-  };
-};
+function A($Y, $Z) {
+  return u($Y).plus(u($Z)).mod(twoToThe64th);
+}
 
 /**
- * Same as int64$Y$Z but casts the octabytes to Uint64's.
- * @param {function} fn
- * @param {function}
- */
-var uint64$Y$Z = function(fn) {
-  return function($X, $Y, $Z) {
-    var Y64U = uint64(resolve($Y, this));
-    var Z64U = uint64(resolve($Z, this));
-
-    fn.apply(this, [$X, Y64U, Z64U]);
-  };
-};
-
-/**
- * Resolves $Y and $Z to their octabytes before calling the passed function.
- * @param {function} fn
- * @param {function}
- */
-var octaYZ = function(fn) {
-  return function($X, $Y, $Z) {
-    var Y = resolve($Y, this);
-    var Z = resolve($Z, this);
-
-    fn.apply(this, [$X, Y, Z]);
-  };
-};
-
-/* Operations */
-
-/**
- * Core logic for all LD__ functions.
- * @param {ByteWidth} byteWidth
- * @param {boolean} [unsigned] - flag to use sign extension
- * @return {function}
- */
-var LD = function(byteWidth, unsigned) {
-  return isRgstrRgstrRgstr(sum$Y$Z64U(function($X, A) {
-    var start = utils.effectiveAddress(byteWidth, A);
-    var bytes = [];
-    for (var i = 0; i < byteWidth; i++) {
-      bytes.push(this.memory.getByte(start.add(i)));
-    }
-    var data = bytes.join('');
-    this.registers[$X] = unsigned ? utils.padOcta(data) : utils.signExtend(byteWidth, data);
-  }));
-};
-
-/**
- * Calculate a memory address by casting the octabytes in $Y and $Z as Uint64's
+ * Calculate a memory address by casting the octabytes in $Y and $Z to Uint64's
  * and summing them. Load and sign-extend the byte at that address into register $X.
  * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.LDB = LD(1);
+MMIX.prototype.LDB = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = signExtend8To64(this.memory.getByte(A($Y, $Z)));
+});
 
 /**
  * Same as LDB but loads the wyde at the calculated address into $X.
@@ -145,7 +137,9 @@ MMIX.prototype.LDB = LD(1);
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.LDW = LD(2);
+MMIX.prototype.LDW = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = signExtend16To64(this.memory.getWyde(A($Y, $Z)));
+});
 
 /**
  * Same as LDB but loads the tetra at the calculated address into $X.
@@ -154,7 +148,9 @@ MMIX.prototype.LDW = LD(2);
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.LDT = LD(4);
+MMIX.prototype.LDT = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = signExtend32To64(this.memory.getTetra(A($Y, $Z)));
+});
 
 /**
  * Sames as LDB but loads the octa at the calculated address into $X.
@@ -163,7 +159,9 @@ MMIX.prototype.LDT = LD(4);
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.LDO = LD(8);
+MMIX.prototype.LDO = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = this.memory.getOcta(A($Y, $Z));
+});
 
 /**
  * Same as LDB but without sign-extension.
@@ -172,7 +170,9 @@ MMIX.prototype.LDO = LD(8);
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.LDBU = LD(1, true);
+MMIX.prototype.LDBU = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = extendUnsignedTo64(this.memory.getByte(A($Y, $Z)));
+});
 
 /**
  * Same as LDW but without sign-extension.
@@ -181,7 +181,9 @@ MMIX.prototype.LDBU = LD(1, true);
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.LDWU = LD(2, true);
+MMIX.prototype.LDWU = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = extendUnsignedTo64(this.memory.getWyde(A($Y, $Z)));
+});
 
 /**
  * Same as LDT but without sign-extension.
@@ -190,7 +192,9 @@ MMIX.prototype.LDWU = LD(2, true);
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.LDTU = LD(4, true);
+MMIX.prototype.LDTU = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = extendUnsignedTo64(this.memory.getTetra(A($Y, $Z)));
+});
 
 /**
  * Same as LDO but should be preferred in unsigned contexts.
@@ -220,22 +224,9 @@ MMIX.prototype.LDTH = function($X, $Y, $Z) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.LDA = isRgstrRgstrRgstr(sum$Y$Z64U(function($X, A) {
-  this.registers[$X] = utils.padOcta(A.toString(16).toUpperCase());
-}));
-
-/**
- * Core logic for all ST_ methods.
- * @param {ByteWidth} byteWidth
- * @param {string} memMethodName - getByte, getWyde, getTetra, getOcta
- * @return {function}
- */
-var ST = function(byteWidth, memMethodName) {
-  return isRgstrRgstrRgstr(sum$Y$Z64U(function($X, A) {
-    var data = this.registers[$X].substring(16 - (2 * byteWidth));
-    this.memory[memMethodName](data, A);
-  }));
-};
+MMIX.prototype.LDA = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = extendUnsignedTo64(A($Y, $Z));
+});
 
 /**
  * Stores the low byte from the value in register $X at the memory address
@@ -246,7 +237,9 @@ var ST = function(byteWidth, memMethodName) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.STB = ST(1, 'setByte');
+MMIX.prototype.STB = rgstrsYZ(function($X, $Y, $Z) {
+  this.memory.setByte(this.registers[$X].substring(14), A($Y, $Z));
+});
 
 /**
  * Same as STB but stores the low wyde from register $X.
@@ -255,7 +248,9 @@ MMIX.prototype.STB = ST(1, 'setByte');
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.STW = ST(2, 'setWyde');
+MMIX.prototype.STW = rgstrsYZ(function($X, $Y, $Z) {
+  this.memory.setWyde(this.registers[$X].substring(12), A($Y, $Z));
+});
 
 /**
  * Same as STB but stores the low tetra from register $X.
@@ -264,7 +259,9 @@ MMIX.prototype.STW = ST(2, 'setWyde');
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.STT = ST(4, 'setTetra');
+MMIX.prototype.STT = rgstrsYZ(function($X, $Y, $Z) {
+  this.memory.setTetra(this.registers[$X].substring(8), A($Y, $Z));
+});
 
 /**
  * Same as STB but stores the entire octabyte from register $X.
@@ -273,7 +270,9 @@ MMIX.prototype.STT = ST(4, 'setTetra');
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.STO = ST(8, 'setOcta');
+MMIX.prototype.STO = rgstrsYZ(function($X, $Y, $Z) {
+  this.memory.setOcta(this.registers[$X], A($Y, $Z));
+});
 
 /**
  * Has the same effect on memory as STB, but overflow never occurs.
@@ -318,11 +317,9 @@ MMIX.prototype.STOU = MMIX.prototype.STO;
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.STHT = isRgstrRgstrRgstr(sum$Y$Z64U(function($X, A) {
-  var data = resolve($X, this).substring(0,8);
-
-  this.memory.setTetra(data, A);
-}));
+MMIX.prototype.STHT = rgstrsYZ(function($X, $Y, $Z) {
+  this.memory.setTetra(this.registers[$X].substring(0, 8), A($Y, $Z));
+});
 
 /**
  * Stores the constant byte X in the memory address obtained by casting the data
@@ -332,10 +329,9 @@ MMIX.prototype.STHT = isRgstrRgstrRgstr(sum$Y$Z64U(function($X, A) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.STCO = isByteRgstrRgstr(sum$Y$Z64U(function(X, A) {
-  var data = utils.padOcta(X);
-  this.memory.setOcta(data, A);
-}));
+MMIX.prototype.STCO = rgstrsYZ(function(X, $Y, $Z) {
+  this.memory.setOcta(extendUnsignedTo64(X), A($Y, $Z));
+});
 
 /**
  * Casts the octabytes in $Y and $Z to int64's and puts their sum in $X.
@@ -344,9 +340,9 @@ MMIX.prototype.STCO = isByteRgstrRgstr(sum$Y$Z64U(function(X, A) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.ADD = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
-  this.registers[$X] = utils.hexify(Y64.add(Z64));
-}));
+MMIX.prototype.ADD = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = hexify64(s($Y).plus(s($Z)).toFixed());
+});
 
 /**
  * Casts the octabytes in $Y and $Z to int64's and puts the difference of Y - Z
@@ -356,9 +352,9 @@ MMIX.prototype.ADD = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.SUB = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
-  this.registers[$X] = utils.hexify(Y64.subtract(Z64));
-}));
+MMIX.prototype.SUB = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = hexify64(s($Y).minus(s($Z)).toFixed());
+});
 
 /**
  * Casts the octabytes in $Y and $Z to int64's and puts their product in $X.
@@ -367,29 +363,29 @@ MMIX.prototype.SUB = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.MUL = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
-  this.registers[$X] = utils.hexify(Y64.multiply(Z64));
-}));
+MMIX.prototype.MUL = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = hexify64(s($Y).times(s($Z)).toFixed());
+});
 
 /**
- * Casts the octabytes in $Y and $Z to int64's and divides Y by Z. Puts the
- * quotient in $X and the remainder in remainder register rR. If the divisor $Z
- * is 0, set $X to 0 and put $Y in rR.
+ * Cast the octabytes in $Y and $Z to signed integers and divide Y by Z.
+ * Put the quotient in $X and the remainder in rR. If the divisor Z is 0, set $X
+ * to 0 and copy the octabyte in $Y to rR.
  * @function
  * @param {Register} $X
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.DIV = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
-  if (Z64.toNumber() === 0) {
-    this.registers[$X] = hexify(Z64);
-    this.registers.rR = hexify(Y64);
+MMIX.prototype.DIV = rgstrsYZ(function($X, $Y, $Z) {
+  if (s($Z).cmp(0) === 0) {
+    this.registers[$X] = '0000000000000000';
+    this.registers.rR = $Y.hex();
     //an "integer divide check" also occurs at this point according to the spec
     return;
   }
-  this.registers[$X] = hexify(Y64.div(Z64));
-  this.registers.rR = hexify(Y64.modulo(Z64));
-}));
+  this.registers[$X] = hexify64(utils.quotient(s($Z), s($Y)));
+  this.registers.rR = hexify64(utils.remainder(s($Z), s($Y)));
+});
 
 /**
  * Casts the octabytes in $Y and $Z to uint64's and puts their sum in $X.
@@ -399,9 +395,9 @@ MMIX.prototype.DIV = isRgstrRgstrRgstr(int64$Y$Z(function($X, Y64, Z64) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.ADDU = isRgstrRgstrRgstr(uint64$Y$Z(function($X, Y64U, Z64U) {
-  this.registers[$X] = hexify(Y64U.add(Z64U));
-}));
+MMIX.prototype.ADDU = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = _.hexify64U(u($Y).plus(u($Z)));
+});
 
 /**
  * Casts the octabytes in $Y and $Z to uint64's and puts the difference of Y - Z
@@ -411,9 +407,9 @@ MMIX.prototype.ADDU = isRgstrRgstrRgstr(uint64$Y$Z(function($X, Y64U, Z64U) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.SUBU = isRgstrRgstrRgstr(uint64$Y$Z(function($X, Y64U, Z64U) {
-  this.registers[$X] = hexify(Y64U.subtract(Z64U));
-}));
+MMIX.prototype.SUBU = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = hexify64U(u($Y).minus(u($Z)));
+});
 
 /**
  * Casts the octabytes in $Y and $Z to uint64's and puts the low 8 bytes of
@@ -423,23 +419,12 @@ MMIX.prototype.SUBU = isRgstrRgstrRgstr(uint64$Y$Z(function($X, Y64U, Z64U) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.MULU = isRgstrRgstrRgstr(octaYZ(function($X, Y, Z) {
-  var Yd = decify(Y);
-  var Zd = decify(Z);
-  var YBig = new Big(Yd);
-  var ZBig = new Big(Zd);
-  var prod = YBig.times(ZBig);
+MMIX.prototype.MULU = rgstrsYZ(function($X, $Y, $Z) {
+  var prod = _.hexify128U(u($Y).times(u($Z)));
 
-  prod = toHex(prod.toString());
-  if (prod.length <= 16) {
-    this.registers[$X] = utils.padOcta(prod);
-    this.registers.rH = '0000000000000000';
-    return;
-  }
-  var sp = prod.length - 16;
-  this.registers[$X] = prod.substring(sp);
-  this.registers.rH = utils.padOcta(prod.substring(0, sp));
-}));
+  this.registers[$X] = prod.substring(16);
+  this.registers.rH = prod.substring(0, 16);
+});
 
 /* Casts the octabytes in $Z and rD to Uint64's. If Z64U > rD64U, concatenate
  * the octabytes in rD and $Y, cast it to a Uint128, divide it by Z64U,
@@ -449,38 +434,20 @@ MMIX.prototype.MULU = isRgstrRgstrRgstr(octaYZ(function($X, Y, Z) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype.DIVU = isRgstrRgstrRgstr(function($X, $Y, $Z) {
-  var Y = resolve($Y, this);
-  var Z = resolve($Z, this);
-  var rD = resolve('rD', this);
-  var rDY = rD + Y;
+MMIX.prototype.DIVU = rgstrsYZ(function($X, $Y, $Z) {
+  var Y = u($Y);
+  var Z = u($Z);
+  var rD = u(new Register(this.registers, 'rD'));
+  var rDY = rD.times(twoToThe64th).plus(Y);
 
-  var Zdeci = decify(Z);
-  var rDdeci = decify(rD);
-  var rDYdeci = decify(rDY);
-
-  var Z64U = Big(Zdeci);
-  var rD64U = Big(rDdeci);
-  var rDY128U = Big(rDYdeci);
-
-  if (Z64U.cmp(rD64U) === 1) {
-    this.registers[$X] = padOcta(toHex(rDY128U.div(Z64U).round(0, 0).toString()));
-    this.registers.rR = padOcta(toHex(rDY128U.mod(Z64U).toString()));
+  if (Z.cmp(rD) === 1) {
+    this.registers[$X] = hexify64(utils.quotient(Z, rDY).toFixed());
+    this.registers.rR = hexify64(utils.remainder(Z, rDY).toFixed());
     return;
   }
-  this.registers[$X] = rD;
-  this.registers.rR = Y;
+  this.registers[$X] = this.registers.rD;
+  this.registers.rR = $Y.hex();
 });
-
-function XADDU(scale) {
-  return function($X, $Y, $Z) {
-    var Y = resolve($Y, this);
-    var Z = resolve($Z, this);
-    var YBigU = Big(decify(Y));
-    var ZBigU = Big(decify(Z));
-    this.registers[$X] = padOcta(toHex(YBigU.times(scale).plus(ZBigU).toString()));
-  };
-}
 
 /** Casts the octabytes in $Y and $Z to UIntBig's and set $X to (2Y + Z) mod 2^64.
  * @function
@@ -488,7 +455,9 @@ function XADDU(scale) {
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype['2ADDU'] = isRgstrRgstrRgstr(XADDU(2));
+MMIX.prototype['2ADDU'] = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = hexify64(u($Y).times(2).plus(u($Z)));
+});
 
 /**
  * Same as 2ADDU but scales Y by 4.
@@ -497,7 +466,9 @@ MMIX.prototype['2ADDU'] = isRgstrRgstrRgstr(XADDU(2));
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype['4ADDU'] = isRgstrRgstrRgstr(XADDU(4));
+MMIX.prototype['4ADDU'] = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = hexify64(u($Y).times(4).plus(u($Z)));
+});
 
 /**
  * Same as 2ADDU but scales Y by 8.
@@ -506,7 +477,9 @@ MMIX.prototype['4ADDU'] = isRgstrRgstrRgstr(XADDU(4));
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype['8ADDU'] = isRgstrRgstrRgstr(XADDU(8));
+MMIX.prototype['8ADDU'] = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = hexify64(u($Y).times(8).plus(u($Z)));
+});
 
 /**
  * Same as 2ADDU but scales Y by 16.
@@ -515,40 +488,8 @@ MMIX.prototype['8ADDU'] = isRgstrRgstrRgstr(XADDU(8));
  * @param {Register} $Y
  * @param {Register} $Z
  */
-MMIX.prototype['16ADDU'] = isRgstrRgstrRgstr(XADDU(16));
-
-/**
- * Checks that the register is valid then returns the data held in the register.
- * @param {Register} $X
- * @param {Object} mmix - the machine to check
- * @return {Hex}
- */
-function resolve($X, mmix) {
-  if (typeof registers[$X] === 'undefined') {
-    throw new Error('MMIX does not have a register ' + $X);
-  }
-  return mmix.registers[$X];
-}
-
-/**
- * Return the sum of all register arguments when their data is cast as uint64's.
- * @param {Object} mmix - a machine
- * @param {...Register} registers
- * @return {Uint64}
- */
-function sum$X64U(mmix) {
-  var registers = [].slice.call(arguments, 1);
-
-  return registers
-    .map(function($X) {
-      return resolve($X, mmix);
-    })
-    .map(function(X) {
-      return utils.uint64(X);
-    })
-    .reduce(function(sum, X64U) {
-      return X64U.add(sum);
-    }, 0);
-}
+MMIX.prototype['16ADDU'] = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = hexify64(u($Y).times(16).plus(u($Z)));
+});
 
 module.exports = MMIX;

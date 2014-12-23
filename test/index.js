@@ -1,4 +1,5 @@
 var expect = require('chai').expect;
+var Big = require('big.js');
 var nth = require('highlandx/nth');
 var MMIX = require('../');
 var Memory = require('../memory');
@@ -24,7 +25,7 @@ describe('Load From Memory Operations', function() {
           before(function() {
             mmix.registers.$2 = Y(t);
             mmix.registers.$3 = Z(t);
-            memory.setOcta(data(t), utils.uint64(address(t)));
+            memory.setOcta(data(t), Big(utils.decify(address(t), 64)));
           });
 
           describe([op, '$1,$2,$3'].join(' '), function() {
@@ -123,7 +124,7 @@ describe('Store Operations', function() {
       tests.forEach(function(t, i) {
         describe(['$1 = ', $1(t), ', $2 = ', $2(t), ', $3 = ', $3(t), ', M_8[', addr(t), '] = ', memOcta(t)].join(''), function() {
           before(function() {
-            memory.setOcta(memOcta(t), utils.uint64(addr(t)));
+            memory.setOcta(memOcta(t), Big(utils.decify(addr(t), 64)));
             mmix.registers.$1 = $1(t);
             mmix.registers.$2 = $2(t);
             mmix.registers.$3 = $3(t);
@@ -132,7 +133,7 @@ describe('Store Operations', function() {
           describe([op, '$1,$2,$3'].join(' '), function() {
             it(['should set the octabyte at M_8[', addr(t), '] to ', answers[i]].join(''), function() {
               mmix[op]('$1', '$2', '$3');
-              var octa = memory.getOcta(utils.uint64(addr(t)));
+              var octa = memory.getOcta(Big(utils.decify(addr(t), 64)));
               expect(octa).to.equal(answers[i]);
             });
           });
@@ -179,14 +180,14 @@ describe('Store Operations', function() {
 
   describe('STCO', function() {
     before(function() {
-      memory.setOcta('0123456789ABCDEF', utils.uint64('00000000000003EA'));
+      memory.setOcta('0123456789ABCDEF', Big(utils.decify('00000000000003EA', 64)));
       mmix.registers.$2 = '00000000000003EA';
       mmix.registers.$3 = '0000000000000002';
     });
 
     it('should store an unsigned byte in a memory octabyte.', function() {
       mmix.STCO('88', '$2', '$3');
-      var octa = memory.getOcta(utils.uint64('00000000000003E8'));
+      var octa = memory.getOcta(Big(utils.decify('00000000000003E8', 64)));
       expect(octa).to.equal('0000000000000088');
     });
   });
@@ -195,27 +196,16 @@ describe('Store Operations', function() {
 describe('Arithmetic Operations', function() {
   var mmix = new MMIX();
   var tests = [
-    //Y, Z, rD
-    ['0000000000000001', '0000000000000001', '0000000000000001'],
-    ['0000000000000002', 'FFFFFFFFFFFFFFFE', '8765432109ABCDEF'],
-    ['FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF', '0000000000000000'],
-    ['FFFFFFFFFFFFFFFF', '0000000000000002', '0000000001111111'],
-    ['0000000000000003', '0000000000000000', '0000000000000003'],
-    ['9e3779b97f4a7c16', '9e3779b97f4a7c16', '9e3779b97f4a7c16'],
+    //Y, Z
+    ['0000000000000001', '0000000000000001'],
+    ['0000000000000002', 'FFFFFFFFFFFFFFFE'],
+    ['FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF'],
+    ['FFFFFFFFFFFFFFFF', '0000000000000002'],
+    ['0000000000000003', '0000000000000000'],
+    ['9e3779b97f4a7c16', '9e3779b97f4a7c16'],
   ];
   var Y = nth(0);
   var Z = nth(1);
-  var rD = nth(2);
-
-  var DIVUanswers = [
-    //$X, rR
-    ['0000000000000001', '0000000000000001'],
-    ['8765432109ABCDF0', '0ECA864213579BE2'],
-    ['0000000000000001', '0000000000000000'],
-    ['0000000001111111', 'FFFFFFFFFFFFFFFF'],
-    ['0000000000000003', '0000000000000003'],
-    ['9e3779b97f4a7c16', '9e3779b97f4a7c16'],
-  ];
 
   var test = function(op, answers) {
     tests.forEach(function(t, i) {
@@ -223,7 +213,6 @@ describe('Arithmetic Operations', function() {
         before(function() {
           mmix.registers.$2 = Y(t);
           mmix.registers.$3 = Z(t);
-          mmix.registers.rD = rD(t);
         });
 
         describe([op, '$1,$2,$3'].join(' '), function() {
@@ -231,12 +220,6 @@ describe('Arithmetic Operations', function() {
             mmix[op]('$1', '$2', '$3');
             expect(mmix.registers.$1).to.equal(answers[i][0]);
           });
-
-          if (op === 'DIV' || op === 'DIVU') {
-            it(['should set the remainder register to', answers[i][1]].join(' '), function() {
-              expect(mmix.registers.rR).to.equal(answers[i][1]);
-            });
-          }
 
           if (op === 'MULU') {
             it(['should set the himult register to', answers[i][1]].join(' '), function() {
@@ -275,15 +258,6 @@ describe('Arithmetic Operations', function() {
     ['1BB32095CCDD51E4'],
   ]);
 
-  test('DIV', [
-    ['0000000000000001', '0000000000000000'],
-    ['FFFFFFFFFFFFFFFF', '0000000000000000'],
-    ['0000000000000001', '0000000000000000'],
-    ['0000000000000000', 'FFFFFFFFFFFFFFFF'],
-    ['0000000000000000', '0000000000000003'],
-    ['0000000000000001', '0000000000000000'],
-  ]);
-
   test('ADDU', [
     ['0000000000000002'],
     ['0000000000000000'],
@@ -310,8 +284,6 @@ describe('Arithmetic Operations', function() {
     ['0000000000000000', '0000000000000000'],
     ['1BB32095CCDD51E4', '61C8864680B583EA'],
   ]);
-
-  test('DIVU', DIVUanswers);
 });
 
 describe('_ADDU Operations', function() {

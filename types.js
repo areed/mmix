@@ -14,6 +14,11 @@
  */
 
 /**
- * instance of Long.js with unsigned flag set
- * @typedef {object} Uint64
+ * instance of Big.js
+ * @typedef {object} Uint
+ */
+
+/**
+ * instance of Big.js
+ * @typedef {object} Int
  */

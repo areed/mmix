@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "big.js": "^3.0.0",
+    "hexa": "latest",
     "highland": "2.2.0",
     "long": "^2.2.3"
   },

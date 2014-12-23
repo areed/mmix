@@ -72,10 +72,12 @@ describe('Arithmetic Operations', function() {
 
   describe('NEG', function() {
     var tests = [
+      //Y, $Z, $X
       ['00', '0000000000000001', 'FFFFFFFFFFFFFFFF'],
       ['00', 'FFFFFFFFFFFFFFFF', '0000000000000001'],
-      ['255', '000000000000007F', '0000000000000080'],
-      ['255', '0000000000000100', 'FFFFFFFFFFFFFFFF'],
+      ['FF', '000000000000007F', '0000000000000080'],
+      ['FF', '0000000000000100', 'FFFFFFFFFFFFFFFF'],
+      ['FF', 'FFFFFFFFFFFFFFFF', '0000000000000100'],
     ];
     tests.forEach(function(t) {
       var Y = t[0];
@@ -89,7 +91,34 @@ describe('Arithmetic Operations', function() {
         });
 
         it('$1 <- ' + X, function() {
+          expect(mmix.registers.$1).to.equal(X);
+        });
+      });
+    });
+  });
 
+  describe('NEGU', function() {
+    var tests = [
+      //Y, $Z, $X
+      ['00', '0000000000000001', 'FFFFFFFFFFFFFFFF'],
+      ['00', 'FFFFFFFFFFFFFFFF', '0000000000000001'],
+      ['FF', '000000000000007F', '0000000000000080'],
+      ['FF', '0000000000000100', 'FFFFFFFFFFFFFFFF'],
+      ['FF', 'FFFFFFFFFFFFFFFF', '0000000000000100'],
+    ];
+    tests.forEach(function(t) {
+      var Y = t[0];
+      var Z = t[1];
+      var X = t[2];
+
+      describe(['Y ==', Y, '$$ $3', Z].join(' '), function() {
+        before(function() {
+          mmix.registers.$3 = Z;
+          mmix.NEGU('$1', Y, '$3');
+        });
+
+        it('$1 <- ' + X, function() {
+          expect(mmix.registers.$1).to.equal(X);
         });
       });
     });

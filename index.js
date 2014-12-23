@@ -513,4 +513,15 @@ MMIX.prototype.NEG = rgstrsZ(function($X, Y, $Z) {
   this.registers[$X] = _.hexify64(Big(_.decify(Y, 8, false)).minus(s($Z)));
 });
 
+/**
+ * Same as NEG but unsigned.
+ * @function
+ * @param {Register}
+ * @param {Hex} Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.NEGU = rgstrsZ(function($X, Y, $Z) {
+  this.registers[$X] = _.hexify64U(Big(_.decify(Y, 8, false)).minus(u($Z)));
+});
+
 module.exports = MMIX;

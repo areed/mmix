@@ -91,6 +91,16 @@ function rgstrsYZ(op) {
   };
 }
 
+function rgstrsZ(op) {
+  return function($X, Y, $Z) {
+    op.apply(this, [
+      $X,
+      Y,
+      new Register(this.registers, $Z),
+    ]);
+  };
+}
+
 function Register(registers, name) {
   this.registers = registers;
   this.name = name;
@@ -490,6 +500,17 @@ MMIX.prototype['8ADDU'] = rgstrsYZ(function($X, $Y, $Z) {
  */
 MMIX.prototype['16ADDU'] = rgstrsYZ(function($X, $Y, $Z) {
   this.registers[$X] = hexify64(u($Y).times(16).plus(u($Z)));
+});
+
+/**
+ * Negate signed.
+ * @function
+ * @param {Register} $X
+ * @param {Hex} Y - an unsigned constant 0 - 255, usually 0
+ * @param {Register} $Z
+ */
+MMIX.prototype.NEG = rgstrsZ(function($X, Y, $Z) {
+  this.registers[$X] = _.hexify64(Big(_.decify(Y, 8, false)).minus(s($Z)));
 });
 
 module.exports = MMIX;

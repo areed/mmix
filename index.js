@@ -524,4 +524,29 @@ MMIX.prototype.NEGU = rgstrsZ(function($X, Y, $Z) {
   this.registers[$X] = _.hexify64U(Big(_.decify(Y, 8, false)).minus(u($Z)));
 });
 
+/**
+ * Shift left.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.SL = rgstrsYZ(function($X, $Y, $Z) {
+  var Z = parseInt(u($Z).toString(), 10);
+  if (Z >= 64) {
+    this.registers[$X] = '0000000000000000';
+    return;
+  }
+  this.registers[$X] = _.hexify64(s($Y).times(two.pow(Z)));
+});
+
+/**
+ * Shift left unsigned. Produces the same result as SL without overflow.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.SLU = MMIX.prototype.SL;
+
 module.exports = MMIX;

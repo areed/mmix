@@ -995,4 +995,30 @@ MMIX.prototype.BDIF = rgstrsYZ(function($X, $Y, $Z) {
   this.registers[$X] = diff.cmp(0) === 1 ? hexify64U(diff) : zeros;
 });
 
+/**
+ * Wyde difference.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.WDIF = rgstrsYZ(function($X, $Y, $Z) {
+  var diff = w($Y).minus(w($Z));
+
+  this.registers[$X] = diff.cmp(0) === 1 ? hexify64U(diff) : zeros;
+});
+
+/**
+ * Tetra difference.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.TDIF = rgstrsYZ(function($X, $Y, $Z) {
+  var diff = t($Y).minus(t($Z));
+
+  this.registers[$X] = diff.cmp(0) === 1 ? hexify64U(diff) : zeros;
+});
+
 module.exports = MMIX;

@@ -1361,4 +1361,52 @@ MMIX.prototype.ORL = function($X, YZ) {
   this.registers[$X] = extendUnsignedTo64(w.or(x).toString(16).toUpperCase());
 };
 
+/**
+ * Bitwise and-not high wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.ANDNH = function($X, YZ) {
+  var w = Long.fromString(YZ, true, 16).shiftLeft(48);
+  var x = Long.fromString(this.registers[$X], true, 16);
+
+  this.registers[$X] = extendUnsignedTo64(x.and(w.not()).toString(16).toUpperCase());
+};
+
+/**
+ * Bitwise and-not medium high wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.ANDNMH = function($X, YZ) {
+  var w = Long.fromString(YZ, true, 16).shiftLeft(32);
+  var x = Long.fromString(this.registers[$X], true, 16);
+
+  this.registers[$X] = extendUnsignedTo64(x.and(w.not()).toString(16).toUpperCase());
+};
+
+/**
+ * Bitwise and-not medium low wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.ANDNML = function($X, YZ) {
+  var w = Long.fromString(YZ, true, 16).shiftLeft(16);
+  var x = Long.fromString(this.registers[$X], true, 16);
+
+  this.registers[$X] = extendUnsignedTo64(x.and(w.not()).toString(16).toUpperCase());
+};
+
+/**
+ * Bitwsie and-not low wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.ANDNL = function($X, YZ) {
+  var w = Long.fromString(YZ, true, 16);
+  var x = Long.fromString(this.registers[$X], true, 16);
+
+  this.registers[$X] = extendUnsignedTo64(x.and(w.not()).toString(16).toUpperCase());
+};
+
 module.exports = MMIX;

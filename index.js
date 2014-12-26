@@ -1021,4 +1021,17 @@ MMIX.prototype.TDIF = rgstrsYZ(function($X, $Y, $Z) {
   this.registers[$X] = diff.cmp(0) === 1 ? hexify64U(diff) : zeros;
 });
 
+/**
+ * Octa difference.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.ODIF = rgstrsYZ(function($X, $Y, $Z) {
+  var diff = u($Y).minus(u($Z));
+
+  this.registers[$X] = diff.cmp(0) === 1 ? hexify64U(diff) : zeros;
+});
+
 module.exports = MMIX;

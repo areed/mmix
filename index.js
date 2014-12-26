@@ -22,6 +22,10 @@ var w = function($R) {
 var t = function($R) {
   return $R.tetra();
 };
+var m = function($R) {
+  return $R.matrix();
+};
+
 var hexify64 = function(deci) {
   if (deci instanceof Big) {
     return hexa.hexify(deci.toFixed(), 64);
@@ -127,6 +131,42 @@ function Register(registers, name) {
   this.name = name;
 }
 
+/**
+ * Returns an array of bits (number).
+ * @return {number[]}
+ */
+Register.prototype.binary = (function() {
+  var map =  {
+    '0': [0, 0, 0, 0],
+    '1': [0, 0, 0, 1],
+    '2': [0, 0, 1, 0],
+    '3': [0, 0, 1, 1],
+    '4': [0, 1, 0, 0],
+    '5': [0, 1, 0, 1],
+    '6': [0, 1, 1, 0],
+    '7': [0, 1, 1, 1],
+    '8': [1, 0, 0, 0],
+    '9': [1, 0, 0, 1],
+    'A': [1, 0, 1, 0],
+    'B': [1, 0, 1, 1],
+    'C': [1, 1, 0, 0],
+    'D': [1, 1, 0, 1],
+    'E': [1, 1, 1, 0],
+    'F': [1, 1, 1, 1]
+  };
+
+  return function() {
+    var hex = this.hex();
+
+    return this
+      .hex()
+      .split('')
+      .reduce(function(memo, H) {
+        return memo.concat(map[H]);
+      }, []);
+  };
+})();
+
 Register.prototype.hex = function() {
   return this.registers[this.name];
 };
@@ -149,6 +189,21 @@ Register.prototype.wyde = function() {
 
 Register.prototype.tetra = function() {
   return Big(decify(this.registers[this.name], 64)).mod(two.pow(32));
+};
+
+Register.prototype.matrix = function() {
+  var bits = this.binary();
+
+  return [
+    bits.slice(0, 8),
+    bits.slice(8, 16),
+    bits.slice(16, 24),
+    bits.slice(24, 32),
+    bits.slice(32, 40),
+    bits.slice(40, 48),
+    bits.slice(48, 56),
+    bits.slice(56)
+  ];
 };
 
 /**
@@ -1032,6 +1087,112 @@ MMIX.prototype.ODIF = rgstrsYZ(function($X, $Y, $Z) {
   var diff = u($Y).minus(u($Z));
 
   this.registers[$X] = diff.cmp(0) === 1 ? hexify64U(diff) : zeros;
+});
+
+function pairs(A, B) {
+  return A.map(function(row, i) {
+    return row.map(function(a) {
+      return row.map(function(y, j) {
+        return [A[i][j], B[j][i]];
+      });
+    });
+  });
+}
+
+function reducePairs(fn, C) {
+  return C.map(function(row) {
+    return row.map(function(pairs) {
+      return pairs.map(function(pair) {
+        return fn.apply(null, pair);
+      });
+    });
+  });
+}
+
+function reducePairedVectors(fn, C) {
+  return C.map(function(row) {
+    return row.map(function(items) {
+      return items.reduce(fn);
+    });
+  });
+}
+
+function matrixToBits(M) {
+  var x = '';
+
+  return M
+    .map(function(row) {
+      return row.join('');
+    })
+    .join('');
+}
+
+var b2h = {
+  '0000': '0',
+  '0001': '1',
+  '0010': '2',
+  '0011': '3',
+  '0100': '4',
+  '0101': '5',
+  '0110': '6',
+  '0111': '7',
+  '1000': '8',
+  '1001': '9',
+  '1010': 'A',
+  '1011': 'B',
+  '1100': 'C',
+  '1101': 'D',
+  '1110': 'E',
+  '1111': 'F',
+};
+
+function binaryToHex(b) {
+  var hs = [];
+  for (var i = 0; i < 64; i += 4) {
+    var nibble = b.substring(i, i + 4);
+    hs.push(b2h[nibble]);
+  }
+  return hs.join('');
+}
+
+function or(a, b) {
+  return a | b;
+}
+function xor(a, b) {
+  return a ^ b;
+}
+function times(a, b) {
+  return a * b;
+}
+
+/**
+ * Multiple or.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.MOR = rgstrsYZ(function($X, $Y, $Z) {
+  var Y = m($Y);
+  var Z = m($Z);
+  var C = reducePairedVectors(times, reducePairs(or, pairs(Y, Z)));
+
+  this.registers[$X] = binaryToHex(matrixToBits(C));
+});
+
+/**
+ * Multiple xor.
+ * @function
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.MXOR = rgstrsYZ(function($X, $Y, $Z) {
+  var Y = m($Y);
+  var Z = m($Z);
+  var C = reducePairedVectors(times, reducePairs(xor, pairs(Y, Z)));
+
+  this.registers[$X] = binaryToHex(matrixToBits(C));
 });
 
 module.exports = MMIX;

@@ -43,3 +43,27 @@ exports.wyde = function(op, tests) {
     });
   });
 };
+
+//immediate wyde constants that transform rather than override the value in $X
+exports.wydeX = function(op, tests) {
+  describe(op, function() {
+    var mmix = new MMIX(new Memory());
+
+    tests.forEach(function(t) {
+      var $X = t[0];
+      var YZ = t[1];
+      var answer = t[2];
+
+      describe(['$1 ==', $X, '&& YZ ==', YZ].join(' '), function() {
+        before(function() {
+          mmix.registers.$1 = $X;
+        });
+
+        it([op, '($1, ', YZ, '): $1 == ', answer].join(''), function() {
+          mmix[op]('$1', YZ);
+          expect(mmix.registers.$1).to.equal(answer);
+        });
+      });
+    });
+  });
+};

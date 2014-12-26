@@ -1,23 +1,51 @@
-var test = require('./templates').wyde;
+var wyde = require('./templates').wyde;
+var wydeX = require('./templates').wydeX;
 
-
-describe.only('Immediate Constants', function() {
-  test('SETH', [
+describe('Immediate Constants', function() {
+  wyde('SETH', [
     ['0000', '0000000000000000'],
     ['FFFF', 'FFFF000000000000'],
     ['0123', '0123000000000000'],
   ]);
 
-  test('SETMH', [
+  wyde('SETMH', [
     ['4567', '0000456700000000'],
   ]);
 
 
-  test('SETML', [
+  wyde('SETML', [
     ['89AB', '0000000089AB0000'],
   ]);
 
-  test('SETL', [
+  wyde('SETL', [
     ['CDEF', '000000000000CDEF'],
+  ]);
+
+  wydeX('INCH', [
+    ['0000000000000000', '0000', '0000000000000000'],
+    ['0000456789ABCDEF', '0123', '0123456789ABCDEF'],
+    ['1111456789ABCDEF', '0123', '1234456789ABCDEF'],
+    ['FFFF1234567890AB', '0001', '00001234567890AB'],
+  ]);
+
+  wydeX('INCMH', [
+    ['0000000000000000', '0000', '0000000000000000'],
+    ['0123000089ABCDEF', '4567', '0123456789ABCDEF'],
+    ['0123012389ABCDEF', '4444', '0123456789ABCDEF'],
+    ['FFFFFFFF567890AB', '0001', '00000000567890AB'],
+  ]);
+
+  wydeX('INCML', [
+    ['0000000000000000', '0000', '0000000000000000'],
+    ['012345670000CDEF', '89AB', '0123456789ABCDEF'],
+    ['012345678888CDEF', '0123', '0123456789ABCDEF'],
+    ['FFFFFFFF7778CDEF', '8888', '000000000000CDEF'],
+  ]);
+
+  wydeX('INCL', [
+    ['0000000000000000', '0000', '0000000000000000'],
+    ['0123456789AB0000', 'CDEF', '0123456789ABCDEF'],
+    ['0123456789ABCCCC', '0123', '0123456789ABCDEF'],
+    ['FFFFFFFFFFFF0001', 'FFFF', '0000000000000000'],
   ]);
 });

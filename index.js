@@ -106,6 +106,15 @@ function rgstrsYZ(op) {
   };
 }
 
+function rgstrsX(op) {
+  return function($X, YZ) {
+    var args = [].slice.call(arguments);
+
+    args[0] = new Register(this.registers, $X);
+    op.apply(this, args);
+  };
+}
+
 function rgstrsY(op) {
   return function($X, $Y, $Z) {
     op.apply(this, [
@@ -1259,5 +1268,49 @@ MMIX.prototype.SETML = function($X, YZ) {
 MMIX.prototype.SETL = function($X, YZ) {
   this.registers[$X] = '000000000000' + YZ;
 };
+
+/**
+ * Increase by high wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.INCH = rgstrsX(function($X, YZ) {
+  var inc = Big(decify(YZ, 16)).times(two.pow(48));
+
+  this.registers[$X.name] = hexify64U(u($X).plus(inc).mod(twoToThe64th));
+});
+
+/**
+ * Increase by medium high wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.INCMH = rgstrsX(function($X, YZ) {
+  var inc = Big(decify(YZ, 16)).times(two.pow(32));
+
+  this.registers[$X.name] = hexify64U(u($X).plus(inc).mod(twoToThe64th));
+});
+
+/**
+ * Increase by medium low wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.INCML = rgstrsX(function($X, YZ) {
+  var inc = Big(decify(YZ, 16)).times(two.pow(16));
+
+  this.registers[$X.name] = hexify64U(u($X).plus(inc).mod(twoToThe64th));
+});
+
+/**
+ * Increase by low wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.INCL = rgstrsX(function($X, YZ) {
+  var inc = Big(decify(YZ, 16));
+
+  this.registers[$X.name] = hexify64U(u($X).plus(inc).mod(twoToThe64th));
+});
 
 module.exports = MMIX;

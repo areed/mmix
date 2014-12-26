@@ -1313,4 +1313,52 @@ MMIX.prototype.INCL = rgstrsX(function($X, YZ) {
   this.registers[$X.name] = hexify64U(u($X).plus(inc).mod(twoToThe64th));
 });
 
+/**
+ * Bitwise or with high wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.ORH = function($X, YZ) {
+  var w = Long.fromString(YZ, true, 16).shiftLeft(48);
+  var x = Long.fromString(this.registers[$X], true, 16);
+
+  this.registers[$X] = extendUnsignedTo64(w.or(x).toString(16).toUpperCase());
+};
+
+/**
+ * Bitwise or with medium high wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.ORMH = function($X, YZ) {
+  var w = Long.fromString(YZ, true, 16).shiftLeft(32);
+  var x = Long.fromString(this.registers[$X], true, 16);
+
+  this.registers[$X] = extendUnsignedTo64(w.or(x).toString(16).toUpperCase());
+};
+
+/**
+ * Bitwise or with medium low wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.ORML = function($X, YZ) {
+  var w = Long.fromString(YZ, true, 16).shiftLeft(16);
+  var x = Long.fromString(this.registers[$X], true, 16);
+
+  this.registers[$X] = extendUnsignedTo64(w.or(x).toString(16).toUpperCase());
+};
+
+/**
+ * Bitwise or with low wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.ORL = function($X, YZ) {
+  var w = Long.fromString(YZ, true, 16);
+  var x = Long.fromString(this.registers[$X], true, 16);
+
+  this.registers[$X] = extendUnsignedTo64(w.or(x).toString(16).toUpperCase());
+};
+
 module.exports = MMIX;

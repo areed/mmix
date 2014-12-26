@@ -1196,7 +1196,9 @@ MMIX.prototype.MXOR = rgstrsYZ(function($X, $Y, $Z) {
 });
 
 function notImplemented(op) {
-  throw new Error(op + ' has not been implemented yet.');
+  return function() {
+    throw new Error(op + ' has not been implemented yet.');
+  };
 }
 
 MMIX.prototype.FADD = notImplemented('FADD');
@@ -1220,5 +1222,18 @@ MMIX.prototype.SFLOT = notImplemented('SFLOT');
 MMIX.prototype.SFLOTU = notImplemented('SFLOTU');
 MMIX.prototype.LDSF = notImplemented('LDSF');
 MMIX.prototype.STSF = notImplemented('STSF');
+
+/**
+ * Set high wyde.
+ * @function
+ * @param {Register} $X
+ * @param {Hex} YZ - must be a wyde
+ */
+MMIX.prototype.SETH = function($X, YZ) {
+  if (YZ.length !== 4) {
+    throw new Error('YZ must be a wyde.');
+  }
+  this.registers[$X] = YZ + '000000000000';
+};
 
 module.exports = MMIX;

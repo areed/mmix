@@ -25,3 +25,21 @@ exports.$X$Y$Z = function(op, tests) {
     });
   });
 };
+
+exports.wyde = function(op, tests) {
+  describe(op, function() {
+    var mmix = new MMIX(new Memory());
+
+    tests.forEach(function(t) {
+      var YZ = t[0];
+      var $X = t[1]; //the value in $X after the operation
+
+      describe('YZ == ' + YZ, function() {
+        it([op, '($1, ', YZ, '): $1 == ', $X].join(''), function() {
+          mmix[op]('$1', YZ);
+          expect(mmix.registers.$1).to.equal($X);
+        });
+      });
+    });
+  });
+};

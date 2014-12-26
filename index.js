@@ -1230,10 +1230,34 @@ MMIX.prototype.STSF = notImplemented('STSF');
  * @param {Hex} YZ - must be a wyde
  */
 MMIX.prototype.SETH = function($X, YZ) {
-  if (YZ.length !== 4) {
-    throw new Error('YZ must be a wyde.');
-  }
   this.registers[$X] = YZ + '000000000000';
+};
+
+/**
+ * Set medium high wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.SETMH = function($X, YZ) {
+  this.registers[$X] = '0000' + YZ + '00000000';
+};
+
+/**
+ * Set medium low wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.SETML = function($X, YZ) {
+  this.registers[$X] = '00000000' + YZ + '0000';
+};
+
+/**
+ * Set low wyde.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.SETL = function($X, YZ) {
+  this.registers[$X] = '000000000000' + YZ;
 };
 
 module.exports = MMIX;

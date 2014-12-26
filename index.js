@@ -1195,4 +1195,30 @@ MMIX.prototype.MXOR = rgstrsYZ(function($X, $Y, $Z) {
   this.registers[$X] = binaryToHex(matrixToBits(C));
 });
 
+function notImplemented(op) {
+  throw new Error(op + ' has not been implemented yet.');
+}
+
+MMIX.prototype.FADD = notImplemented('FADD');
+MMIX.prototype.FSUB = notImplemented('FSUB');
+MMIX.prototype.FMUL = notImplemented('FMUL');
+MMIX.prototype.FDIV = notImplemented('FDIV');
+MMIX.prototype.FREM = notImplemented('FREM');
+MMIX.prototype.FSQRT = notImplemented('FSQRT');
+MMIX.prototype.FINT = notImplemented('FINT');
+MMIX.prototype.FCMP = notImplemented('FCMP');
+MMIX.prototype.FEQL = notImplemented('FEQL');
+MMIX.prototype.FUN = notImplemented('FUN');
+MMIX.prototype.FCMPE = notImplemented('FCMPE');
+MMIX.prototype.FEQLE = notImplemented('FEQLE');
+MMIX.prototype.FUNE = notImplemented('FUNE');
+MMIX.prototype.FIX = notImplemented('FIX');
+MMIX.prototype.FIXU = notImplemented('FIXU');
+MMIX.prototype.FLOT = notImplemented('FLOT');
+MMIX.prototype.FLOTU = notImplemented('FLOTU');
+MMIX.prototype.SFLOT = notImplemented('SFLOT');
+MMIX.prototype.SFLOTU = notImplemented('SFLOTU');
+MMIX.prototype.LDSF = notImplemented('LDSF');
+MMIX.prototype.STSF = notImplemented('STSF');
+
 module.exports = MMIX;

@@ -24,4 +24,16 @@ describe('Programs', function() {
       expect(memory.store[key]).to.equal(assembled[3].substring(6,8));
     });
   });
+
+  describe('run', function() {
+    var assembled = assemble(instructions);
+    var start = mmix.loadProgram(assembled);
+
+    it('should run a program at the given memory address.', function() {
+      var s = mmix.run(start);
+      s.each(function(x) {
+      });
+      expect(mmix.registers.$0).to.equal('0123456789ABCDEF');
+    });
+  });
 });

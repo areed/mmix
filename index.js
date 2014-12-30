@@ -1,6 +1,7 @@
 var Big = require('big.js');
 var Long = require('long');
 var hexa = require('hexa');
+var highland = require('highland');
 
 var utils = require('./utils');
 var _ = utils;
@@ -1437,7 +1438,28 @@ MMIX.prototype.loadProgram = function(instructions) {
  */
 MMIX.prototype.run = function(address) {
   this.at = address;
-  var instruction = this.memory.getTetra(address);
+  var prev = Big(0);
+  var self = this;
+
+  var s = highland(function(push, next) {
+    if (self.at.cmp(prev) === 0) {
+      prev = self.at = prev.plus(4);
+    } else {
+      prev = self.at;
+    }
+    var tetra = self.memory.getTetra(self.at);
+    if (tetra === '00000000') {
+      push(null, highland.nil);
+      return;
+    }
+    push(null, tetra);
+    next();
+  });
+  return s
+    .map(disassemble)
+    .doto(function(instruction) {
+      self[instruction[0]].apply(self, instruction.slice(1));
+    });
 };
 
 /**

@@ -7,6 +7,7 @@ var utils = require('./utils');
 var _ = utils;
 var Memory = require('./Memory');
 var disassemble = require('./disassemble');
+var opcodes = require('./opcodes');
 
 var decify = hexa.decify;
 var u = function($R) {
@@ -1438,7 +1439,8 @@ MMIX.prototype.loadProgram = function(instructions) {
  */
 MMIX.prototype.run = function(address) {
   this.at = address;
-  var prev = Big(0);
+  this.counts = {};
+  var prev = Big(-1);
   var self = this;
 
   var s = highland(function(push, next) {
@@ -1447,6 +1449,7 @@ MMIX.prototype.run = function(address) {
     } else {
       prev = self.at;
     }
+    self.counts[Memory.addressKey(self.at)] = (self.counts[Memory.addressKey(self.at)] || 0) + 1;
     var tetra = self.memory.getTetra(self.at);
     if (tetra === '00000000') {
       push(null, highland.nil);
@@ -1463,14 +1466,19 @@ MMIX.prototype.run = function(address) {
 };
 
 /**
- * Run a single instruction.
- * @param {string} op
- * @param {...string} args
+ *
  */
-MMIX.prototype.execute = function(op) {
-  var args = [].slice.call(arguments, 1);
-
-  this[op].apply(this, args);
+MMIX.prototype.costs = function() {
+  var costs = {};
+  for (var a in this.counts) {
+    if (this.counts.hasOwnProperty(a)) {
+      var op = this.memory.store[a];
+      var cost = opcodes.costs[op];
+      var count = this.counts[a];
+      costs[a] = {oops: cost.oops * count, mems: cost.mems * count};
+    }
+  }
+  return costs;
 };
 
 module.exports = MMIX;

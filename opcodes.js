@@ -1,3 +1,5 @@
+var _ = require('./utils');
+
 var i = 0;
 //0 stands for register, other numbers for the byte width of the argument, -1
 //for unused byte
@@ -280,7 +282,8 @@ var opcodes = [
 ];
 
 exports.opnames = opcodes.reduce(function(memo, op, index) {
-  memo[index.toString(16).toUpperCase()] = op[0];
+  var key = _.hexifyByte(index);
+  memo[key] = op[0];
   return memo;
 }, {});
 
@@ -291,5 +294,11 @@ exports.opcodes = opcodes.reduce(function(memo, op, index) {
 
 exports.formats = opcodes.reduce(function(memo, op) {
   memo[op[0]] = op[3];
+  return memo;
+}, {});
+
+exports.costs = opcodes.reduce(function(memo, op, index) {
+  var key = _.hexifyByte(index);
+  memo[key] = {oops: op[1], mems: op[2]};
   return memo;
 }, {});

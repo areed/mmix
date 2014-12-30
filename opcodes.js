@@ -1,58 +1,49 @@
-var $X_$Y_$Z = 0;
-var $X_$Y_Z = 1;
-var $X_Y_$Z = 2;
-var $X_Y_Z = 3;
-var X_YZ = 4;
-var XYZ = 5;
-var X_$Y_$Z = 6;
-var X_$Y_Z = 7;
-var $X_Z = 8;
-var X_$Z = 9;
-var $X_YZ = 10;
-var X_Z = 11;
-var $X_0 = 12;
-var $Z = 13;
-
-exports.forms = {
-  '$X_$Y_$Z': $X_$Y_$Z,
-  '$X_$Y_Z': $X_$Y_Z,
-  '$X_Y_$Z': $X_Y_$Z,
-  '$X_Y_Z': $X_Y_Z,
-  '$X_YZ': $X_YZ,
-  'X_YZ': X_YZ,
-  'XYZ': XYZ,
-  'X_$Y_$Z': X_$Y_$Z,
-  'X_$Y_Z': X_$Y_Z,
-  '$X_Z': $X_Z,
-  'X_$Z': X_$Z,
-};
+var i = 0;
+//0 stands for register, other numbers for the byte width of the argument, -1
+//for unused byte
+var $X_$Y_$Z = [0, 0, 0];
+var $X_$Y_Z = [0, 0, 1];
+var $X_Y_$Z = [0, 1, 0];
+var $X_Y_Z = [0, 1, 1];
+var $X_YZ = [0, 2];
+var X_YZ = [1, 2];
+var XYZ = [3];
+var X_$Y_$Z = [1, 0, 0];
+var X_$Y_Z = [1, 0, 1];
+var $X_Z = [0, -1, 1];
+var X_$Z = [1, -1, 0];
+var X_Z = [1, -1, 1];
+var $X_0 = [0, -1, -1];
+var $Z = [-1, -1, 0];
+var X_Y_Z = [1, 1, 1];
+var niladic = [-1, -1, -1];
 
 var opcodes = [
-  //name, oops cost, mems cost, operand format
-  ['TRAP', 5, 0, undefined],
-  ['FCMP', 1, 0, undefined],
-  ['FUN', 1, 0, undefined],
-  ['FEQL', 1, 0, undefined],
-  ['FADD', 4, 0, undefined],
-  ['FIX', 4, 0, undefined],
-  ['FSUB', 4, 0, undefined],
-  ['FIXU', 4, 0, undefined],
-  ['FLOT', 4, 0, undefined],
-  ['FLOTI', 4, 0, undefined],
-  ['FLOTU', 4, 0, undefined],
-  ['FLOTUI', 4, 0, undefined],
-  ['SFLOT', 4, 0, undefined],
-  ['SFLOTI', 4, 0, undefined],
-  ['SFLOTU', 4, 0, undefined],
-  ['SFLOTUI', 4, 0, undefined],
-  ['FMUL', 4, 0, undefined],
-  ['FCMPE', 4, 0, undefined],
-  ['FUNE', 1, 0, undefined],
-  ['FEQLE', 4, 0, undefined],
-  ['FDIV', 40, 0, undefined],
-  ['FSQRT', 40, 0, undefined],
-  ['FREM', 4, 0, undefined],
-  ['FINT', 4, 0, undefined],
+  //name, oops cost, mems cost, signature
+  ['TRAP', 5, 0, X_Y_Z],
+  ['FCMP', 1, 0, $X_$Y_$Z],
+  ['FUN', 1, 0, $X_$Y_$Z],
+  ['FEQL', 1, 0, $X_$Y_$Z],
+  ['FADD', 4, 0, $X_$Y_$Z],
+  ['FIX', 4, 0, $X_Y_$Z],
+  ['FSUB', 4, 0, $X_$Y_$Z],
+  ['FIXU', 4, 0, $X_Y_$Z],
+  ['FLOT', 4, 0, $X_Y_$Z],
+  ['FLOTI', 4, 0, $X_Y_Z],
+  ['FLOTU', 4, 0, $X_Y_$Z],
+  ['FLOTUI', 4, 0, $X_Y_Z],
+  ['SFLOT', 4, 0, $X_Y_$Z],
+  ['SFLOTI', 4, 0, $X_Y_Z],
+  ['SFLOTU', 4, 0, $X_Y_$Z],
+  ['SFLOTUI', 4, 0, $X_Y_Z],
+  ['FMUL', 4, 0, $X_$Y_$Z],
+  ['FCMPE', 4, 0, $X_$Y_$Z],
+  ['FUNE', 1, 0, $X_$Y_$Z],
+  ['FEQLE', 4, 0, $X_$Y_$Z],
+  ['FDIV', 40, 0, $X_$Y_$Z],
+  ['FSQRT', 40, 0, $X_Y_$Z],
+  ['FREM', 4, 0, $X_$Y_$Z],
+  ['FINT', 4, 0, $X_Y_$Z],
   ['MUL', 10, 0, $X_$Y_$Z],
   ['MULI', 10, 0, $X_$Y_Z],
   ['MULU', 10, 0, $X_$Y_$Z],
@@ -174,8 +165,8 @@ var opcodes = [
   ['LDOI', 1, 1, $X_$Y_Z],
   ['LDOU', 1, 1, $X_$Y_$Z],
   ['LDOUI', 1, 1, $X_$Y_Z],
-  ['LDSF', 1, 1, undefined],
-  ['LDSFI', 1, 1, undefined],
+  ['LDSF', 1, 1, $X_$Y_$Z],
+  ['LDSFI', 1, 1, $X_$Y_$Z],
   ['LDHT', 1, 1, $X_$Y_$Z],
   ['LDHTI', 1, 1, $X_$Y_Z],
   ['CSWAP', 2, 2, $X_$Y_$Z],
@@ -279,14 +270,19 @@ var opcodes = [
   ['PUT', 1, 0, X_$Z],
   ['PUTI', 1, 0, X_Z],
   ['POP', 3, 0, X_YZ],
-  ['RESUME', 5, 0, null],
+  ['RESUME', 5, 0, niladic],
   ['SAVE', 1, 20, $X_0],
   ['UNSAVE', 1, 20, $Z],
   ['SYNC', 1, 0, XYZ],
   ['SWYM', 1, 0, XYZ],
   ['GET', 1, 0, $X_Z],
-  ['TRIP', 5, 0, XYZ],
+  ['TRIP', 5, 0, X_Y_Z],
 ];
+
+exports.opnames = opcodes.reduce(function(memo, op, index) {
+  memo[index.toString(16).toUpperCase()] = op[0];
+  return memo;
+}, {});
 
 exports.opcodes = opcodes.reduce(function(memo, op, index) {
   memo[op[0]] = index;

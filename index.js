@@ -216,6 +216,20 @@ Register.prototype.matrix = function() {
 };
 
 /**
+ * @param {Array}
+ */
+MMIX.prototype.loadProgram = function(instructions) {
+  var start = new Big(256);
+  var memory = this.memory;
+
+  instructions.forEach(function(instruct, index) {
+    memory.setTetra(instruct, start.plus(index * 4));
+  });
+
+  return start;
+};
+
+/**
  * Used by the LD* operations to calculate a memory address.
  * @param {Register} $Y
  * @param {Register} $Z
@@ -1407,6 +1421,17 @@ MMIX.prototype.ANDNL = function($X, YZ) {
   var x = Long.fromString(this.registers[$X], true, 16);
 
   this.registers[$X] = extendUnsignedTo64(x.and(w.not()).toString(16).toUpperCase());
+};
+
+/**
+ * Run a single instruction.
+ * @param {string} op
+ * @param {...string} args
+ */
+MMIX.prototype.execute = function(op) {
+  var args = [].slice.call(arguments, 1);
+
+  this[op].apply(this, args);
 };
 
 module.exports = MMIX;

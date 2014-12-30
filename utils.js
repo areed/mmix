@@ -44,6 +44,27 @@ exports.s = function($R) {
   return $R.signed();
 };
 
+var hexifyByte = exports.hexifyByte = exports.hexify8U = function(deci) {
+  var d = parseInt(deci, 10) % 256;
+  var h = d.toString(16).toUpperCase();
+
+  return h.length === 1 ? '0' + h : h;
+};
+
+exports.hexifyWyde = exports.hexify16U = function(deci) {
+  var d = parseInt(deci, 10) % 65536;
+  var h = d.toString(16).toUpperCase();
+
+  return ('0000' + h).slice(h.length);
+};
+
+exports.hexifyTripleByte = exports.hexify24U = function(deci) {
+  var d = parseInt(deci, 10) % 16777216;
+  var h = d.toString(16).toUpperCase();
+
+  return ('000000', + h).slice(h.length);
+};
+
 var hexify64 = exports.hexify64 = function(deci) {
   if (deci instanceof Big) {
     return hexa.hexify(deci.toFixed(), 64);
@@ -90,4 +111,13 @@ exports.signExtend16To64 = function(hex) {
 
 exports.signExtend32To64 = function(hex) {
   return hexa.signExtend(64, 32, hex);
+};
+
+/**
+ * Returns the hex constant byte for a general purpose register.
+ * @param {string} $X - e.g. $0 or $255
+ * @return {Hex}
+ */
+exports.registerToHex = function($X) {
+  return hexifyByte($X.slice(1));
 };

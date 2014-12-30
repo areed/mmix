@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 var opcodes = require('../opcodes');
 
 describe('Opcodes', function() {
-  it('should', function() {
+  it('opcodes should be a map from opnames to opcodes.', function() {
     expect(opcodes.opcodes.FMUL).to.equal(16);
     expect(opcodes.opcodes.ADD).to.equal(32);
     expect(opcodes.opcodes.CMP).to.equal(48);
@@ -21,8 +21,12 @@ describe('Opcodes', function() {
     expect(opcodes.opcodes.TRIP).to.equal(255);
   });
 
+  it('formats should be a map from opnames to signatures.', function() {
+    expect(opcodes.formats.STB).to.deep.equal([0, 0, 0]);
+    expect(opcodes.formats.ADDI).to.deep.equal([0, 0, 1]);
+  });
+
   it('should', function() {
-    expect(opcodes.formats.STB).to.equal(opcodes.forms.$X_$Y_$Z);
-    expect(opcodes.formats.ADDI).to.equal(opcodes.forms.$X_$Y_Z);
+    expect(opcodes.opnames.FF).to.equal('TRIP');
   });
 });

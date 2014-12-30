@@ -5,6 +5,7 @@ var hexa = require('hexa');
 var utils = require('./utils');
 var _ = utils;
 var Memory = require('./Memory');
+var disassemble = require('./disassemble');
 
 var decify = hexa.decify;
 var u = function($R) {
@@ -66,16 +67,19 @@ var zeros = '0000000000000000';
  */
 function MMIX(memory) {
   this.memory = memory;
+  this.at = null;
   var registers = this.registers = {};
+  var special = this.special = {};
 
   for (var i = 0; i < 256; i++) {
     addRegister(registers, '$' + i);
   }
+
   ('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
     .split('')
     .concat(['BB', 'TT', 'WW', 'XX', 'YY', 'ZZ'])
     .forEach(function(x) {
-      addRegister(registers, 'r' + x);
+      addRegister(special, 'r' + x);
     });
 }
 
@@ -213,20 +217,6 @@ Register.prototype.matrix = function() {
     bits.slice(48, 56),
     bits.slice(56)
   ];
-};
-
-/**
- * @param {Array}
- */
-MMIX.prototype.loadProgram = function(instructions) {
-  var start = new Big(256);
-  var memory = this.memory;
-
-  instructions.forEach(function(instruct, index) {
-    memory.setTetra(instruct, start.plus(index * 4));
-  });
-
-  return start;
 };
 
 /**
@@ -1421,6 +1411,33 @@ MMIX.prototype.ANDNL = function($X, YZ) {
   var x = Long.fromString(this.registers[$X], true, 16);
 
   this.registers[$X] = extendUnsignedTo64(x.and(w.not()).toString(16).toUpperCase());
+};
+
+/**
+ * @param {Array}
+ */
+MMIX.prototype.loadProgram = function(instructions) {
+  var start = new Big(256);
+  var memory = this.memory;
+
+  //TODO don't mutate instructions array
+  if (instructions[instructions.length - 1] !== '00000000') {
+    instructions.push('00000000');
+  }
+
+  instructions.forEach(function(instruct, index) {
+    memory.setTetra(instruct, start.plus(index * 4));
+  });
+
+  return start;
+};
+
+/**
+ * @param {Object} address - type Big.js address of first instruction
+ */
+MMIX.prototype.run = function(address) {
+  this.at = address;
+  var instruction = this.memory.getTetra(address);
 };
 
 /**

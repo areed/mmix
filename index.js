@@ -1415,8 +1415,116 @@ MMIX.prototype.ANDNL = function($X, YZ) {
   this.registers[$X] = extendUnsignedTo64(x.and(w.not()).toString(16).toUpperCase());
 };
 
+function jump(h) {
+  this.jumpTarget = this.at.plus(Big(parseInt(h, 16)).times(4));
+}
+
 /**
- * @param {Array}
+ * Jump.
+ * @param {Hex}
+ */
+MMIX.prototype.JMP = function(XYZ) {
+  jump.call(this, XYZ);
+};
+
+/**
+ * Branch if negative.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.BN = rgstrsX(function($X, YZ) {
+  if (s($X).cmp(0) === -1) {
+    jump.call(this, YZ);
+  }
+});
+MMIX.prototype.PBN = MMIX.prototype.BN;
+
+/**
+ * Branch if zero.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.BZ = rgstrsX(function($X, YZ) {
+  if (s($X).cmp(0) === 0) {
+    jump.call(this, YZ);
+  }
+});
+MMIX.prototype.PBZ = MMIX.prototype.BZ;
+
+/**
+ * Branch if positive.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.BP = rgstrsX(function($X, YZ) {
+  if (s($X).cmp(0) === 1) {
+    jump.call(this, YZ);
+  }
+});
+MMIX.prototype.PBP = MMIX.prototype.BP;
+
+/**
+ * Branch if odd.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.BOD = rgstrsX(function($X, YZ) {
+  if (_.remainder(two, s($X)).cmp(1) === 0) {
+    jump.call(this, YZ);
+  }
+});
+MMIX.prototype.PBOD = MMIX.prototype.BOD;
+
+/**
+ * Branch if nonnegative.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.BNN = rgstrsX(function($X, YZ) {
+  if (s($X).cmp(0) > -1) {
+    jump.call(this, YZ);
+  }
+});
+MMIX.prototype.PBNN = MMIX.prototype.BNN;
+
+/**
+ * Branch if nonzero.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.BNZ = rgstrsX(function($X, YZ) {
+  if (s($X).cmp(0) !== 0) {
+    jump.call(this, YZ);
+  }
+});
+MMIX.prototype.PBNZ = MMIX.prototype.BNZ;
+
+/**
+ * Branch if nonpositive.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.BNP = rgstrsX(function($X, YZ) {
+  if (s($X).cmp(0) !== 0) {
+    jump.call(this, YZ);
+  }
+});
+MMIX.prototype.PBNP = MMIX.prototype.BNP;
+
+/**
+ * Branch if even.
+ * @param {Register} $X
+ * @param {Hex} YZ
+ */
+MMIX.prototype.BEV = rgstrsX(function($X, YZ) {
+  if (s($X).mod(2).cmp(0) === 0) {
+    jump.call(this, YZ);
+  }
+});
+MMIX.prototype.PBEV = MMIX.prototype.BEV;
+
+/**
+ * @param {Array} instructions
  */
 MMIX.prototype.loadProgram = function(instructions) {
   var start = new Big(256);
@@ -1438,19 +1546,16 @@ MMIX.prototype.loadProgram = function(instructions) {
  * @param {Object} address - type Big.js address of first instruction
  */
 MMIX.prototype.run = function(address) {
-  this.at = address;
+  this.at = address.minus(4);
   this.counts = {};
-  var prev = Big(-1);
   var self = this;
 
   var s = highland(function(push, next) {
-    if (self.at.cmp(prev) === 0) {
-      prev = self.at = prev.plus(4);
-    } else {
-      prev = self.at;
-    }
-    self.counts[Memory.addressKey(self.at)] = (self.counts[Memory.addressKey(self.at)] || 0) + 1;
-    var tetra = self.memory.getTetra(self.at);
+    var at = self.jumpTarget || self.at.plus(4);
+    self.at = at;
+    self.jumpTarget = null;
+    self.counts[Memory.addressKey(at)] = (self.counts[Memory.addressKey(at)] || 0) + 1;
+    var tetra = self.memory.getTetra(at);
     if (tetra === '00000000') {
       push(null, highland.nil);
       return;
@@ -1458,6 +1563,7 @@ MMIX.prototype.run = function(address) {
     push(null, tetra);
     next();
   });
+
   return s
     .map(disassemble)
     .doto(function(instruction) {

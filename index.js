@@ -1238,6 +1238,16 @@ MMIX.prototype.SFLOTU = notImplemented('SFLOTU');
 MMIX.prototype.LDSF = notImplemented('LDSF');
 MMIX.prototype.STSF = notImplemented('STSF');
 
+MMIX.prototype.PUSHJ = notImplemented('PUSHJ');
+MMIX.prototype.PUSHGO = notImplemented('PUSHGO');
+MMIX.prototype.POP = notImplemented('POP');
+MMIX.prototype.SAVE = notImplemented('SAVE');
+MMIX.prototype.UNSAVE = notImplemented('UNSAVE');
+
+MMIX.prototype.TRIP = notImplemented('TRIP');
+MMIX.prototype.TRAP = notImplemented('TRAP');
+MMIX.prototype.RESUME = notImplemented('RESUME');
+
 /**
  * Set high wyde.
  * @function

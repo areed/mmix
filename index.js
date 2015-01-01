@@ -1428,6 +1428,17 @@ MMIX.prototype.JMP = function(XYZ) {
 };
 
 /**
+ * Go.
+ * @param {Register} $X
+ * @param {Register} $Y
+ * @param {Register} $Z
+ */
+MMIX.prototype.GO = rgstrsYZ(function($X, $Y, $Z) {
+  this.registers[$X] = this.at.plus(4);
+  this.jumpTarget = A($Y, $Z);
+});
+
+/**
  * Branch if negative.
  * @param {Register} $X
  * @param {Hex} YZ

@@ -1,129 +1,147 @@
-/** @module memory */
-var Big = require('big.js');
-var utils = require('./utils');
+var Long = require('long');
 
-/**
- * @constructor
- * @alias module:memory
- */
-function Memory() {
-  this.store = {};
+//default user space segment sizes
+var TEXT_SEGMENT_SIZE_DEFAULT = 512;
+var DATA_SEGMENT_SIZE_DEFAULT = 512;
+var POOL_SEGMENT_SIZE_DEFAULT = 512;
+var STACK_SEGMENT_SIZE_DEFAULT = 512;
+
+var KERNEL_SPACE_SIZE_DEFAULT = 0;
+
+function provision(size, defaultSize) {
+  return new Uint8Array(typeof size === 'number' ? size : defaultSize);
 }
 
 /**
- * Returns the byte stored at the address.
- * @param {Uint64} addr
+ * True iff the address is between 0 and 2^61 - 1 inclusive
+ * @param {Hex} address
+ * @return {boolean}
+ */
+function isText(address) {
+  return /^[01][0-9A-F]{15}$/.test(address);
+}
+
+/**
+ * True iff the address is between 2^61 and 2^62 - 1 inclusive
+ * @param {Hex} address
+ * @return {boolean}
+ */
+function isData(address) {
+  return /^[23][0-9A-F]{15}$/.test(address);
+}
+
+/**
+ * True iff the address is between 2^62 and 6 * 2^60 - 1 inclusive
+ * @param {Hex} address
+ * @return {boolean}
+ */
+function isPool(address) {
+  return /^[45][0-9A-F]{15}$/.test(address);
+}
+
+/**
+ * True iff the address is between 6 * 2^60 and 2^63 - 1 inclusive
+ * @param {Hex} address
+ * @return {boolean}
+ */
+function isStack(address) {
+  return /^[67][0-9A-F]{15}$/.test(address);
+}
+
+/**
+ * True iff the address is equal to or above 2^63
+ * @param {Hex} address
+ * @return {boolean}
+ */
+function isKernel(address) {
+  return /^[89A-F][0-9A-F]{15}$/.test(address);
+}
+
+var outOfBounds = new Error('Segment does not have actual memory at that address');
+
+/**
+ * Returns the index and segment for an address.
+ * @param {Hex} address
+ * @param {Object} memory
+ * @return {Object}
+ */
+function resolve(address, memory) {
+  var l = Long.fromString(address, true, 16);
+  var i = null;
+  var segment = null;
+
+  if (isText(address)) {
+    segment = memory.text;
+    i = l.toInt();
+  }
+ 
+  if (isData(address)) {
+    segment = memory.data;
+    i = l.minus(Long.fromString('2000000000000000', true, 16)).toInt();
+  }
+
+  if (isPool(address)) {
+    segment = memory.pool;
+    i = l.minus(Long.fromString('4000000000000000', true, 16)).toInt();
+  }
+
+  if (isStack(address)) {
+    segment = memory.stack;
+    i = l.minus(Long.fromString('6000000000000000', true, 16)).toInt();
+  }
+
+  if (isKernel(address)) {
+    segment = memory.kernel;
+    i = l.minus(Long.fromString('8000000000000000', true, 16)).toInt();
+  }
+
+  if (segment === null) {
+    throw new Error('No memory segment contains the address: ' + address);
+  }
+
+  if (l.compare(segment.length) !== -1) {
+    throw new Error('Segment does not have an actual memory cell at address: ' + address);
+  }
+
+  return {segment: segment, index: i};
+}
+
+/**
+ * @constructor
+ * @param {number} [text] - bytes of memory the machine should have in its text
+ * segment in user space
+ * @param {number} [data] - bytes of memory in data segment
+ * @param {number} [pool] - bytes of memory in pool segment
+ * @param {number} [stack] - bytes of memory in stack segment
+ * @param {number} [kernel] - bytes of memory for kernel space
+ */
+function Memory(text, data, pool, stack, kernel) {
+  this.text = provision(text, TEXT_SEGMENT_SIZE_DEFAULT);
+  this.data = provision(data, DATA_SEGMENT_SIZE_DEFAULT);
+  this.pool = provision(pool, POOL_SEGMENT_SIZE_DEFAULT);
+  this.stack = provision(stack, STACK_SEGMENT_SIZE_DEFAULT);
+  this.kernel = provision(kernel, KERNEL_SPACE_SIZE_DEFAULT);
+}
+
+/**
+ * @param {Hex} address
  * @return {Hex}
  */
-Memory.prototype.getByte = function(addr) {
-  return this.store[Memory.addressKey(addr)] || '00';
+Memory.prototype.getByte = function(address) {
+  var m = resolve(address, this);
+
+  return m.segment[m.index];
 };
 
 /**
- * Stores a byte at the given address.
  * @param {Hex} data
- * @param {Uint64} addr
- */
-Memory.prototype.setByte = function(data, addr) {
-  if (data.length !== 2) {
-    throw new Error('Setting a single memory cell requires 1 byte of data.');
-  }
-  if (!(addr instanceof Big)) {
-    throw new Error('Address must be a Big');
-  }
-  this.store[Memory.addressKey(addr)] = data;
-};
-
-/**
- * Returns the wyde that contains the byte at the given address.
- * @param {Uint64} addr
+ * @param {Hex} address
  * @return {Hex}
  */
-Memory.prototype.getWyde = function(addr) {
-  var start = utils.effectiveAddress(2, addr);
-  var bytes = [];
-  for (var i = 0; i < 2; i++) {
-    bytes.push(this.getByte(start.plus(i)));
-  }
-  return bytes.join('');
-};
+Memory.prototype.setByte = function(address) {
+  var m = resolve(address, this);
 
-/**
- * Stores a wyde at the M_2 address containing the given byte address.
- * @param {Hex} data
- * @param {Uint64} addr
- */
-Memory.prototype.setWyde = function(data, addr) {
-  var start = utils.effectiveAddress(2, addr);
-
-  for (var i = 0; i < 2; i++) {
-    this.setByte(data.substring(i*2, (i*2) + 2), start.plus(i));
-  }
-};
-
-/**
- * Returns the tetra that contains the byte at the given address.
- * @param {Uint64} addr
- * @return {Hex}
- */
-Memory.prototype.getTetra = function(addr) {
-  var start = utils.effectiveAddress(4, addr);
-  var bytes = [];
-  for (var i = 0; i < 4; i++) {
-    bytes.push(this.getByte(start.plus(i)));
-  }
-  return bytes.join('');
-};
-
-/**
- * Stores a tetra at the M_4 address containing the given byte address.
- * @param {Hex} data
- * @param {Uint64} addr
- */
-Memory.prototype.setTetra = function(data, addr) {
-  var start = utils.effectiveAddress(4, addr);
-  
-  for (var i = 0; i < 4; i++) {
-    this.setByte(data.substring(i*2, (i*2) + 2), start.plus(i));
-  }
-};
-
-/**
- * Returns the octabyte that contains the byte at the given address.
- * @param {Uint64} addr
- * @return {Hex}
- */
-Memory.prototype.getOcta = function(addr) {
-  var start = utils.effectiveAddress(8, addr);
-
-  var bytes = [];
-  for (var i = 0; i < 8; i++) {
-    bytes.push(this.getByte(start.plus(i)));
-  }
-  return bytes.join('');
-};
-
-/**
- * Stores an octabyte at the M_8 address containing the given byte address.
- * @param {Hex} data
- * @param {Uint64} addr
- */
-Memory.prototype.setOcta = function(data, addr) {
-  var start = utils.effectiveAddress(8, addr);
-
-  data = utils.extendUnsignedTo64(data);
-
-  for (var i = 0; i < 8; i++) {
-    this.setByte(data.substring(i*2, (i*2) + 2), start.plus(i));
-  }
-};
-
-/**
- * @param {Uint64} addr
- * @return {Hex}
- */
-Memory.addressKey = function(addr) {
-  return addr.toString(16).toUpperCase();
+  m.segment[m.index] = data;
 };
 
 module.exports = Memory;

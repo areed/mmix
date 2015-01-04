@@ -1,4 +1,7 @@
 var _ = require('./utils');
+var interrupts = require('./interrupts');
+var swym = require('./swym');
+var load = require('./load');
 
 var i = 0;
 //0 stands for register, other numbers for the byte width of the argument, -1
@@ -22,7 +25,7 @@ var niladic = [-1, -1, -1];
 
 var opcodes = [
   //name, oops cost, mems cost, signature
-  ['TRAP', 5, 0, X_Y_Z],
+  ['TRAP', 5, 0, X_Y_Z, interrupts.TRAP],
   ['FCMP', 1, 0, $X_$Y_$Z],
   ['FUN', 1, 0, $X_$Y_$Z],
   ['FEQL', 1, 0, $X_$Y_$Z],
@@ -151,14 +154,14 @@ var opcodes = [
   ['ZSNPI', 1, 0, $X_$Y_Z],
   ['ZSEV', 1, 0, $X_$Y_$Z],
   ['ZSEVI', 1, 0, $X_$Y_Z],
-  ['LDB', 1, 1, $X_$Y_$Z],
-  ['LDBI', 1, 1, $X_$Y_Z],
-  ['LDBU', 1, 1, $X_$Y_$Z],
-  ['LDBUI', 1, 1, $X_$Y_Z],
-  ['LDW', 1, 1, $X_$Y_$Z],
-  ['LDWI', 1, 1, $X_$Y_Z],
-  ['LDWU', 1, 1, $X_$Y_$Z],
-  ['LDWUI', 1, 1, $X_$Y_Z],
+  ['LDB', 1, 1, $X_$Y_$Z, load.LDB],
+  ['LDBI', 1, 1, $X_$Y_Z, load.LDBI],
+  ['LDBU', 1, 1, $X_$Y_$Z, load.LDBU],
+  ['LDBUI', 1, 1, $X_$Y_Z, load.LDBUI],
+  ['LDW', 1, 1, $X_$Y_$Z, load.LDW],
+  ['LDWI', 1, 1, $X_$Y_Z, load.LDWI],
+  ['LDWU', 1, 1, $X_$Y_$Z, load.LDWU],
+  ['LDWUI', 1, 1, $X_$Y_Z, load.LDWUI],
   ['LDT', 1, 1, $X_$Y_$Z],
   ['LDTI', 1, 1, $X_$Y_Z],
   ['LDTU', 1, 1, $X_$Y_$Z],
@@ -272,13 +275,13 @@ var opcodes = [
   ['PUT', 1, 0, X_$Z],
   ['PUTI', 1, 0, X_Z],
   ['POP', 3, 0, X_YZ],
-  ['RESUME', 5, 0, niladic],
+  ['RESUME', 5, 0, niladic, interrupts.RESUME],
   ['SAVE', 1, 20, $X_0],
   ['UNSAVE', 1, 20, $Z],
   ['SYNC', 1, 0, XYZ],
-  ['SWYM', 1, 0, XYZ],
+  ['SWYM', 1, 0, XYZ, swym],
   ['GET', 1, 0, $X_Z],
-  ['TRIP', 5, 0, X_Y_Z],
+  ['TRIP', 5, 0, X_Y_Z, interrupts.TRIP],
 ];
 
 exports.opnames = opcodes.reduce(function(memo, op, index) {
@@ -302,3 +305,7 @@ exports.costs = opcodes.reduce(function(memo, op, index) {
   memo[key] = {oops: op[1], mems: op[2]};
   return memo;
 }, {});
+
+exports.ops = opcodes.map(function(o) {
+  return o[4];
+});

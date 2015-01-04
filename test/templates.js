@@ -1,6 +1,27 @@
 var expect = require('chai').expect;
 var Memory = require('../memory');
 var MMIX = require('../');
+var _ = require('../utils');
+
+exports.diff = function(tests) {
+  tests.forEach(function(t) {
+    var setup = t[0];
+    var tetra = t[1];
+    var diff = t[2];
+    var state = null;
+
+    describe('State is: ' + JSON.stringify(setup), function() {
+      before(function() {
+        state = _.extend(setup, new MMIX(new Memory()));
+      });
+
+      it(tetra + ' should return diff: ' + JSON.stringify(diff), function() {
+        expect(_.execute(tetra, state)).to.deep.equal(diff);
+      });
+    });
+  });
+};
+
 
 exports.$X$Y$Z = function(op, tests) {
   describe(op, function() {

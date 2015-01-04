@@ -22,3 +22,14 @@
  * instance of Big.js
  * @typedef {object} Int
  */
+
+/**
+ * The machine's state.
+ * @typedef {Object} State
+ */
+
+/**
+ * The difference between the state of the machine after the instruction
+ * executes and the state of the machine before the instruction executed.
+ * @typedef {Object} Diff
+ */

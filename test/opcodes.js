@@ -26,7 +26,12 @@ describe('Opcodes', function() {
     expect(opcodes.formats.ADDI).to.deep.equal([0, 0, 1]);
   });
 
-  it('should', function() {
+  it('opnames should be a map from bytes to opnames', function() {
     expect(opcodes.opnames.FF).to.equal('TRIP');
+  });
+
+  it('ops should return the function that performs the operation.', function() {
+    expect(opcodes.ops[0]).to.have.property('name', 'TRAP');
+    expect(opcodes.ops[255]).to.have.property('name', 'TRIP');
   });
 });

@@ -8,8 +8,8 @@ test(require('./load'));
 function test(module) {
   highland.keys(module)
     .each(function(key) {
-      describe.only(key, function() {
-        templates.diff(module[key]);
+      describe(key, function() {
+        templates.differ(module[key]);
       });
     });
 }

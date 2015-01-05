@@ -24,6 +24,11 @@
  */
 
 /**
+ * The state of a machine.
+ * @typedef {Object} State
+ */
+
+/**
  * The difference between the state of the machine after the instruction
  * executes and the state of the machine before the instruction executed.
  * @typedef {Object} Diff

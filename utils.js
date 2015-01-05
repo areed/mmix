@@ -4,8 +4,65 @@ var _ = require('highland');
 
 var twoToThe64th = Big(2).pow(64);
 
-var internals = {};
-internals['@'] = true;
+exports.compose = _.compose;
+
+exports.build = function() {
+  var o = {};
+  for (var i = 0; i < arguments.length; i += 2) {
+    o[arguments[i]] = arguments[i + 1];
+  }
+  return o;
+};
+
+/**
+ * Returns the byte in memory at the given address.
+ * @param {Hex} address - an octabyte
+ * @param {State} state
+ */
+var loadByte = exports.loadByte = function(address, state) {
+  return hexifyByte(state.memory.getByte(address));
+};
+
+/**
+ * Returns the wyde in memory that contains the byte at the given address.
+ * @param {Hex} address - an octabyte; the least significant bit is ignored and
+ * treated as 0
+ * @param {State} state
+ */
+var loadWyde = exports.loadWyde = function(address, state) {
+  var addr = effectiveAddress(2, bigifyOcta(address));
+  return loadByte(octafyBig(addr), state) + loadByte(octafyBig(addr.plus(1)), state);
+};
+
+/**
+ * Returns the tetra in memory that contains the byte at the given address.
+ * @param {Hex} address - an octabyte; the least 2 significant bits will be
+ * ignored and treated as 0
+ * @param {State} state
+ */
+var loadTetra = exports.loadTetra = function(address, state) {
+  var addr = effectiveAddress(4, bigifyOcta(address));
+
+  return loadWyde(octafyBig(addr), state) + loadWyde(octafyBig(addr.plus(2)), state);
+};
+
+/**
+ * Returns the octa in memory that contains the byte at the given address.
+ * @param {Hex} address - an octabyte; the least 3 significant bits will be
+ * ignored and treated as 0
+ * @param {State} state
+ * @return {Hex}
+ */
+exports.loadOcta = function(address, state) {
+  var addr = effectiveAddress(8, bigifyOcta(address));
+  return loadTetra(octafyBig(addr), state) + loadTetra(octafyBig(addr.plus(4)), state);
+};
+
+var internals = exports.internals = function() {
+  return {
+    '@': ZEROS
+  };
+};
 
 function isGenReg(key) {
   if (!/^\$/.test(key)) {
@@ -26,7 +83,7 @@ function isSpecialReg(key) {
 }
 
 function isInternalAttr(key) {
-  return internals.hasOwnProperty(key);
+  return internals().hasOwnProperty(key);
 }
 
 function isAddress(key) {
@@ -40,27 +97,27 @@ function isAddress(key) {
  */
 exports.applyDiff = function(diff, machine) {
   for (var p in diff) {
-    if (machine.hasOwnProperty(p)) {
-      if (isGenReg(p)) {
-        machine[p] = diff[p];
-        break;
-      }
-
-      if (isSpecialReg(p)) {
-        machine[p] = diff[p];
-        break;
-      }
-
-      if (isInternalAttr(p)) {
-        machine[p] = diff[p];
-        break;
-      }
-
-      if (isAddress(p)) {
-        machine.memory.setByte(diff[p], p);
-        break;
-      }
+    if (isGenReg(p)) {
+      machine.general[p] = diff[p];
+      continue;
     }
+
+    if (isSpecialReg(p)) {
+      machine.special[p] = diff[p];
+      continue;
+    }
+
+    if (isInternalAttr(p)) {
+      machine.internal[p] = diff[p];
+      continue;
+    }
+
+    if (isAddress(p)) {
+      machine.memory.setByte(parseInt(diff[p], 16), p);
+      continue;
+    }
+
+    throw new Error('Unrecognized property in diff: ' + p);
   }
 
   return machine;
@@ -129,7 +186,12 @@ exports.opDoesStore = function(b) {
  * @return {Int}
  */
 exports.A = function(state, Y, Z) {
-  return octafyBig(regUint64(Y, state).plus(regUint64(Z, state)).mod(twoToThe64th));
+  var bigY = regUint64(Y, state);
+  var bigZ = regUint64(Z, state);
+  var address = bigY.plus(bigZ);
+
+  address = address.mod(twoToThe64th);
+  return octafyBig(address);
 };
 
 /**
@@ -203,7 +265,7 @@ exports.atInstruction = function(state) {
  * returns the constant "0000000000000000".
  * @return {Hex}
  */
-exports.ZEROS = '0000000000000000';
+var ZEROS = exports.ZEROS = '0000000000000000';
 
 /**
  * returns the octabyte contents of a general register identified by a byte.
@@ -212,7 +274,7 @@ exports.ZEROS = '0000000000000000';
  * @return {Hex} this is simply data - signed vs. unsigned is meaningless here
  */
 var genRegOcta = exports.genRegOcta = function(b, state) {
-  return state[genRegKey(b)];
+  return state.general[genRegKey(b)];
 };
 
 /**
@@ -242,7 +304,7 @@ var genRegKey = exports.genRegKey = function(b) {
  * @param {Uint} addr
  * @return {Uint}
  */
-exports.effectiveAddress = function(byteWidth, addr) {
+var effectiveAddress = exports.effectiveAddress = function(byteWidth, addr) {
   return addr.minus(addr.mod(byteWidth));
 };
 

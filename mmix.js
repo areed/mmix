@@ -8,19 +8,19 @@ var _ = require('./utils');
  */
 function MMIX(memory) {
   this.memory = memory;
-  this.general = {};
-  this.special = {};
-  this.internal = _.internal;
+  var general = this.general = {};
+  var special = this.special = {};
+  this.internal = _.internals();
 
   for (var i = 0; i < 256; i++) {
-    addRegister(this.general, '$' + i);
+    addRegister(general, '$' + i);
   }
 
   ('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
     .split('')
     .concat(['BB', 'TT', 'WW', 'XX', 'YY', 'ZZ'])
     .forEach(function(x) {
-      addRegister(this.special, 'r' + x);
+      addRegister(special, 'r' + x);
     });
 }
 
@@ -45,3 +45,5 @@ function addRegister(registers, name) {
     },
   });
 }
+
+module.exports = MMIX;

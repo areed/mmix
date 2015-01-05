@@ -57,8 +57,6 @@ function isKernel(address) {
   return /^[89A-F][0-9A-F]{15}$/.test(address);
 }
 
-var outOfBounds = new Error('Segment does not have actual memory at that address');
-
 /**
  * Returns the index and segment for an address.
  * @param {Hex} address
@@ -77,29 +75,29 @@ function resolve(address, memory) {
  
   if (isData(address)) {
     segment = memory.data;
-    i = l.minus(Long.fromString('2000000000000000', true, 16)).toInt();
+    i = l.subtract(Long.fromString('2000000000000000', true, 16)).toInt();
   }
 
   if (isPool(address)) {
     segment = memory.pool;
-    i = l.minus(Long.fromString('4000000000000000', true, 16)).toInt();
+    i = l.subtract(Long.fromString('4000000000000000', true, 16)).toInt();
   }
 
   if (isStack(address)) {
     segment = memory.stack;
-    i = l.minus(Long.fromString('6000000000000000', true, 16)).toInt();
+    i = l.subtract(Long.fromString('6000000000000000', true, 16)).toInt();
   }
 
   if (isKernel(address)) {
     segment = memory.kernel;
-    i = l.minus(Long.fromString('8000000000000000', true, 16)).toInt();
+    i = l.subtract(Long.fromString('8000000000000000', true, 16)).toInt();
   }
 
   if (segment === null) {
     throw new Error('No memory segment contains the address: ' + address);
   }
 
-  if (l.compare(segment.length) !== -1) {
+  if (i >= segment.length) {
     throw new Error('Segment does not have an actual memory cell at address: ' + address);
   }
 
@@ -125,7 +123,7 @@ function Memory(text, data, pool, stack, kernel) {
 
 /**
  * @param {Hex} address
- * @return {Hex}
+ * @return {number}
  */
 Memory.prototype.getByte = function(address) {
   var m = resolve(address, this);
@@ -134,14 +132,14 @@ Memory.prototype.getByte = function(address) {
 };
 
 /**
- * @param {Hex} data
+ * @param {number} b
  * @param {Hex} address
  * @return {Hex}
  */
-Memory.prototype.setByte = function(address) {
+Memory.prototype.setByte = function(b, address) {
   var m = resolve(address, this);
 
-  m.segment[m.index] = data;
+  m.segment[m.index] = b;
 };
 
 module.exports = Memory;

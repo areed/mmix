@@ -5,18 +5,18 @@ var _ = require('../utils');
 
 exports.diff = function(tests) {
   tests.forEach(function(t) {
-    var setup = t[0];
+    var state = t[0];
     var tetra = t[1];
     var diff = t[2];
-    var state = null;
+    var machine = null;
 
-    describe('State is: ' + JSON.stringify(setup), function() {
+    describe('State is: ' + JSON.stringify(state), function() {
       before(function() {
-        state = _.extend(setup, new MMIX(new Memory()));
+        machine = _.applyDiff(state, new MMIX(new Memory()));
       });
 
       it(tetra + ' should return diff: ' + JSON.stringify(diff), function() {
-        expect(_.execute(tetra, state)).to.deep.equal(diff);
+        expect(_.execute(tetra, machine)).to.deep.equal(diff);
       });
     });
   });

@@ -43,8 +43,9 @@ exports.differ = function(tests) {
             expect(out).to.have.property(d, diff[d]);
           }
           for (var o in out) {
-            expect(out).to.have.property(d, diff[o]);
+            expect(out).to.have.property(o, diff[o]);
           }
+          expect(out).to.deep.equal(diff);
         });
       });
     });

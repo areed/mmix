@@ -3,7 +3,8 @@ var templates = require('./templates');
 
 //test(require('./interrupts'));
 //test(require('./swym'));
-test(require('./load'));
+//test(require('./load'));
+test(require('./store'));
 
 function test(module) {
   highland.keys(module)

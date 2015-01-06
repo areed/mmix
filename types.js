@@ -24,6 +24,16 @@
  */
 
 /**
+ * signed instance of Long.js
+ * @typedef {Object} Int64
+ */
+
+/**
+ * unsigned instance of Long.js
+ * @typedef {Object} Uint64
+ */
+
+/**
  * The state of a machine.
  * @typedef {Object} State
  */

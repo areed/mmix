@@ -1,8 +1,14 @@
 var Big = require('big.js');
+var Long = require('Long');
 var hexa = require('hexa');
 var _ = require('highland');
+var underscore = require('underscore');
 
 var twoToThe64th = Big(2).pow(64);
+
+exports.omit = function(keys, obj) {
+  return underscore.omit(obj, keys);
+};
 
 exports.compose = _.compose;
 
@@ -213,6 +219,11 @@ var regUint64 = exports.regUint64 = function(b, state) {
   return bigifyOcta(genRegOcta(b, state));
 };
 
+var int64 = exports.int64 = function(octa) {
+  return Long.fromString(octa, false, 16);
+};
+
+
 /**
  * Returns a Big.js Uint64.
  * @param {Hex} octa
@@ -329,6 +340,35 @@ var remainder = exports.remainder = function(divisor, n) {
   return n.minus(q.times(divisor));
 };
 
+/**
+ * @param {Int64} divisor
+ * @param {Int64} n
+ * @return {Int64}
+ */
+var quotient64 = exports.quotient64 = function(divisor, n) {
+  var q = n.div(divisor);
+
+  if (q.multiply(divisor).lessThanOrEqual(n)) {
+    return q;
+  }
+  q = q.subtract(1);
+  if (q.multiply(divisor).lessThanOrEqual(n)) {
+    return q;
+  }
+  throw new Error(['Fix quotient64 implementation for divisor and dividend', divisor, n].join(' '));
+};
+
+/**
+ * @param {Int64} divisor
+ * @param {Int64} n
+ * @return {Int64}
+ */
+var remainder64 = exports.remainder64 = function(divisor, n) {
+  var q = quotient64(divisor, n);
+
+  return n.subtract(q.multiply(divisor));
+};
+
 exports.decify = hexa.decify;
 
 /**
@@ -355,6 +395,64 @@ exports.s = function($R) {
   return $R.signed();
 };
 
+/**
+ * Returns the two's complement hexadecimal digits for an Int64.
+ * Overflow checks should be performed in the calling code as needed.
+ * @param {Int64} i64
+ * @return {Hex}
+ */
+exports.int64ToByte = function(i64) {
+  return hexifyByte(remainder64(Long.fromInt(256), i64));
+};
+
+/**
+ * Two's complement wyde from an Int64.
+ * @param {Int64} n
+ * @return {Hex}
+ */
+exports.int64ToWyde = function(n) {
+  return hexifyWyde(remainder64(Long.fromInt(65536), n));
+};
+
+/**
+ * Two's complement tetra from an Int64.
+ * @param {Int64} n
+ * @return {Hex}
+ */
+exports.int64ToTetra = function(n) {
+  return hexifyTetra(remainder64(Long.fromString('4294967296'), n));
+};
+
+/**
+ * Returns true iff an int64 is outside the range -128 to +127.
+ * @param {Int64} i
+ * @return {boolean}
+ */
+exports.int64Overflows8 = function(i) {
+  return i.greaterThanOrEqual(Long.fromInt(127)) ||
+    i.lessThanOrEqual(Long.fromInt(-128));
+};
+
+/**
+ * Returns true iff an int64 is outside the range -32768 and 32767.
+ * @param {Int64} n
+ * @return {boolean}
+ */
+exports.int64Overflows16 = function(n) {
+  return n.greaterThanOrEqual(Long.fromInt(32767)) ||
+    n.lessThanOrEqual(Long.fromInt(-32768));
+};
+
+/**
+ * Returns true iff an int 64 is outside the range -2147483648 and 2147483647.
+ * @param {Int64} n
+ * @return {boolean}
+ */
+exports.int64Overflows32 = function(n) {
+  return n.greaterThanOrEqual(Long.fromInt(2147483647)) ||
+    n.lessThanOrEqual(Long.fromInt(-2147483648));
+};
+
 var hexifyByte = exports.hexifyByte = exports.hexify8U = function(deci) {
   var d = parseInt(deci, 10) % 256;
   var h = d.toString(16).toUpperCase();
@@ -362,7 +460,7 @@ var hexifyByte = exports.hexifyByte = exports.hexify8U = function(deci) {
   return h.length === 1 ? '0' + h : h;
 };
 
-exports.hexifyWyde = exports.hexify16U = function(deci) {
+var hexifyWyde = exports.hexifyWyde = exports.hexify16U = function(deci) {
   var d = parseInt(deci, 10) % 65536;
   var h = d.toString(16).toUpperCase();
 
@@ -374,6 +472,13 @@ exports.hexifyTripleByte = exports.hexify24U = function(deci) {
   var h = d.toString(16).toUpperCase();
 
   return ('000000', + h).slice(h.length);
+};
+
+var hexifyTetra = exports.hexifyTetra = exports.hexifyTetra = function(deci) {
+  var d = parseInt(deci, 10) % 4294967296;
+  var h = d.toString(16).toUpperCase();
+  
+  return ('00000000' + h).slice(h.length);
 };
 
 var hexify64 = exports.hexify64 = function(deci) {
@@ -432,3 +537,11 @@ exports.signExtend32To64 = function(hex) {
 exports.registerToHex = function($X) {
   return hexifyByte($X.slice(1));
 };
+
+/**
+ * Fetches the octa in a register and casts it to a signed Int64.
+ * @param {State} state
+ * @param {Hex} b
+ * @return {Int64}
+ */
+var regInt64 = exports.regInt64 = _.compose(int64, genRegOcta);

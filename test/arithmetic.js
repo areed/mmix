@@ -1,248 +1,282 @@
-var expect = require('chai').expect;
-var Memory = require('../memory');
-var MMIX = require('../');
+exports.ADD = [
+  [
+    '20000102',
+    {
+      '$1': '0000000000000001',
+      '$2': '0000000000000001',
+    },
+    {
+      '$0': '0000000000000002',
+    }
+  ],
+  [
+    '20000102',
+    {
+      '$1': '0000000000000002',
+      '$2': 'FFFFFFFFFFFFFFFE',
+    },
+    {
+      '$0': '0000000000000000',
+    }
+  ],
+  [
+    '20000102',
+    {
+      '$1': 'FFFFFFFFFFFFFFFF',
+      '$2': 'FFFFFFFFFFFFFFFF',
+    },
+    {
+      '$0': 'FFFFFFFFFFFFFFFE',
+    }
+  ],
+  [
+    '20000102',
+    {
+      '$1': 'FFFFFFFFFFFFFFFF',
+      '$2': '0000000000000002',
+    },
+    {
+      '$0': '0000000000000001',
+    }
+  ],
+  [
+    '20000102',
+    {
+      '$1': '0000000000000003',
+      '$2': '0000000000000000',
+    },
+    {
+      '$0': '0000000000000003',
+    }
+  ],
+  [
+    '20000102',
+    {
+      '$1': '9E3779B97F4A7C16',
+      '$2': '9E3779B97F4A7C16',
+    },
+    {
+      '$0': '3C6EF372FE94F82C',
+      'exceptions': '01000000',
+    }
+  ]
+];
 
-describe('Arithmetic Operations', function() {
-  var mmix = new MMIX(new Memory());
+exports.ADDI = [
+  [
+    '21000101',
+    {
+      '$1': '0000000000000001',
+    },
+    {
+      '$0': '0000000000000002',
+    }
+  ],
+  [
+    '21000202',
+    {
+      '$2': 'FFFFFFFFFFFFFFFE',
+    },
+    {
+      '$0': '0000000000000000',
+    }
+  ],
+  [
+    '21000100',
+    {
+      '$1': 'FFFFFFFFFFFFFFFF',
+    },
+    {
+      '$0': 'FFFFFFFFFFFFFFFF',
+    }
+  ],
+  [
+    '21000102',
+    {
+      '$1': 'FFFFFFFFFFFFFFFF',
+    },
+    {
+      '$0': '0000000000000001',
+    }
+  ],
+  [
+    '21000100',
+    {
+      '$1': '0000000000000003',
+    },
+    {
+      '$0': '0000000000000003',
+    }
+  ],
+  [
+    '210001A5',
+    {
+      '$1': '9E3779B97F4A7C16',
+    },
+    {
+      '$0': '9E3779B97F4A7CBB',
+    }
+  ],
+  [
+    '210001FF',
+    {
+      '$1': '7FFFFFFFFFFFFFFF',
+    },
+    {
+      '$0': '80000000000000FE',
+      'exceptions': '01000000',
+    }
+  ]
+];
 
-  describe('DIV', function() {
-    [
-      ['0000000000000001', '0000000000000001', '0000000000000001', '0000000000000000'],
-      ['0000000000000002', 'FFFFFFFFFFFFFFFE', 'FFFFFFFFFFFFFFFF', '0000000000000000'],
-      ['FFFFFFFFFFFFFFFD', '0000000000000002', 'FFFFFFFFFFFFFFFE', '0000000000000001'],
-      ['FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF', '0000000000000001', '0000000000000000'],
-      ['FFFFFFFFFFFFFFFF', '0000000000000002', 'FFFFFFFFFFFFFFFF', '0000000000000001'],
-      ['0000000000000003', '0000000000000000', '0000000000000000', '0000000000000003'],
-      ['9e3779b97f4a7c16', '9e3779b97f4a7c16', '0000000000000001', '0000000000000000'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-      var rR = t[3];
+exports.ADDU = [
+  [
+    '22000102',
+    {
+      '$1': '0000000000000001',
+      '$2': '0000000000000001',
+    },
+    {
+      '$0': '0000000000000002',
+    }
+  ],
+  [
+    '22000102',
+    {
+      '$1': '0000000000000002',
+      '$2': 'FFFFFFFFFFFFFFFE',
+    },
+    {
+      '$0': '0000000000000000',
+    }
+  ],
+  [
+    '22000102',
+    {
+      '$1': 'FFFFFFFFFFFFFFFF',
+      '$2': 'FFFFFFFFFFFFFFFF',
+    },
+    {
+      '$0': 'FFFFFFFFFFFFFFFE',
+    }
+  ],
+  [
+    '22000102',
+    {
+      '$1': 'FFFFFFFFFFFFFFFF',
+      '$2': '0000000000000002',
+    },
+    {
+      '$0': '0000000000000001',
+    }
+  ],
+  [
+    '22000102',
+    {
+      '$1': '0000000000000003',
+      '$2': '0000000000000000',
+    },
+    {
+      '$0': '0000000000000003',
+    }
+  ],
+  [
+    '22000102',
+    {
+      '$1': '9E3779B97F4A7C16',
+      '$2': '9E3779B97F4A7C16',
+    },
+    {
+      '$0': '3C6EF372FE94F82C',
+    }
+  ]
+];
 
-      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-          mmix.DIV('$1', '$2', '$3');
-        });
-        it('$1  <- ' + X, function() {
-          expect(mmix.registers.$1).to.equal(X);
-        });
+exports.ADDUI = [
+  [
+    '23000101',
+    {
+      '$1': '0000000000000001',
+    },
+    {
+      '$0': '0000000000000002',
+    }
+  ],
+  [
+    '23000202',
+    {
+      '$2': 'FFFFFFFFFFFFFFFE',
+    },
+    {
+      '$0': '0000000000000000',
+    }
+  ],
+  [
+    '23000100',
+    {
+      '$1': 'FFFFFFFFFFFFFFFF',
+    },
+    {
+      '$0': 'FFFFFFFFFFFFFFFF',
+    }
+  ],
+  [
+    '23000102',
+    {
+      '$1': 'FFFFFFFFFFFFFFFF',
+    },
+    {
+      '$0': '0000000000000001',
+    }
+  ],
+  [
+    '23000100',
+    {
+      '$1': '0000000000000003',
+    },
+    {
+      '$0': '0000000000000003',
+    }
+  ],
+  [
+    '230001A5',
+    {
+      '$1': '9E3779B97F4A7C16',
+    },
+    {
+      '$0': '9E3779B97F4A7CBB',
+    }
+  ],
+  [
+    '230001FF',
+    {
+      '$1': '0FFFFFFFFFFFFFFF',
+    },
+    {
+      '$0': '10000000000000FE',
+    }
+  ]
+];
 
-        it('$rR <- ' + rR, function() {
-          expect(mmix.registers.rR).to.equal(rR);
-        });
-      });
-    });
-  });
-
-  describe('DIVU', function() {
-    [
-      ['0000000000000001', '0000000000000001', '0000000000000001', '0000000000000001', '0000000000000001'],
-      ['0000000000000002', 'FFFFFFFFFFFFFFFE', '8765432109ABCDEF', '8765432109ABCDF0', '0ECA864213579BE2'],
-      ['FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF', '0000000000000000', '0000000000000001', '0000000000000000'],
-      ['FFFFFFFFFFFFFFFF', '0000000000000002', '0000000011111111', '0000000011111111', 'FFFFFFFFFFFFFFFF'],
-      ['0000000000000003', '0000000000000000', '0000000000000003', '0000000000000003', '0000000000000003'],
-      ['9e3779b97f4a7c16', '9e3779b97f4a7c16', '9e3779b97f4a7c16', '9e3779b97f4a7c16', '9e3779b97f4a7c16'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var rD = t[2];
-      var X = t[3];
-      var rR = t[4];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z, '&& $rD ==', rD].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-          mmix.registers.rD = rD;
-          mmix.DIVU('$1', '$2', '$3');
-        });
-
-        it('$1  <- ' + X, function() {
-          expect(mmix.registers.$1).to.equal(X);
-        });
-
-        it('$rR <- ' + Y, function() {
-        });
-      });
-    });
-  });
-
-  describe('NEG', function() {
-    var tests = [
-      //Y, $Z, $X
-      ['00', '0000000000000001', 'FFFFFFFFFFFFFFFF'],
-      ['00', 'FFFFFFFFFFFFFFFF', '0000000000000001'],
-      ['FF', '000000000000007F', '0000000000000080'],
-      ['FF', '0000000000000100', 'FFFFFFFFFFFFFFFF'],
-      ['FF', 'FFFFFFFFFFFFFFFF', '0000000000000100'],
-    ];
-    tests.forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['Y ==', Y, '$$ $3', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$3 = Z;
-          mmix.NEG('$1', Y, '$3');
-        });
-
-        it('$1 <- ' + X, function() {
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    });
-  });
-
-  describe('NEGU', function() {
-    var tests = [
-      //Y, $Z, $X
-      ['00', '0000000000000001', 'FFFFFFFFFFFFFFFF'],
-      ['00', 'FFFFFFFFFFFFFFFF', '0000000000000001'],
-      ['FF', '000000000000007F', '0000000000000080'],
-      ['FF', '0000000000000100', 'FFFFFFFFFFFFFFFF'],
-      ['FF', 'FFFFFFFFFFFFFFFF', '0000000000000100'],
-    ];
-    tests.forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['Y ==', Y, '$$ $3', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$3 = Z;
-          mmix.NEGU('$1', Y, '$3');
-        });
-
-        it('$1 <- ' + X, function() {
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    });
-  });
-
-  describe('SL', function() {
-    var tests = [
-      //$Y, $Z, $X
-      ['0000000000000000', '0000000000000000', '0000000000000000'],
-      ['0000000000000001', '0000000000000000', '0000000000000001'],
-      ['00000000FFFFFFFF', '0000000000000020', 'FFFFFFFF00000000'],
-      ['FFFFFFFF00000000', '0000000000000004', 'FFFFFFF000000000'],
-    ];
-
-    tests.forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '$$ $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-          mmix.SL('$1', '$2', '$3');
-        });
-
-        it('$1 <- ' + X, function() {
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    });
-  });
-
-  describe('SR', function() {
-    var tests = [
-      //$Y, $Z, $X
-      ['0000000000000000', '0000000000000000', '0000000000000000'],
-      ['1000000000000000', '0000000000000000', '1000000000000000'],
-      ['1000000000000000', '0000000000000001', '0800000000000000'],
-      ['0000000000000008', '0000000000000001', '0000000000000004'],
-      ['1111111111111111', '0000000000000020', '0000000011111111'],
-      ['F000000000000000', '0000000000000040', 'FFFFFFFFFFFFFFFF'],
-      ['8000000000000000', '0000000000000004', 'F800000000000000'],
-    ];
-
-    tests.forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '$$ $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('$1 <- ' + X, function() {
-          mmix.SR('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    });
-  });
-
-  describe('SRU', function() {
-    var tests = [
-      //$Y, $Z, $X
-      ['0000000000000000', '0000000000000000', '0000000000000000'],
-      ['1000000000000000', '0000000000000000', '1000000000000000'],
-      ['1000000000000000', '0000000000000001', '0800000000000000'],
-      ['0000000000000008', '0000000000000001', '0000000000000004'],
-      ['1111111111111111', '0000000000000020', '0000000011111111'],
-      ['F000000000000000', '0000000000000040', '0000000000000000'],
-      ['8000000000000000', '0000000000000004', '0800000000000000'],
-    ];
-
-    tests.forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '$$ $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('$1 <- ' + X, function() {
-          mmix.SRU('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    });
-  });
-
-  describe('Comparisons', function() {
-    var tests = [
-      //Y, Z, CMP answer, CMPU answer
-      ['0000000000000000', '0000000000000000', '0000000000000000', '0000000000000000'],
-      ['FFFFFFFFFFFFFFFF', '7777777777777777', 'FFFFFFFFFFFFFFFF', '0000000000000001'],
-    ];
-
-    tests.forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var sX = t[2];
-      var uX = t[3];
-
-      describe(['$2 ==', Y, '$$ $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('CMP($1, $2, $3) -> $1 == ' + sX, function() {
-          mmix.CMP('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(sX);
-        });
-
-        it('CMPU($1, $2, $3) -> $1 == ' + uX, function() {
-          mmix.CMPU('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(uX);
-        });
-      });
-    });
-  });
-});
+exports['2ADDU'] = [
+  [
+    '28000102',
+    {
+      '$1': '0000000000000000',
+      '$2': '0000000000000000',
+    },
+    {
+      '$0': '0000000000000000',
+    }
+  ],
+  [
+    '28000102',
+    {
+      '$1': '2000000000000000',
+      '$2': '0000000000000008',
+    },
+    {
+      '$0': '4000000000000008'
+    }
+  ],
+];

@@ -4,7 +4,10 @@ var templates = require('./templates');
 //test(require('./interrupts'));
 //test(require('./swym'));
 //test(require('./load'));
-test(require('./store'));
+//test(require('./store'));
+//test(require('./arithmetic'));
+//test(require('./bytewise'));
+test(require('./branch'));
 
 function test(module) {
   highland.keys(module)

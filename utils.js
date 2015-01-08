@@ -4,13 +4,71 @@ var hexa = require('hexa');
 var _ = require('highland');
 var underscore = require('underscore');
 
-var twoToThe64th = Big(2).pow(64);
+var twoToThe64th = exports.twoToThe64th = Big(2).pow(64);
+
+/**
+ * Returns true iff the octa in the given general register is 0.
+ * @param {Hex} b - the byte corresponding to a general register
+ * @param {State} state
+ * @return {boolean}
+ */
+exports.regIsZero = function(b, state) {
+  return genRegOcta(b, state) === '0000000000000000';
+};
+
+/**
+ * Returns true iff the octa in the given general register is negative.
+ * @param {Hex} b - the byte corresponding to a general register
+ * @param {State} state
+ * @return {boolean}
+ */
+exports.regIsNeg = function(b, state) {
+  return binary(genRegOcta(b, state))[0] === 1;
+};
+
+/**
+ * Returns true iff the octa in the given general register is positive.
+ * @param {Hex} b - the byte corresponding to a general register
+ * @param {State} state
+ * @return {boolean}
+ */
+exports.regIsPos = function(b, state) {
+  return binary(genRegOcta(b, state))[0] === 0;
+};
+
+/**
+ * Returns true iff the signed octa in the specified general register is odd.
+ * @param {Hex} b - the byte corresponding to a general register
+ * @param {State} state
+ * @return {boolean}
+ */
+exports.regIsOdd = function(b, state) {
+  return binary(genRegOcta(b, state)).pop() === 1;
+};
+
+/**
+ * Batches an array into nested arrays of the given size.
+ * @param {number} s - items in each chunk
+ * @param {Array} a
+ * @return {Array[]}
+ */
+exports.chunk = function(s, a) {
+  var chunked = [];
+
+  for (var i = 0; i < a.length; i += s) {
+    chunked.push(a.slice(i, i + s));
+  }
+
+  return chunked;
+};
+
+exports.curry = _.curry;
 
 exports.omit = function(keys, obj) {
   return underscore.omit(obj, keys);
 };
 
-exports.compose = _.compose;
+var compose = exports.compose = _.compose;
 
 exports.build = function() {
   var o = {};
@@ -210,6 +268,7 @@ exports.AI = function(state, Y, Z) {
 };
 
 /**
+ * Deprecated. This should be named regUint since it casts to a Big.js.
  * Fetches the octa in a register identified by a byte and casts it to a Uint64.
  * @param {State} state
  * @param {Hex} b
@@ -219,10 +278,61 @@ var regUint64 = exports.regUint64 = function(b, state) {
   return bigifyOcta(genRegOcta(b, state));
 };
 
+/**
+ * Fetches the octa in a general register and casts it to a Uint64.
+ * @param {Hex} b
+ * @param {State} state
+ * @return {Uint64} Long.js
+ */
+exports.regToUint64 = function(b, state) {
+  return Long.fromString(genRegOcta(b, state), true, 16);
+};
+
+/**
+ * Fetches the octa in a special register and casts it to a Uint64.
+ * @param {string} r - the name of the special register e.g. "rM"
+ * @param {State} state
+ * @return {Uint64} Long.js
+ */
+exports.specialToUint64 = function(r, state) {
+  return Long.fromString(specialRegOcta(r, state));
+};
+
 var int64 = exports.int64 = function(octa) {
   return Long.fromString(octa, false, 16);
 };
 
+/**
+ * @param {Hex} b
+ * @return {Uint}
+ */
+exports.byteToUint = function(b) {
+  return Big(parseInt(b, 16));
+};
+
+/**
+ * Converts a byte or wyde to a Uint64 (Long.js).
+ * @param {Hex} b
+ * @return {Uint64}
+ */
+var hexToUint64 = exports.byteToUint64 = exports.wydeToUint64 = exports.tetraToUint64 = exports.octaToUint64 = function(b) {
+  return Long.fromString(b, true, 16);
+};
+
+var octaIsNegative = exports.octaIsNegative = function(octa) {
+  return octa.length === 16 && /^[89A-F]/.test(octa);
+};
+
+/**
+ * Returns the signed integer corresponding to 16 hexadecimal digits.
+ * @param {Hex} octa
+ * @return {Int}
+ */
+var octaToInt = exports.octaToInt = function(octa) {
+  var big = bigifyOcta(octa);
+
+  return octaIsNegative(octa) ? big.minus(twoToThe64th) : big;
+};
 
 /**
  * Returns a Big.js Uint64.
@@ -268,8 +378,37 @@ exports.memKey = function(hex) {
  * @param {State} state
  * @return {Hex} the tetra instruction
  */
-exports.atInstruction = function(state) {
-  return state[state['@']];
+var atInstruction = exports.atInstruction = function(state) {
+  return loadTetra(atAddress(state), state);
+};
+
+/**
+ * Returns the current '@' address.
+ * @param {State} state
+ * @return {Hex} an octabyte address
+ */
+var atAddress = exports.atAddress = function(state) {
+  return state.internal['@'];
+};
+
+/**
+ * Returns the relative address forward.
+ * @param {State}
+ * @param {Hex} h - a wyde or triple byte unsigned
+ * @return {Hex} an octabyte
+ */
+exports.RA = function(h, state) {
+  return uint64ToOcta(atUint64(state).add(hexToUint64(h).multiply(4)));
+};
+
+/**
+ * Returns the relative address backward.
+ * @param {State}
+ * @param {Hex} h - a wyde or triple byte unsigned
+ * @return {Hex} an octabyte
+ */
+exports.RAB = function(h, state) {
+  return uint64ToOcta(atUint64(state).subtract(hexToUint64(h).multiply(4)));
 };
 
 /**
@@ -279,13 +418,23 @@ exports.atInstruction = function(state) {
 var ZEROS = exports.ZEROS = '0000000000000000';
 
 /**
- * returns the octabyte contents of a general register identified by a byte.
- * @param {State} state
+ * Returns the octabyte contents of a general register identified by a byte.
  * @param {Hex} b - e.g. "FF" to get the contents of $255 or "00" for $0
+ * @param {State} state
  * @return {Hex} this is simply data - signed vs. unsigned is meaningless here
  */
 var genRegOcta = exports.genRegOcta = function(b, state) {
   return state.general[genRegKey(b)];
+};
+
+/**
+ * Returns the octabyte contents of a specia register identified by name.
+ * @param {string} r e.g. 'rM' or 'rXX'
+ * @param {State} state
+ * @return {Hex}
+ */
+var specialRegOcta = exports.specialRegOcta = function(r, state) {
+  return state.special[name];
 };
 
 /**
@@ -453,6 +602,15 @@ exports.int64Overflows32 = function(n) {
     n.lessThanOrEqual(Long.fromInt(-2147483648));
 };
 
+/**
+ * Returns true iff a big is outside the range -2^63 and 2^63 - 1.
+ * @param {Int} n
+ * @return {boolean}
+ */
+exports.bigOverflows64 = function(n) {
+  return n.gte(Big(2).pow(63)) || n.lt(Big(-2).pow(63));
+};
+
 var hexifyByte = exports.hexifyByte = exports.hexify8U = function(deci) {
   var d = parseInt(deci, 10) % 256;
   var h = d.toString(16).toUpperCase();
@@ -513,7 +671,7 @@ exports.hexify128U = (function() {
   };
 })();
 
-exports.extendUnsignedTo64 = function(hex) {
+var extendUnsignedTo64 = exports.extendUnsignedTo64 = function(hex) {
   return hexa.pad0Octa(hex);
 };
 
@@ -530,6 +688,15 @@ exports.signExtend32To64 = function(hex) {
 };
 
 /**
+ * Converts a Uint64 (Long.js) to an octabyte.
+ * @param {Uint64} n
+ * @return {Hex}
+ */
+var uint64ToOcta = exports.uint64ToOcta = function(n) {
+  return extendUnsignedTo64(n.toString(16).toUpperCase());
+};
+
+/**
  * Returns the hex constant byte for a general purpose register.
  * @param {string} $X - e.g. $0 or $255
  * @return {Hex}
@@ -540,8 +707,119 @@ exports.registerToHex = function($X) {
 
 /**
  * Fetches the octa in a register and casts it to a signed Int64.
- * @param {State} state
  * @param {Hex} b
- * @return {Int64}
+ * @param {State} state
+ * @return {Int}
  */
-var regInt64 = exports.regInt64 = _.compose(int64, genRegOcta);
+exports.regToInt = _.compose(octaToInt, genRegOcta);
+
+/**
+ * Fetches the octa in a register and casts it to a Big signed Int.
+ * @param {Hex} b
+ * @param {State} state
+ * @return {Int}
+ */
+var regToBig = exports.regToBig = _.compose(bigifyOcta, genRegOcta);
+
+var binary = exports.binary = (function() {
+  var map =  {
+    '0': [0, 0, 0, 0],
+    '1': [0, 0, 0, 1],
+    '2': [0, 0, 1, 0],
+    '3': [0, 0, 1, 1],
+    '4': [0, 1, 0, 0],
+    '5': [0, 1, 0, 1],
+    '6': [0, 1, 1, 0],
+    '7': [0, 1, 1, 1],
+    '8': [1, 0, 0, 0],
+    '9': [1, 0, 0, 1],
+    'A': [1, 0, 1, 0],
+    'B': [1, 0, 1, 1],
+    'C': [1, 1, 0, 0],
+    'D': [1, 1, 0, 1],
+    'E': [1, 1, 1, 0],
+    'F': [1, 1, 1, 1]
+  };
+
+  return function(hex) {
+
+    return hex
+      .split('')
+      .reduce(function(memo, H) {
+        return memo.concat(map[H]);
+      }, []);
+  };
+})();
+
+var matrix = exports.matrix = function(octa) {
+  var bits = binary(octa);
+
+  return [
+    bits.slice(0, 8),
+    bits.slice(8, 16),
+    bits.slice(16, 24),
+    bits.slice(24, 32),
+    bits.slice(32, 40),
+    bits.slice(40, 48),
+    bits.slice(48, 56),
+    bits.slice(56)
+  ];
+};
+
+exports.pairs = function pairs(A, B) {
+  return A.map(function(row, i) {
+    return row.map(function(a) {
+      return row.map(function(y, j) {
+        return [A[i][j], B[j][i]];
+      });
+    });
+  });
+};
+
+exports.reducePairedVectors = function reducePairedVectors(fn, C) {
+  return C.map(function(row) {
+    return row.map(function(items) {
+      return items.reduce(fn);
+    });
+  });
+};
+
+exports.reducePairs = function reducePairs(fn, C) {
+  return C.map(function(row) {
+    return row.map(function(pairs) {
+      return pairs.map(function(pair) {
+        return fn.apply(null, pair);
+      });
+    });
+  });
+};
+
+exports.matrixToBits = function matrixToBits(M) {
+  var x = '';
+
+  return M
+    .map(function(row) {
+      return row.join('');
+    })
+    .join('');
+};
+
+exports.or = function or(a, b) {
+  return a | b;
+};
+
+exports.xor = function xor(a, b) {
+  return a ^ b;
+};
+
+exports.times = function times(a, b) {
+  return a * b;
+};
+
+/**
+ * Returns the current '@' address as a Uint64.
+ * @param {State} state
+ * @return {Uint64}
+ */
+var atUint64 = exports.atUint64 = compose(hexToUint64, atAddress);
+

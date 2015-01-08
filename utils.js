@@ -401,8 +401,12 @@ var atAddress = exports.atAddress = function(state) {
  * @param {Hex} h - a wyde or triple byte unsigned
  * @return {Hex} an octabyte
  */
-exports.RA = function(h, state) {
+var RA = exports.RA = function(h, state) {
   return uint64ToOcta(atUint64(state).add(hexToUint64(h).multiply(4)));
+};
+
+exports.step = function(state) {
+  return RA('01', state);
 };
 
 /**

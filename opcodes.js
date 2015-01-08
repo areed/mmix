@@ -9,7 +9,9 @@ var immediate = require('./immediate');
 var interrupts = require('./interrupts');
 var load = require('./load');
 var shift = require('./shift');
+var special = require('./special');
 var store = require('./store');
+var subroutine = require('./subroutine');
 var swym = require('./swym');
 
 //0 stands for register, other numbers for the byte width of the argument, -1
@@ -192,8 +194,8 @@ var opcodes = [
   ['PRELDI', 1, 0, X_$Y_Z],
   ['PREGO', 1, 0, X_$Y_$Z],
   ['PREGOI', 1, 0, X_$Y_Z],
-  ['GO', 1, 0, $X_$Y_$Z],
-  ['GOI', 1, 0, $X_$Y_Z],
+  ['GO', 1, 0, $X_$Y_$Z, jump.GO],
+  ['GOI', 1, 0, $X_$Y_Z, jump.GOI],
   ['STB', 1, 1, $X_$Y_$Z, store.STB],
   ['STBI', 1, 1, $X_$Y_Z, store.STBI],
   ['STBU', 1, 1,  $X_$Y_$Z, store.STBU],
@@ -224,8 +226,8 @@ var opcodes = [
   ['PRESTI', 1, 0, X_$Y_Z],
   ['SYNCID', 1, 0, X_$Y_$Z],
   ['SYNCIDI', 1, 0, X_$Y_Z],
-  ['PUSHGO', 3, 0, $X_$Y_$Z],
-  ['PUSHGOI', 3, 0, $X_$Y_Z],
+  ['PUSHGO', 3, 0, $X_$Y_$Z, subroutine.PUSHGO],
+  ['PUSHGOI', 3, 0, $X_$Y_Z, subroutine.PUSHGOI],
   ['OR', 1, 0, $X_$Y_$Z, bitwise.OR],
   ['ORI', 1, 0, $X_$Y_Z, bitwise.ORI],
   ['ORN', 1, 0, $X_$Y_$Z, bitwise.ORN],
@@ -274,21 +276,21 @@ var opcodes = [
   ['ANDNMH', 1, 0, $X_YZ, immediate.ANDNMH],
   ['ANDNML', 1, 0, $X_YZ, immediate.ANDNML],
   ['ANDNL', 1, 0, $X_YZ, immediate.ANDNL],
-  ['JMP', 1, 0, XYZ],
-  ['JMPB', 1, 0, XYZ],
-  ['PUSHJ', 1, 0, $X_YZ],
-  ['PUSHJB', 1, 0, $X_YZ],
-  ['GETA', 1, 0, $X_YZ],
-  ['GETAB', 1, 0, $X_YZ],
-  ['PUT', 1, 0, X_$Z],
-  ['PUTI', 1, 0, X_Z],
-  ['POP', 3, 0, X_YZ],
+  ['JMP', 1, 0, XYZ, jump.JMP],
+  ['JMPB', 1, 0, XYZ, jump.JMPB],
+  ['PUSHJ', 1, 0, $X_YZ, subroutine.PUSHJ],
+  ['PUSHJB', 1, 0, $X_YZ, subroutine.PUSHJB],
+  ['GETA', 1, 0, $X_YZ, jump.GETA],
+  ['GETAB', 1, 0, $X_YZ, jump.GETAB],
+  ['PUT', 1, 0, X_$Z, special.PUT],
+  ['PUTI', 1, 0, X_Z, special.PUTI],
+  ['POP', 3, 0, X_YZ, subroutine.POP],
   ['RESUME', 5, 0, niladic, interrupts.RESUME],
-  ['SAVE', 1, 20, $X_0],
-  ['UNSAVE', 1, 20, $Z],
+  ['SAVE', 1, 20, $X_0, special.SAVE],
+  ['UNSAVE', 1, 20, $Z, special.UNSAVE],
   ['SYNC', 1, 0, XYZ],
   ['SWYM', 1, 0, XYZ, swym],
-  ['GET', 1, 0, $X_Z],
+  ['GET', 1, 0, $X_Z, special.GET],
   ['TRIP', 5, 0, X_Y_Z, interrupts.TRIP],
 ];
 

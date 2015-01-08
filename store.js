@@ -11,7 +11,7 @@ var _ = require('./utils');
  * @return {Diff}
  */
 var STB = exports.STB = function(state, X, Y, Z) {
-  var x64 = _.regInt64(X, state);
+  var x64 = _.regToInt64(X, state);
   var diff = _.build(_.A(state, Y, Z), _.int64ToByte(x64));
 
   //overflow check
@@ -27,7 +27,7 @@ var STB = exports.STB = function(state, X, Y, Z) {
  * @return {Diff}
  */
 var STBI = exports.STBI = function(state, X, Y, Z) {
-  var x64 = _.regInt64(X, state);
+  var x64 = _.regToInt64(X, state);
   var diff = _.build(_.AI(state, Y, Z), _.int64ToByte(x64));
 
   return _.int64Overflows8(x64) ? _.extend({exceptions: '01000000'}, diff) : diff;
@@ -66,7 +66,7 @@ exports.STBUI = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.STW = function(state, X, Y, Z) {
-  var x64 = _.regInt64(X, state);
+  var x64 = _.regToInt64(X, state);
   var w = _.int64ToWyde(x64);
   var addr = _.effectiveAddress(2, _.bigifyOcta(_.A(state, Y, Z)));
   var diff = _.build(
@@ -86,7 +86,7 @@ exports.STW = function(state, X, Y, Z) {
  * @param {Hex} Z - immediate byte constant
  */
 exports.STWI = function(state, X, Y, Z) {
-  var x64 = _.regInt64(X, state);
+  var x64 = _.regToInt64(X, state);
   var w = _.int64ToWyde(x64);
   var addr = _.effectiveAddress(2, _.bigifyOcta(_.AI(state, Y, Z)));
   var diff = _.build(
@@ -107,7 +107,7 @@ exports.STWI = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.STWU = function(state, X, Y, Z) {
-  var x64 = _.regInt64(X, state);
+  var x64 = _.regToInt64(X, state);
   var w = _.int64ToWyde(x64);
   var addr = _.effectiveAddress(2, _.bigifyOcta(_.A(state, Y, Z)));
 
@@ -126,7 +126,7 @@ exports.STWU = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.STWUI = function(state, X, Y, Z) {
-  var x64 = _.regInt64(X, state);
+  var x64 = _.regToInt64(X, state);
   var w = _.int64ToWyde(x64);
   var addr = _.effectiveAddress(2, _.bigifyOcta(_.AI(state, Y, Z)));
 
@@ -145,7 +145,7 @@ exports.STWUI = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.STT = function(state, X, Y, Z) {
-  var x64 = _.regInt64(X, state);
+  var x64 = _.regToInt64(X, state);
   var t = _.int64ToTetra(x64);
   var addr = _.effectiveAddress(4, _.bigifyOcta(_.A(state, Y, Z)));
   var diff = _.build(
@@ -167,7 +167,7 @@ exports.STT = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.STTI = function(state, X, Y, Z) {
-  var x64 = _.regInt64(X, state);
+  var x64 = _.regToInt64(X, state);
   var t = _.int64ToTetra(x64);
   var addr = _.effectiveAddress(4, _.bigifyOcta(_.AI(state, Y, Z)));
   var diff = _.build(
@@ -189,7 +189,7 @@ exports.STTI = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.STTU = function(state, X, Y, Z) {
-  var x64 = _.regInt64(X, state);
+  var x64 = _.regToInt64(X, state);
   var t = _.int64ToTetra(x64);
   var addr = _.effectiveAddress(4, _.bigifyOcta(_.A(state, Y, Z)));
   return _.build(
@@ -209,7 +209,7 @@ exports.STTU = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.STTUI = function(state, X, Y, Z) {
-  var x64 = _.regInt64(X, state);
+  var x64 = _.regToInt64(X, state);
   var t = _.int64ToTetra(x64);
   var addr = _.effectiveAddress(4, _.bigifyOcta(_.AI(state, Y, Z)));
   return _.build(

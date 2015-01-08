@@ -1,4 +1,5 @@
 var _ = require('./utils');
+var Big = require('Big.js');
 
 var modTwo64th = _.compose(_.octafyBig, _.curry(_.remainder, _.twoToThe64th));
 
@@ -273,4 +274,217 @@ exports.NEGU = function(state, X, Y, Z) {
  */
 exports.NEGUI = function(state, X, Y, Z) {
   return _.omit(['exceptions'], NEGI(state, X, Y, Z));
+};
+
+/**
+ * Multiply signed.
+ * @param {State} state
+ * @param {Hex} X - destination register
+ * @param {Hex} Y - source register
+ * @param {Hex} Z - source register
+ * @return {Diff}
+ */
+exports.MUL = function(state, X, Y, Z) {
+  var bigX = _.regToInt(Y, state).times(_.regToInt(Z, state));
+  var diff = _.build(_.genRegKey(X), modTwo64th(bigX));
+
+  return _.bigOverflows64(bigX) ? _.extend({exceptions: '01000000'}, diff) : diff;
+};
+
+/**
+ * Multiply signed immediate.
+ * @param {State} state
+ * @param {Hex} X - destination register
+ * @param {Hex} Y - source register
+ * @param {Hex} Z - immediate byte constant
+ * @return {Diff}
+ */
+exports.MULI = function(state, X, Y, Z) {
+  var bigX = _.regToInt(Y, state).times(_.byteToUint(Z, state));
+  var diff = _.build(_.genRegKey(X), modTwo64th(bigX));
+
+  return _.bigOverflows64(bigX) ? _.extend({exceptions: '01000000'}, diff) : diff;
+};
+
+/**
+ * Multiply unsigned
+ * @param {State} state
+ * @param {Hex} X - destination register
+ * @param {Hex} Y - source register
+ * @param {Hex} Z - source register
+ * @return {Diff}
+ */
+exports.MULU = function(state, X, Y, Z) {
+  var yBig = _.regToUint(Y, state);
+  var zBig = _.regToUint(Z, state);
+  var prod = yBig.times(zBig);
+  var doubleOcta = _.hexify128U(prod);
+
+  return _.build(
+    _.genRegKey(X),
+    prod.substring(16, 32),
+    'rH',
+    prod.substring(0, 16)
+  );
+};
+
+/**
+ * Multiply unsigned immediate.
+ * @param {State} state
+ * @param {Hex} X - destination register
+ * @param {Hex} Y - source register
+ * @param {Hex} Z - immediate byte constant
+ * @return {Diff}
+ */
+exports.MULUI = function(state, X, Y, Z) {
+  var yBig = _.regToUint(Y, state);
+  var zBig = _.byteToUint(Z, state);
+  var prod = yBig.times(zBig);
+  var doubleOcta = _.hexify128U(prod);
+
+  return _.build(
+    _.genRegKey(X),
+    prod.substring(16, 32),
+    'rH',
+    prod.substring(0, 16)
+  );
+};
+
+/**
+ * Divide signed.
+ * @param {State} state
+ * @param {Hex} X - destination register
+ * @param {Hex} Y - source register
+ * @param {Hex} Z - source register
+ * @return {Diff}
+ */
+exports.DIV = function(state, X, Y, Z) {
+  var bigZ = _.regToInt(Z, state);
+  var bigY = _.regToInt(Y, state);
+  var overflows = false;
+
+  if (bigZ.cmp(0) === 0) {
+    return _.build(
+      _.genRegKey(X),
+      _.ZEROS,
+      'rR',
+      _.genRegOcta(Y, state),
+      'exceptions',
+      '10000000'  //integer divide check
+    );
+  }
+  //an integer overflow exception can only occur in one case: when -2^63 is
+  //divided by -1
+  if (_.genRegOcta(Y, state) === '8000000000000000' &&
+      _.genRegOcta(Z, state) === 'FFFFFFFFFFFFFFFF') {
+    overflows = true;
+  }
+  var diff = _.build(
+    _.genRegKey(X),
+    _.hexify64(_.quotient(bigZ, bigY)),
+    'rR',
+    _.hexify64(_.remainder(bigZ, bigY))
+  );
+  return overflows ? _.extend({exceptions: '01000000'}, diff) : diff;
+};
+
+/**
+ * Divide signed immediate.
+ * @param {State} state
+ * @param {Hex} X - destination register
+ * @param {Hex} Y - source register
+ * @param {Hex} Z - immediate byte constant
+ * @return {Diff}
+ */
+exports.DIVI = function(state, X, Y, Z) {
+  //since the divisor is always nonnegative, no integer overflow can occur
+  var bigY = _.regToInt(Y, state);
+  var bigZ = _.byteToUint(Z);
+
+  if (bigZ.cmp(0) === 0) {
+    return _.build(
+      _.genRegKey(X),
+      _.ZEROS,
+      'rR',
+      _.genRegOcta(Y, state),
+      'exceptions',
+      '10000000'  //integer divide check
+    );
+  }
+  return _.build(
+    _.genRegKey(X),
+    _.hexify64(_.quotient(bigZ, bigY)),
+    'rR',
+    _.hexify64(_.remainder(bigZ, bigY))
+  );
+};
+
+/**
+ * Divide unsigned.
+ * @param {State} state
+ * @param {Hex} X - destination register
+ * @param {Hex} Y - source register
+ * @param {Hex} Z - source register
+ * @return {Diff}
+ */
+exports.DIVU = function(state, X, Y, Z) {
+  var yBig = _.regToUint(Y, state);
+  var zBig = _.regToUint(Z, state);
+  var rDBig = _.specialRegToUint('rD', state);
+  var rDYBig = rDBig.times(Big(2).pow(64)).plus(yBig);
+
+  /* 
+   * If rD is greater than or equal to the divisor (and in particular if the
+   * divisor is zero), then $X is set to rD and rR is set to $Y.  
+   */
+  if (zBig.cmp(rDBig) !== 1) {
+    return _.build(
+      _.genRegKey(X),
+      _.specialRegOcta('rD', state),
+      'rR',
+      _.genRegOcta(Y, state)
+    );
+  }
+
+  return _.build(
+    _.genRegKey(X),
+    _.hexify64(_.quotient(zBig, rDYBig)),
+    'rR',
+    _.hexify64(_.remainder(zBig, rDYBig))
+  );
+};
+
+/**
+ * Divide unsigned immediate.
+ * @param {State} state
+ * @param {Hex} X - destination register
+ * @param {Hex} Y - source register
+ * @param {Hex} Z - immediate byte constant
+ * @return {Diff}
+ */
+exports.DIVUI = function(state, X, Y, Z) {
+  var yBig = _.regToUint(Y, state);
+  var zBig = _.byteToUint(Z, state);
+  var rDBig = _.specialRegToUint('rD', state);
+  var rDYBig = rDBig.times(Big(2).pow(64)).plus(yBig);
+
+  /* 
+   * If rD is greater than or equal to the divisor (and in particular if the
+   * divisor is zero), then $X is set to rD and rR is set to $Y.  
+   */
+  if (zBig.cmp(rDBig) !== 1) {
+    return _.build(
+      _.genRegKey(X),
+      _.specialRegOcta('rD', state),
+      'rR',
+      _.genRegOcta(Y, state)
+    );
+  }
+
+  return _.build(
+    _.genRegKey(X),
+    _.hexify64(_.quotient(zBig, rDYBig)),
+    'rR',
+    _.hexify64(_.remainder(zBig, rDYBig))
+  );
 };

@@ -11,8 +11,8 @@ var trip = exports.trip = function trip(state, to) {
   var opDoesStore = _.opDoesStore(_.OP(tripper));
 
   return {
-    rB: state.$255,
-    $255: state.rJ,
+    rB: _.genRegOcta('FF', state), //$255
+    $255: _.specialRegOcta('rJ', state),
     rW: _.atStep(state),
     rX: '80000000' + tripper,
     rY: opDoesStore ? _.A(state, _.Y(tripper), _.Z(tripper)) : _.genRegOcta(_.Y(tripper), state),

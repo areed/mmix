@@ -298,6 +298,10 @@ exports.specialToUint64 = function(r, state) {
   return Long.fromString(specialRegOcta(r, state));
 };
 
+exports.specialToUint = function(r, state) {
+  return bigifyOcta(specialRegOcta(r, state));
+};
+
 var int64 = exports.int64 = function(octa) {
   return Long.fromString(octa, false, 16);
 };
@@ -358,7 +362,7 @@ var octafyBig = exports.octafyBig = function(big) {
  * @return {Hex}
  */
 exports.atStep = function(state) {
-  return hexify64(bigifyOcta(state['@']).plus(4));
+  return uint64ToOcta(atUint64(state).add(4));
 };
 
 /**
@@ -434,7 +438,11 @@ var genRegOcta = exports.genRegOcta = function(b, state) {
  * @return {Hex}
  */
 var specialRegOcta = exports.specialRegOcta = function(r, state) {
-  return state.special[name];
+  return state.special[r];
+};
+
+exports.specialRegUint = function(r, state) {
+  return bigifyOcta(specialRegOcta(r, state));
 };
 
 /**
@@ -469,16 +477,20 @@ var effectiveAddress = exports.effectiveAddress = function(byteWidth, addr) {
 };
 
 /**
+ * The quotient of y divided by z is the floor of y/z.
+ * @param {Int} divisor
  * @param {Int} n
  * @return {Int}
  */
 var quotient = exports.quotient = function(divisor, n) {
   var q = n.div(divisor);
 
-  return n.cmp(0) === -1 ? q.round(0, 3) : q.round(0, 0);
+  //floor
+  return q.cmp(0) === -1 ? q.round(0, 3) : q.round(0, 0);
 };
 
 /**
+ * The reminader of y divided by z is y - quotient(y/z) * z.
  * @param {Int} divisor
  * @param {Int} n
  * @return {Int}
@@ -495,6 +507,7 @@ var remainder = exports.remainder = function(divisor, n) {
  * @return {Int64}
  */
 var quotient64 = exports.quotient64 = function(divisor, n) {
+  //TODO floor
   var q = n.div(divisor);
 
   if (q.multiply(divisor).lessThanOrEqual(n)) {
@@ -706,12 +719,25 @@ exports.registerToHex = function($X) {
 };
 
 /**
- * Fetches the octa in a register and casts it to a signed Int64.
+ * Fetches the octa in a register and casts it to a signed big Int.
  * @param {Hex} b
  * @param {State} state
  * @return {Int}
  */
 exports.regToInt = _.compose(octaToInt, genRegOcta);
+
+exports.regToUint = function(b, state) {
+  var octa = genRegOcta(b, state);
+  return bigifyOcta(octa);
+};
+
+exports.specialRegToUint = function(r, state) {
+  return bigifyOcta(specialRegOcta(r, state));
+};
+
+exports.regToInt64 = function(b, state) {
+  return Long.fromString(genRegOcta(b, state), false, 16);
+};
 
 /**
  * Fetches the octa in a register and casts it to a Big signed Int.

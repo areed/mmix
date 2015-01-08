@@ -1,1 +1,1 @@
-exports.SWYM = [[{}, 'FD000000', {}]];
+exports.SWYM = [['FD000000', {}, {}]];

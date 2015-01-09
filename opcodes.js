@@ -7,6 +7,7 @@ var compare = require('./compare');
 var conditional = require('./conditional');
 var immediate = require('./immediate');
 var interrupts = require('./interrupts');
+var jump = require('./jump');
 var load = require('./load');
 var shift = require('./shift');
 var special = require('./special');

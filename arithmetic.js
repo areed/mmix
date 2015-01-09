@@ -148,7 +148,7 @@ exports['2ADDUI'] = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports['4ADDU'] = function(state, X, Y, Z) {
-  var bigX = _.regToInt(Y, state).times(4).plus(_.regToInt(Z));
+  var bigX = _.regToInt(Y, state).times(4).plus(_.regToInt(Z, state));
 
   return _.build(_.genRegKey(X), modTwo64th(bigX));
 };
@@ -176,7 +176,7 @@ exports['4ADDUI'] = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports['8ADDU'] = function(state, X, Y, Z) {
-  var bigX = _.regToInt(Y, state).times(8).plus(_.regToInt(Z));
+  var bigX = _.regToInt(Y, state).times(8).plus(_.regToInt(Z, state));
 
   return _.build(_.genRegKey(X), modTwo64th(bigX));
 };
@@ -204,7 +204,7 @@ exports['8ADDUI'] = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports['16ADDU'] = function(state, X, Y, Z) {
-  var bigX = _.regToInt(Y, state).times(16).plus(_.regToInt(Z));
+  var bigX = _.regToInt(Y, state).times(16).plus(_.regToInt(Z, state));
 
   return _.build(_.genRegKey(X), modTwo64th(bigX));
 };

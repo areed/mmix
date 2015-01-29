@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var disassemble = require('../disassemble');
 
-describe('Disassembler', function() {
+describe.skip('Disassembler', function() {
   var instructions = [
     ['2001FF03', ['ADD', '$1', '$255', '$3']],
     ['21000110', ['ADDI', '$0', '$1', '10']],

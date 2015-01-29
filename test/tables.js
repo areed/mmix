@@ -1,8 +1,10 @@
 var highland = require('highland');
 var templates = require('./templates');
 
-test(require('./arithmetic'));
+test(require('./immediate'));
+
 /*
+test(require('./arithmetic'));
 test(require('./bytewise'));
 test(require('./branch'));
 test(require('./interrupts'));

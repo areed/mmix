@@ -5,7 +5,7 @@ var MMIX = require('../mmix');
 var Memory = require('../memory');
 var utils = require('../utils');
 
-describe('Utils', function() {
+describe.skip('Utils', function() {
   describe('internals', function() {
     it('should return a fresh internal state object.', function() {
       var i = utils.internals();

@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var assemble = require('../assemble');
 
-describe('Assembler', function() {
+describe.skip('Assembler', function() {
   it('should transform instructions into tetras.', function() {
     var instructions = [
       ['ADD', '$1', '$255', '$3'],

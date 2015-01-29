@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var opcodes = require('../opcodes');
 
-describe('Opcodes', function() {
+describe.skip('Opcodes', function() {
   it('opcodes should be a map from opnames to opcodes.', function() {
     expect(opcodes.opcodes.FMUL).to.equal(16);
     expect(opcodes.opcodes.ADD).to.equal(32);

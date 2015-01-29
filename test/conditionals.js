@@ -1,7 +1,8 @@
 var expect = require('chai').expect;
 
-var MMIX = require('../');
 var Memory = require('../memory');
+
+return;
 
 describe('Conditional Instructions', function() {
   var mmix = new MMIX(new Memory());

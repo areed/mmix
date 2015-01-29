@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var Memory = require('../memory');
 
-describe('Memory', function() {
+describe.skip('Memory', function() {
   var memory = null;
 
   before(function() {

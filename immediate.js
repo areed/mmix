@@ -1,3 +1,8 @@
+var _ = require('./utils');
+var Big = require('big.js');
+
+var two = Big(2);
+
 /**
  * Set high wyde.
  * @param {State}
@@ -9,7 +14,7 @@
 exports.SETH = function(state, X, Y, Z) {
   return _.build(
     _.genRegKey(X),
-    X + Y + '000000000000'
+    Y + Z + '000000000000'
   );
 };
 
@@ -24,7 +29,7 @@ exports.SETH = function(state, X, Y, Z) {
 exports.SETMH = function(state, X, Y, Z) {
   return _.build(
     _.genRegKey(X),
-    '0000' + X + Y + '00000000'
+    '0000' + Y + Z + '00000000'
   );
 };
 
@@ -39,7 +44,7 @@ exports.SETMH = function(state, X, Y, Z) {
 exports.SETML = function(state, X, Y, Z) {
   return _.build(
     _.genRegKey(X),
-    '00000000' + X + Y + '0000'
+    '00000000' + Y + Z + '0000'
   );
 };
 
@@ -54,7 +59,7 @@ exports.SETML = function(state, X, Y, Z) {
 exports.SETL = function(state, X, Y, Z) {
   return _.build(
     _.genRegKey(X),
-    '000000000000' + X + Y
+    '000000000000' + Y + Z
   );
 };
 

@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var Memory = require('../memory');
-var MMIX = require('../');
 
+return;
 describe('Bitwise Operations', function() {
   var mmix = new MMIX(new Memory());
 

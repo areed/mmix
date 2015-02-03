@@ -295,7 +295,7 @@ exports.regToUint64 = function(b, state) {
  * @return {Uint64} Long.js
  */
 exports.specialToUint64 = function(r, state) {
-  return Long.fromString(specialRegOcta(r, state));
+  return Long.fromString(specialRegOcta(r, state), true, 16);
 };
 
 exports.specialToUint = function(r, state) {

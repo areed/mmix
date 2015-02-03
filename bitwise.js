@@ -270,8 +270,8 @@ exports.MUXI = function(state, X, Y, Z) {
   var y = _.regToUint64(Y, state);
   var z = _.byteToUint64(Z);
   var rM = _.specialToUint64('rM', state);
-  var a = Y.and(rM);
-  var b = Z.and(rM.not());
+  var a = y.and(rM);
+  var b = z.and(rM.not());
 
   return _.build(_.genRegKey(X), _.uint64ToOcta(a.or(b)));
 };

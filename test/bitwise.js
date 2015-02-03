@@ -1,201 +1,328 @@
-var expect = require('chai').expect;
-var Memory = require('../memory');
+exports.OR = [
+  ['C0010203', {
+    $2: '0101010101010101',
+    $3: '0000000000000000',
+  }, {
+    $1: '0101010101010101',
+  }],
+  ['C0010203', {
+    $2: '0101010101010101',
+    $3: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+  ['C0010203', {
+    $2: 'AAAAAAAAAAAAAAAA',
+    $3: '3333333333333333',
+  }, {
+    $1: 'BBBBBBBBBBBBBBBB',
+  }],
+];
+
+exports.ORI = [
+  ['C1010200', {
+    $2: '0101010101010101',
+  }, {
+    $1: '0101010101010101',
+  }],
+  ['C10102FF', {
+    $2: '0101010101010101',
+  }, {
+    $1: '01010101010101FF',
+  }],
+  ['C1010233', {
+    $2: 'AAAAAAAAAAAAAAAA',
+  }, {
+    $1: 'AAAAAAAAAAAAAABB',
+  }],
+];
+
+exports.ORN = [
+  ['C2010203', {
+    $2: '0101010101010101',
+    $3: '0000000000000000',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+  ['C2010203', {
+    $2: '0101010101010101',
+    $3: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: '0101010101010101',
+  }],
+  ['C2010203', {
+    $2: 'AAAAAAAAAAAAAAAA',
+    $3: '3333333333333333',
+  }, {
+    $1: 'EEEEEEEEEEEEEEEE',
+  }],
+];
+
+exports.ORNI = [
+  ['C3010200', {
+    $2: '0101010101010101',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+  ['C30102FF', {
+    $2: '0101010101010101',
+  }, {
+    $1: 'FFFFFFFFFFFFFF01',
+  }],
+  ['C3010233', {
+    $2: 'AAAAAAAAAAAAAAAA',
+  }, {
+    $1: 'FFFFFFFFFFFFFFEE',
+  }],
+];
+
+exports.NOR = [
+  ['C4010203', {
+    $2: '0101010101010101',
+    $3: '0000000000000000',
+  }, {
+    $1: 'FEFEFEFEFEFEFEFE',
+  }],
+  ['C4010203', {
+    $2: '0101010101010101',
+    $3: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['C4010203', {
+    $2: 'AAAAAAAAAAAAAAAA',
+    $3: '3333333333333333',
+  }, {
+    $1: '4444444444444444',
+  }],
+];
+
+exports.NORI = [
+  ['C5010200', {
+    $2: '0101010101010101',
+  }, {
+    $1: 'FEFEFEFEFEFEFEFE',
+  }],
+  ['C50102FF', {
+    $2: '0101010101010101',
+  }, {
+    $1: 'FEFEFEFEFEFEFE00',
+  }],
+  ['C5010233', {
+    $2: 'AAAAAAAAAAAAAAAA',
+  }, {
+    $1: '5555555555555544',
+  }],
+];
+
+exports.XOR = [
+  ['C6010203', {
+    $2: '0101010101010101',
+    $3: '0000000000000000',
+  }, {
+    $1: '0101010101010101',
+  }],
+  ['C6010203', {
+    $2: '0101010101010101',
+    $3: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FEFEFEFEFEFEFEFE',
+  }],
+  ['C6010203', {
+    $2: 'AAAAAAAAAAAAAAAA',
+    $3: '3333333333333333',
+  }, {
+    $1: '9999999999999999',
+  }],
+];
+
+exports.XORI = [
+  ['C7010200', {
+    $2: '0101010101010101',
+  }, {
+    $1: '0101010101010101',
+  }],
+  ['C70102FF', {
+    $2: '0101010101010101',
+  }, {
+    $1: '01010101010101FE',
+  }],
+  ['C7010233', {
+    $2: 'AAAAAAAAAAAAAAAA',
+  }, {
+    $1: 'AAAAAAAAAAAAAA99',
+  }],
+];
+
+exports.AND = [
+  ['C8010203', {
+    $2: '0000000000000000',
+    $3: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['C8010203', {
+    $2: '0101010101010101',
+    $3: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: '0101010101010101',
+  }],
+  ['C8010203', {
+    $2: 'AAAAAAAAAAAAAAAA',
+    $3: '7777777777777777',
+  }, {
+    $1: '2222222222222222',
+  }],
+];
+
+exports.ANDI = [
+  ['C9010200', {
+    $2: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['C90102FF', {
+    $2: '0101010101010101',
+  }, {
+    $1: '0000000000000001',
+  }],
+  ['C90102AA', {
+    $2: '7777777777777777',
+  }, {
+    $1: '0000000000000022',
+  }],
+];
+
+exports.ANDN = [
+  ['CA010203', {
+    $2: '0101010101010101',
+    $3: '0000000000000000',
+  }, {
+    $1: '0101010101010101',
+  }],
+  ['CA010203', {
+    $2: '0101010101010101',
+    $3: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['CA010203', {
+    $2: 'AAAAAAAAAAAAAAAA',
+    $3: '3333333333333333',
+  }, {
+    $1: '8888888888888888',
+  }],
+];
+
+exports.ANDNI = [
+  ['CB010200', {
+    $2: '0101010101010101',
+  }, {
+    $1: '0101010101010101',
+  }],
+  ['CB0102FF', {
+    $2: '0101010101010101',
+  }, {
+    $1: '0101010101010100',
+  }],
+  ['CB010233', {
+    $2: 'AAAAAAAAAAAAAAAA',
+  }, {
+    $1: 'AAAAAAAAAAAAAA88',
+  }],
+];
+
+exports.NAND = [
+  ['CC010203', {
+    $2: '0000000000000000',
+    $3: '0000000000000000',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+  ['CC010203', {
+    $2: '0101010101010101',
+    $3: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FEFEFEFEFEFEFEFE',
+  }],
+  ['CC010203', {
+    $2: 'AAAAAAAAAAAAAAAA',
+    $3: '7777777777777777',
+  }, {
+    $1: 'DDDDDDDDDDDDDDDD',
+  }],
+];
+
+exports.NANDI = [
+  ['CD010200', {
+    $2: '0000000000000000',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+  ['CD0102FF', {
+    $2: '0101010101010101',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFE',
+  }],
+  ['CD010277', {
+    $2: 'AAAAAAAAAAAAAAAA',
+  }, {
+    $1: 'FFFFFFFFFFFFFFDD',
+  }],
+];
+
+exports.NXOR = [
+  ['CE010203', {
+    $2: '0101010101010101',
+    $3: '0000000000000000',
+  }, {
+    $1: 'FEFEFEFEFEFEFEFE',
+  }],
+  ['CE010203', {
+    $2: '0101010101010101',
+    $3: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: '0101010101010101',
+  }],
+  ['CE010203', {
+    $2: 'AAAAAAAAAAAAAAAA',
+    $3: '3333333333333333',
+  }, {
+    $1: '6666666666666666',
+  }],
+];
+
+exports.NXORI = [
+  ['CF010200', {
+    $2: '0101010101010101',
+    $3: '0000000000000000',
+  }, {
+    $1: 'FEFEFEFEFEFEFEFE',
+  }],
+  ['CF0102FF', {
+    $2: '0101010101010101',
+  }, {
+    $1: 'FEFEFEFEFEFEFE01',
+  }],
+  ['CF010233', {
+    $2: 'AAAAAAAAAAAAAAAA',
+  }, {
+    $1: '5555555555555566',
+  }],
+];
+
+exports.MUX = [
+  ['D8010203', {
+    $2: '0000000000000000',
+    $3: 'FFFFFFFFFFFFFFFF',
+    rM: '7F7F7F7F7F7F7F7F',
+  }, {
+    $1: '8080808080808080',
+  }],
+];
 
 return;
-describe('Bitwise Operations', function() {
-  var mmix = new MMIX(new Memory());
-
-  describe('AND', function() {
-    [
-      ['0000000000000000', '0000000000000000', '0000000000000000'],
-      ['0101010101010101', 'FFFFFFFFFFFFFFFF', '0101010101010101'],
-      ['AAAAAAAAAAAAAAAA', '7777777777777777', '2222222222222222'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('AND($1, $2, $3): $1 == ' + X, function() {
-          mmix.AND('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    }); 
-  });
-
-  describe('OR', function() {
-    [
-      ['0101010101010101', '0000000000000000', '0101010101010101'],
-      ['0101010101010101', 'FFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFF'],
-      ['AAAAAAAAAAAAAAAA', '3333333333333333', 'BBBBBBBBBBBBBBBB'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('OR($1, $2, $3): $1 == ' + X, function() {
-          mmix.OR('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    }); 
-  });
-
-  describe('XOR', function() {
-    [
-      ['0101010101010101', '0000000000000000', '0101010101010101'],
-      ['0101010101010101', 'FFFFFFFFFFFFFFFF', 'FEFEFEFEFEFEFEFE'],
-      ['AAAAAAAAAAAAAAAA', '3333333333333333', '9999999999999999'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('XOR($1, $2, $3): $1 == ' + X, function() {
-          mmix.XOR('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    }); 
-  });
-
-  describe('ANDN', function() {
-    [
-      ['0101010101010101', '0000000000000000', '0101010101010101'],
-      ['0101010101010101', 'FFFFFFFFFFFFFFFF', '0000000000000000'],
-      ['AAAAAAAAAAAAAAAA', '3333333333333333', '8888888888888888'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('ANDN($1, $2, $3): $1 == ' + X, function() {
-          mmix.ANDN('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    }); 
-  });
-
-  describe('ORN', function() {
-    [
-      ['0101010101010101', '0000000000000000', 'FFFFFFFFFFFFFFFF'],
-      ['0101010101010101', 'FFFFFFFFFFFFFFFF', '0101010101010101'],
-      ['AAAAAAAAAAAAAAAA', '3333333333333333', 'EEEEEEEEEEEEEEEE'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('ORN($1, $2, $3): $1 == ' + X, function() {
-          mmix.ORN('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    }); 
-  });
-
-  describe('NAND', function() {
-    [
-      ['0000000000000000', '0000000000000000', 'FFFFFFFFFFFFFFFF'],
-      ['0101010101010101', 'FFFFFFFFFFFFFFFF', 'FEFEFEFEFEFEFEFE'],
-      ['AAAAAAAAAAAAAAAA', '7777777777777777', 'DDDDDDDDDDDDDDDD'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('NAND($1, $2, $3): $1 == ' + X, function() {
-          mmix.NAND('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    }); 
-  });
-
-  describe('NOR', function() {
-    [
-      ['0101010101010101', '0000000000000000', 'FEFEFEFEFEFEFEFE'],
-      ['0101010101010101', 'FFFFFFFFFFFFFFFF', '0000000000000000'],
-      ['AAAAAAAAAAAAAAAA', '3333333333333333', '4444444444444444'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('NOR($1, $2, $3): $1 == ' + X, function() {
-          mmix.NOR('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    }); 
-  });
-
-  describe('NXOR', function() {
-    [
-      ['0101010101010101', '0000000000000000', 'FEFEFEFEFEFEFEFE'],
-      ['0101010101010101', 'FFFFFFFFFFFFFFFF', '0101010101010101'],
-      ['AAAAAAAAAAAAAAAA', '3333333333333333', '6666666666666666'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('NXOR($1, $2, $3): $1 == ' + X, function() {
-          mmix.NXOR('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    }); 
-  });
+/*
 
   describe('MUX', function() {
     [
@@ -205,26 +332,6 @@ describe('Bitwise Operations', function() {
       ['AAAAAAAAAAAAAAAA', '3333333333333333', 'BBBBBBBBBBBBBBBB', 'AAAAAAAAAAAAAAAA'],
       ['2222222222222222', 'DDDDDDDDDDDDDDDD', 'FFFFFFFFFFFFFFFF', '2222222222222222'],
       ['2222222222222222', 'DDDDDDDDDDDDDDDD', '0000000000000000', 'DDDDDDDDDDDDDDDD'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var rM = t[2];
-      var X = t[3];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z, '&& $rM ==', rM].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-          mmix.registers.rM = rM;
-        });
-
-        it('MUX($1, $2, $3): $1 == ' + X, function() {
-          mmix.MUX('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    });
-  });
 
   describe('SADD', function() {
     [
@@ -235,22 +342,4 @@ describe('Bitwise Operations', function() {
       ['AAAAAAAAAAAAAAAA', '3333333333333333', '0000000000000010'],
       ['2222222222222222', 'DDDDDDDDDDDDDDDD', '0000000000000010'],
       ['DDDDDDDDDDDDDDDD', '2222222222222222', '0000000000000030'],
-    ].forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var X = t[2];
-
-      describe(['$2 ==', Y, '&& $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('SADD($1, $2, $3): $1 == ' + X, function() {
-          mmix.SADD('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(X);
-        });
-      });
-    });
-  });
-});
+*/

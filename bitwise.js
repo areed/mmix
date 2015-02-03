@@ -40,7 +40,7 @@ exports.ANDI = function(state, X, Y, Z) {
  */
 exports.OR = function(state, X, Y, Z) {
   var y = _.regToUint64(Y, state);
-  var z = _.retToUint64(Z);
+  var z = _.regToUint64(Z, state);
 
   return _.build(_.genRegKey(X), _.uint64ToOcta(y.or(z)));
 };
@@ -100,7 +100,7 @@ exports.XORI = function(state, X, Y, Z) {
  */
 exports.ANDN = function(state, X, Y, Z) {
   var y = _.regToUint64(Y, state);
-  var z = _.regToUint64(Z, stae);
+  var z = _.regToUint64(Z, state);
 
   return _.build(_.genRegKey(X), _.uint64ToOcta(y.and(z.not())));
 };
@@ -252,8 +252,8 @@ exports.MUX = function(state, X, Y, Z) {
   var y = _.regToUint64(Y, state);
   var z = _.regToUint64(Z, state);
   var rM = _.specialToUint64('rM', state);
-  var a = Y.and(rM);
-  var b = Z.and(rM.not());
+  var a = y.and(rM);
+  var b = z.and(rM.not());
 
   return _.build(_.genRegKey(X), _.uint64ToOcta(a.or(b)));
 };

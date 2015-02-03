@@ -120,56 +120,156 @@ exports.INCL = [
   }],
 ];
 
-return;
-describe.skip('Immediate Constants', function() {
+exports.ORH = [
+  ['E8010000', {
+    $1: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['E8010123', {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+  ['E8010123', {
+    $1: '0000000000000000',
+  }, {
+    $1: '0123000000000000',
+  }],
+  ['E8012222', {
+    $1: 'DDDDDDDDDDDDDDDD',
+  }, {
+    $1: 'FFFFDDDDDDDDDDDD',
+  }],
+];
 
-  wydeX('ORH', [
-    ['0000000000000000', '0000', '0000000000000000'],
-    ['FFFFFFFFFFFFFFFF', '0123', 'FFFFFFFFFFFFFFFF'],
-    ['0000000000000000', '0123', '0123000000000000'],
-    ['DDDDDDDDDDDDDDDD', '2222', 'FFFFDDDDDDDDDDDD'],
-  ]);
+exports.ORMH = [
+  ['E9010000', {
+    $1: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['E9010000', {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+  ['E901FFFF', {
+    $1: '0000000000000000',
+  }, {
+    $1: '0000FFFF00000000',
+  }],
+  ['E9012222', {
+    $1: 'DDDDDDDDDDDDDDDD',
+  }, {
+    $1: 'DDDDFFFFDDDDDDDD',
+  }],
+];
 
-  wydeX('ORMH', [
-    ['0000000000000000', '0000', '0000000000000000'],
-    ['FFFFFFFFFFFFFFFF', '0000', 'FFFFFFFFFFFFFFFF'],
-    ['0000000000000000', 'FFFF', '0000FFFF00000000'],
-    ['DDDDDDDDDDDDDDDD', '2222', 'DDDDFFFFDDDDDDDD'],
-  ]);
+exports.ORML = [
+  ['EA010000', {
+    $1: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['EA010000', {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+  ['EA01FFFF', {
+    $1: '0000000000000000',
+  }, {
+    $1: '00000000FFFF0000',
+  }],
+  ['EA012222', {
+    $1: 'DDDDDDDDDDDDDDDD',
+  }, {
+    $1: 'DDDDDDDDFFFFDDDD',
+  }],
+];
 
-  wydeX('ORML', [
-    ['0000000000000000', '0000', '0000000000000000'],
-    ['FFFFFFFFFFFFFFFF', '0000', 'FFFFFFFFFFFFFFFF'],
-    ['0000000000000000', 'FFFF', '00000000FFFF0000'],
-    ['DDDDDDDDDDDDDDDD', '2222', 'DDDDDDDDFFFFDDDD'],
-  ]);
+exports.ORL = [
+  ['EB010000', {
+    $1: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['EB010000', {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+  ['EB01FFFF', {
+    $1: '0000000000000000',
+  }, {
+    $1: '000000000000FFFF',
+  }],
+  ['EB012222', {
+    $1: 'DDDDDDDDDDDDDDDD',
+  }, {
+    $1: 'DDDDDDDDDDDDFFFF',
+  }],
+];
 
-  wydeX('ORL', [
-    ['0000000000000000', '0000', '0000000000000000'],
-    ['FFFFFFFFFFFFFFFF', '0000', 'FFFFFFFFFFFFFFFF'],
-    ['0000000000000000', 'FFFF', '000000000000FFFF'],
-    ['DDDDDDDDDDDDDDDD', '2222', 'DDDDDDDDDDDDFFFF'],
-  ]);
+exports.ANDNH = [
+  ['EC010000', {
+    $1: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['EC01FFFF', {
+    $1: 'FFFF000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['EC010000', {
+    $1: 'FFFF000000000000',
+  }, {
+    $1: 'FFFF000000000000',
+  }],
+  ['EC010000', {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+];
 
-  wydeX('ANDNH', [
-    ['0000000000000000', '0000', '0000000000000000'],
-    ['FFFF000000000000', 'FFFF', '0000000000000000'],
-    ['FFFF000000000000', '0000', 'FFFF000000000000'],
-    ['FFFFFFFFFFFFFFFF', '0000', 'FFFFFFFFFFFFFFFF'],
-  ]);
+exports.ANDNMH = [
+  ['ED010000', {
+    $1: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['ED01FFFF', {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FFFF0000FFFFFFFF',
+  }],
+];
 
-  wydeX('ANDNMH', [
-    ['0000000000000000', '0000', '0000000000000000'],
-    ['FFFFFFFFFFFFFFFF', 'FFFF', 'FFFF0000FFFFFFFF'],
-  ]);
+exports.ANDML = [
+  ['EE010000', {
+    $1: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['EE01FFFF', {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FFFFFFFF0000FFFF',
+  }],
+];
 
-  wydeX('ANDNML', [
-    ['0000000000000000', '0000', '0000000000000000'],
-    ['FFFFFFFFFFFFFFFF', 'FFFF', 'FFFFFFFF0000FFFF'],
-  ]);
-
-  wydeX('ANDNL', [
-    ['0000000000000000', '0000', '0000000000000000'],
-    ['FFFFFFFFFFFFFFFF', 'FFFF', 'FFFFFFFFFFFF0000'],
-  ]);
-});
+exports.ANDNL = [
+  ['EF010000', {
+    $1: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['EF01FFFF', {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FFFFFFFFFFFF0000',
+  }],
+];

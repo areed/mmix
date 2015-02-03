@@ -1,5 +1,6 @@
 var _ = require('./utils');
 var Big = require('big.js');
+var Long = require('Long');
 
 var two = Big(2);
 
@@ -217,7 +218,7 @@ exports.ANDNH = function(state, X, Y, Z) {
 
   return _.build(
     _.genRegKey(X),
-    _.uint64ToOcta(yz.and(x.not()))
+    _.uint64ToOcta(x.and(yz.not()))
   );
 };
 
@@ -235,7 +236,7 @@ exports.ANDNMH = function(state, X, Y, Z) {
 
   return _.build(
     _.genRegKey(X),
-    _.uint64ToOcta(yz.and(x.not()))
+    _.uint64ToOcta(x.and(yz.not()))
   );
 };
 
@@ -253,7 +254,7 @@ exports.ANDNML = function(state, X, Y, Z) {
 
   return _.build(
     _.genRegKey(X),
-    _.uint64ToOcta(yz.and(x.not()))
+    _.uint64ToOcta(x.and(yz.not()))
   );
 };
 
@@ -271,6 +272,6 @@ exports.ANDNL = function(state, X, Y, Z) {
 
   return _.build(
     _.genRegKey(X),
-    _.uint64ToOcta(yz.and(x.not()))
+    _.uint64ToOcta(x.and(yz.not()))
   );
 };

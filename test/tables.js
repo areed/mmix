@@ -5,6 +5,8 @@ test(require('./arithmetic'));
 test(require('./bitwise'));
 test(require('./bytewise'));
 test(require('./branch'));
+test(require('./compare'));
+test(require('./conditionals'));
 test(require('./immediate'));
 test(require('./interrupts'));
 test(require('./load'));

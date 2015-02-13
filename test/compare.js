@@ -1,35 +1,55 @@
+exports.CMP = [
+  ['30010203', {
+    $2: '0000000000000000',
+    $3: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['30010203', {
+    $2: 'FFFFFFFFFFFFFFFF',
+    $3: '7777777777777777',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+];
 
-/*
-  describe('Comparisons', function() {
-    var tests = [
-      //Y, Z, CMP answer, CMPU answer
-      ['0000000000000000', '0000000000000000', '0000000000000000', '0000000000000000'],
-      ['FFFFFFFFFFFFFFFF', '7777777777777777', 'FFFFFFFFFFFFFFFF', '0000000000000001'],
-    ];
+exports.CMPI = [
+  ['31010200', {
+    $2: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['31010277', {
+    $2: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: 'FFFFFFFFFFFFFFFF',
+  }],
+];
 
-    tests.forEach(function(t) {
-      var Y = t[0];
-      var Z = t[1];
-      var sX = t[2];
-      var uX = t[3];
+exports.CMPU = [
+  ['32010203', {
+    $2: '0000000000000000',
+    $3: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['32010203', {
+    $2: 'FFFFFFFFFFFFFFFF',
+    $3: '7777777777777777',
+  }, {
+    $1: '0000000000000001',
+  }],
+];
 
-      describe(['$2 ==', Y, '$$ $3 ==', Z].join(' '), function() {
-        before(function() {
-          mmix.registers.$2 = Y;
-          mmix.registers.$3 = Z;
-        });
-
-        it('CMP($1, $2, $3) -> $1 == ' + sX, function() {
-          mmix.CMP('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(sX);
-        });
-
-        it('CMPU($1, $2, $3) -> $1 == ' + uX, function() {
-          mmix.CMPU('$1', '$2', '$3');
-          expect(mmix.registers.$1).to.equal(uX);
-        });
-      });
-    });
-  });
-});
-*/
+exports.CMPUI = [
+  ['33010200', {
+    $2: '0000000000000000',
+  }, {
+    $1: '0000000000000000',
+  }],
+  ['33010277', {
+    $2: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: '0000000000000001',
+  }],
+];

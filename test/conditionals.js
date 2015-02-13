@@ -1,116 +1,300 @@
-var expect = require('chai').expect;
+exports.CSN = [
+  ['60010203', {
+    $2: '0000000000000000',
+    $3: '1111111111111111',
+  }, {}],
+  ['60010203', {
+    $2: 'FFFFFFFFFFFFFFFF',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['60010203', {
+    $2: '0000000000000002',
+    $3: '1111111111111111',
+  }, {}],
+];
 
-var Memory = require('../memory');
+exports.CSNI = [
+  ['61010211', {
+    $2: '0000000000000000',
+  }, {}],
+  ['61010211', {
+    $2: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['61010211', {
+    $2: '0000000000000002',
+  }, {}],
+];
 
-return;
+exports.CSZ = [
+  ['62010203', {
+    $2: '0000000000000000',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['62010203', {
+    $2: 'FFFFFFFFFFFFFFFE',
+    $3: '1111111111111111',
+  }, {}],
+  ['62010203', {
+    $2: '1111111111111111',
+    $1: '1111111111111111',
+  }, {}],
+];
 
-describe('Conditional Instructions', function() {
-  var mmix = new MMIX(new Memory());
-  var zeros = '0000000000000000';
-  var ones = '1111111111111111';
-  var twos = '2222222222222222';
+exports.CSZI = [
+  ['63010211', {
+    $2: '0000000000000000',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['63010211', {
+    $2: 'FFFFFFFFFFFFFFFE',
+  }, {}],
+  ['63010211', {
+    $2: '0000000000000001',
+  }, {}],
+];
 
-  var tests = [
-    //$Y, isNeg, isZero, isPositive, isOdd
-    ['0000000000000000', false, true, false, false],
-    ['FFFFFFFFFFFFFFFF', true, false, false, true],
-    ['0000000000000001', false, false, true, true],
-    ['FFFFFFFFFFFFFFFE', true, false, false, false],
-    ['0000000000000002', false, false, true, false],
-  ];
-  tests.forEach(function(t) {
-    var Y = t[0];
-    var isNeg = t[1];
-    var isZero = t[2];
-    var isPos = t[3];
-    var isOdd = t[4];
+exports.CSP = [
+  ['64010203', {
+    $2: '7FFFFFFFFFFFFFFF',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['64010203', {
+    $2: '0000000000000000',
+    $3: '1111111111111111',
+  }, {}],
+  ['64010203', {
+    $2: '8000000000000000',
+    $3: '1111111111111111',
+  }, {}],
+];
 
-    describe(['$1 ==', ones, '&& $2 ==', Y, '&& $3 ==', twos].join(' '), function() {
-      beforeEach(function() {
-        mmix.registers.$1 = ones;
-        mmix.registers.$2 = Y;
-        mmix.registers.$3 = twos;
-      });
+exports.CSPI = [
+  ['65010211', {
+    $2: '7FFFFFFFFFFFFFFF',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['65010211', {
+    $2: '0000000000000000',
+  }, {}],
+  ['65010211', {
+    $2: '8000000000000000',
+  }, {}],
+];
 
-      it('CSN($1, $2, $3): $1 == ' + (isNeg ? twos : ones), function() {
-        mmix.CSN('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isNeg ? twos : ones);
-      });
+exports.CSOD = [
+  ['66010203', {
+    $2: '0000000000000001',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['66010203', {
+    $2: '0000000000000000',
+    $3: '1111111111111111',
+  }, {}],
+  ['66010203', {
+    $2: 'FFFFFFFFFFFFFFFF',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['66010203', {
+    $2: '8000000000000000',
+    $3: '1111111111111111',
+  }, {}],
+  ['66010203', {
+    $2: '7FFFFFFFFFFFFFFE',
+    $3: '1111111111111111',
+  }, {}],
+];
 
-      it('CSZ($1, $2, $3): $1 == ' + (isZero ? twos : ones), function() {
-        mmix.CSZ('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isZero ? twos : ones);
-      });
+exports.CSODI = [
+  ['67010211', {
+    $2: '0000000000000001',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['67010211', {
+    $2: '0000000000000000',
+  }, {}],
+  ['67010211', {
+    $2: 'FFFFFFFFFFFFFFFF',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['67010211', {
+    $2: '0000000000000002',
+  }, {}],
+  ['67010211', {
+    $2: 'EEEEEEEEEEEEEEEE',
+  }, {}],
+];
 
-      it('CSP($1, $2, $3): $1 == ' + (isPos ? twos : ones), function() {
-        mmix.CSP('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isPos ? twos : ones);
-      });
+exports.CSNN = [
+  ['68010203', {
+    $2: '0000000000000000',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['68010203', {
+    $2: 'FFFFFFFFFFFFFFFF',
+    $3: '1111111111111111',
+  }, {}],
+  ['68010203', {
+    $2: '0000000000000002',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+];
 
-      it('CSOD($1, $2, $3): $1 == ' + (isOdd ? twos : ones), function() {
-        mmix.CSOD('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isOdd ? twos : ones);
-      });
+exports.CSNNI = [
+  ['69010211', {
+    $2: '0000000000000000',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['69010211', {
+    $2: 'FFFFFFFFFFFFFFFF',
+  }, {}],
+  ['69010211', {
+    $2: '0000000000000002',
+    $3: '1111111111111111',
+  }, {
+    $1: '0000000000000011',
+  }],
+];
 
-      it('CSNN($1, $2, $3): $1 == ' + (isNeg ? ones : twos), function() {
-        mmix.CSNN('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isNeg ? ones : twos);
-      });
+exports.CSNZ = [
+  ['6A010203', {
+    $2: '0000000000000000',
+    $3: '1111111111111111',
+  }, {}],
+  ['6A010203', {
+    $2: 'FFFFFFFFFFFFFFFE',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['6A010203', {
+    $2: '0000000000000001',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+];
 
-      it('CSNZ($1, $2, $3): $1 == ' + (isZero ? ones : twos), function() {
-        mmix.CSNZ('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isZero ? ones : twos);
-      });
+exports.CSNZI = [
+  ['6B010211', {
+    $2: '0000000000000000',
+  }, {}],
+  ['6B010211', {
+    $2: 'FFFFFFFFFFFFFFFE',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['6B010211', {
+    $2: '0000000000000001',
+  }, {
+    $1: '0000000000000011',
+  }],
+];
 
-      it('CSNP($1, $2, $3): $1 == ' + (isPos ? ones : twos), function() {
-        mmix.CSNP('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isPos ? ones : twos);
-      });
+exports.CSNP = [
+  ['6C010203', {
+    $2: '7FFFFFFFFFFFFFFF',
+    $3: '1111111111111111',
+  }, {}],
+  ['6C010203', {
+    $2: '0000000000000000',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['6C010203', {
+    $2: '8000000000000000',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+];
 
-      it('CSEV($1, $2, $3): $1 == ' + (isOdd ? ones : twos), function() {
-        mmix.CSEV('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isOdd ? ones : twos);
-      });
+exports.CSNPI = [
+  ['6D010211', {
+    $2: '7FFFFFFFFFFFFFFF',
+  }, {}],
+  ['6D010211', {
+    $2: '0000000000000000',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['6D010211', {
+    $2: '8000000000000000',
+  }, {
+    $1: '0000000000000011',
+  }],
+];
 
-      it('ZSN($1, $2, $3): $1 == ' + (isNeg ? twos : zeros), function() {
-        mmix.ZSN('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isNeg ? twos : zeros);
-      });
+exports.CSEV = [
+  ['6E010203', {
+    $2: '0000000000000000',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['6E010203', {
+    $2: 'EEEEEEEEEEEEEEEE',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['6E010203', {
+    $2: '7777777777777778',
+    $3: '1111111111111111',
+  }, {
+    $1: '1111111111111111',
+  }],
+  ['6E010203', {
+    $2: '0000000000000001',
+    $3: '1111111111111111',
+  }, {}],
+  ['6E010203', {
+    $2: 'FFFFFFFFFFFFFFFF',
+    $3: '1111111111111111',
+  }, {}],
+];
 
-      it('ZSZ($1, $2, $3): $1 == ' + (isZero ? twos : zeros), function() {
-        mmix.ZSZ('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isZero ? twos : zeros);
-      });
-
-      it('ZSP($1, $2, $3): $1 == ' + (isPos ? twos : zeros), function() {
-        mmix.ZSP('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isPos ? twos : zeros);
-      });
-
-      it('ZSOD($1, $2, $3): $1 == ' + (isOdd ? twos : zeros), function() {
-        mmix.ZSOD('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isOdd ? twos : zeros);
-      });
-
-      it('ZSNN($1, $2, $3): $1 == ' + (isNeg ? zeros : twos), function() {
-        mmix.ZSNN('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isNeg ? zeros : twos);
-      });
-
-      it('ZSNZ($1, $2, $3): $1 == ' + (isZero ? zeros : twos), function() {
-        mmix.ZSNZ('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isZero ? zeros : twos);
-      });
-
-      it('ZSNP($1, $2, $3): $1 == ' + (isPos ? zeros : twos), function() {
-        mmix.ZSNP('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isPos ? zeros : twos);
-      });
-
-      it('ZSEV($1, $2, $3): $1 == ' + (isOdd ? zeros : twos), function() {
-        mmix.ZSEV('$1', '$2', '$3');
-        expect(mmix.registers.$1).to.equal(isOdd ? zeros : twos);
-      });
-    });
-  });
-});
+exports.CSEVI = [
+  ['6F010211', {
+    $2: '0000000000000000',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['6F010211', {
+    $2: '0000000000000006',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['6F010211', {
+    $2: 'AAAAAAAAAAAAAAAA',
+  }, {
+    $1: '0000000000000011',
+  }],
+  ['6F010211', {
+    $2: 'BBBBBBBBBBBBBBBB',
+  }, {}],
+  ['6F010211', {
+    $2: '0123456789ABCDEF',
+  }, {}],
+];

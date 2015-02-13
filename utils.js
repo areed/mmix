@@ -33,7 +33,8 @@ exports.regIsNeg = function(b, state) {
  * @return {boolean}
  */
 exports.regIsPos = function(b, state) {
-  return binary(genRegOcta(b, state))[0] === 0;
+  var octa = genRegOcta(b, state);
+  return binary(octa)[0] === 0 && octa !== '0000000000000000';
 };
 
 /**
@@ -321,6 +322,15 @@ exports.byteToUint = function(b) {
  */
 var hexToUint64 = exports.byteToUint64 = exports.wydeToUint64 = exports.tetraToUint64 = exports.octaToUint64 = function(b) {
   return Long.fromString(b, true, 16);
+};
+
+/**
+ * Converts a byte or wyde to an Int64 (Long.js).
+ * @param {Hex} b
+ * @return {Int64}
+ */
+exports.byteToInt64 = function(b) {
+  return Long.fromString(b, false, 16);
 };
 
 var octaIsNegative = exports.octaIsNegative = function(octa) {

@@ -1,3 +1,5 @@
+var _ = require('./utils');
+
 /**
  * Conditionally set if negative.
  * @param {State} state
@@ -8,7 +10,7 @@
  */
 exports.CSN = function(state, X, Y, Z) {
   return _.regIsNeg(Y, state) ?
-    _.build(_.genRegKey(X), _.genRegOcta(Z)) : {};
+    _.build(_.genRegKey(X), _.genRegOcta(Z, state)) : {};
 };
 
 /**
@@ -21,7 +23,7 @@ exports.CSN = function(state, X, Y, Z) {
  */
 exports.CSNI = function(state, X, Y, Z) {
   return _.regIsNeg(Y, state) ?
-    _.build(_genRegKey(X), _.extendUnsignedTo64(Z)) : {};
+    _.build(_.genRegKey(X), _.extendUnsignedTo64(Z)) : {};
 };
 
 /**
@@ -34,7 +36,7 @@ exports.CSNI = function(state, X, Y, Z) {
  */
 exports.CSZ = function(state, X, Y, Z) {
   return _.regIsZero(Y, state) ?
-    _.build(_.genRegKey(X), _.genRegOcta(Z)) : {};
+    _.build(_.genRegKey(X), _.genRegOcta(Z, state)) : {};
 };
 
 /**
@@ -60,7 +62,7 @@ exports.CSZI = function(state, X, Y, Z) {
  */
 exports.CSP = function(state, X, Y, Z) {
   return _.regIsPos(Y, state) ?
-    _.build(_.genRegKey(X), _.genRegOcta(Z)) : {};
+    _.build(_.genRegKey(X), _.genRegOcta(Z, state)) : {};
 };
 
 /**
@@ -86,7 +88,7 @@ exports.CSPI = function(state, X, Y, Z) {
  */
 exports.CSOD = function(state, X, Y, Z) {
   return _.regIsOdd(Y, state) ?
-    _.build(_.genRegKey(X), _.genRegOcta(Z)) : {};
+    _.build(_.genRegKey(X), _.genRegOcta(Z, state)) : {};
 };
 
 /**
@@ -111,7 +113,7 @@ exports.CSODI = function(state, X, Y, Z) {
  */
 exports.CSNN = function(state, X, Y, Z) {
   return _.regIsNeg(Y, state) ?
-    {} : _.build(_.genRegKey(X), _.genRegOcta(Z));
+    {} : _.build(_.genRegKey(X), _.genRegOcta(Z, state));
 };
 
 /**
@@ -137,7 +139,7 @@ exports.CSNNI = function(state, X, Y, Z) {
  */
 exports.CSNZ = function(state, X, Y, Z) {
   return _.regIsZero(Y, state) ?
-    {} : _.build(_.genRegKey(X), _.genRegOcta(Z));
+    {} : _.build(_.genRegKey(X), _.genRegOcta(Z, state));
 };
 
 /**
@@ -216,7 +218,7 @@ exports.CSEVI = function(state, X, Y, Z) {
 exports.ZSN = function(state, X, Y, Z) {
   return _.build(
     _.genRegKey(X),
-    _.regIsNeg(Y, state) ? _.genRegOcta(Z) : _.ZEROS
+    _.regIsNeg(Y, state) ? _.genRegOcta(Z, state) : _.ZEROS
   );
 };
 
@@ -246,7 +248,7 @@ exports.ZSNI = function(state, X, Y, Z) {
 exports.ZSZ = function(state, X, Y, Z) {
   return _.build(
     _.genRegKey(X),
-    _.regIsZero(Y, state) ? _.genRegOcta(Z) : _.ZEROS
+    _.regIsZero(Y, state) ? _.genRegOcta(Z, state) : _.ZEROS
   );
 };
 
@@ -276,7 +278,7 @@ exports.ZSZI = function(state, X, Y, Z) {
 exports.ZSP = function(state, X, Y, Z) {
   return _.build(
     _.genRegKey(X),
-    _.regIsPos(Y, state) ? _.genRegOcta(Z) : _.ZEROS
+    _.regIsPos(Y, state) ? _.genRegOcta(Z, state) : _.ZEROS
   );
 };
 
@@ -306,7 +308,7 @@ exports.ZSPI = function(state, X, Y, Z) {
 exports.ZSOD = function(state, X, Y, Z) {
   return _.build(
     _.genRegKey(X),
-    _.regIsOdd(Y, state) ? _.genRegOcta(Z) : _.ZEROS
+    _.regIsOdd(Y, state) ? _.genRegOcta(Z, state) : _.ZEROS
   );
 };
 

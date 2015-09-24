@@ -281,7 +281,7 @@ exports.diffEffects = function(diff, machine) {
  * @param {Object} b
  * @return {Object}
  */
-exports.extend = require('highlandx/extend');
+exports.extend = _.extend;
 
 /**
  * Returns the first byte of an instruction.

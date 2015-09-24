@@ -7,16 +7,15 @@
     "test": "test"
   },
   "dependencies": {
-    "big.js": "^3.0.0",
+    "big.js": "^3.1.3",
     "hexa": "latest",
     "highland": "2.2.0",
     "lodash": "^3.10.1",
-    "long": "^2.2.3",
+    "long": "^2.2.5",
     "underscore": "^1.7.0"
   },
   "devDependencies": {
     "chai": "^1.10.0",
-    "highlandx": "^1.10.0",
     "mocha": "^2.0.1"
   },
   "scripts": {

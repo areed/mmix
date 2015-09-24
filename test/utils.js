@@ -31,6 +31,38 @@ describe('Utils', function() {
     });
   });
 
+  describe('diffEffects', function() {
+    it('should check for additional state changes triggered by a diff.', function() {
+      var machine = new MMIX();
+      var state = {
+        'rG': '0000000000000020',
+        'rL': '0000000000000004',
+      };
+      [
+        [
+          {
+            '$2': '0000000000000000',
+          },
+          {},
+        ],
+        [
+          {
+            '$8': '0000000000000001',
+            '$6': '0000000000000001',
+          },
+          {
+            'rL': '0000000000000009',
+          },
+        ],
+      ].forEach(function(t) {
+        var machine = new MMIX();
+ 
+        utils.applyDiff(state, machine);
+        expect(utils.diffEffects(t[0], machine)).to.deep.equal(t[1]);
+      });
+    });
+  });
+
   describe('effectiveAddress', function() {
     var effective = utils.effectiveAddress;
     [

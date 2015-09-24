@@ -10,6 +10,7 @@
     "big.js": "^3.0.0",
     "hexa": "latest",
     "highland": "2.2.0",
+    "lodash": "^3.10.1",
     "long": "^2.2.3",
     "underscore": "^1.7.0"
   },

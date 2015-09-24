@@ -129,7 +129,7 @@ var internals = exports.internals = function() {
   };
 };
 
-function isGenReg(key) {
+var isGenReg = exports.isGenReg = function(key) {
   if (!/^\$/.test(key)) {
     return false;
   }
@@ -137,7 +137,7 @@ function isGenReg(key) {
   return n >= 0 && n <= 255;
 }
 
-function isSpecialReg(key) {
+var isSpecialReg = exports.isSpecialReg = function(key) {
   switch (key.length) {
   case 2:
     return /r[A-Z]/.test(key);
@@ -147,13 +147,13 @@ function isSpecialReg(key) {
   return false;
 }
 
-function isInternalAttr(key) {
+var isInternalAttr = exports.isInternalAttr = function(key) {
   return internals().hasOwnProperty(key);
 }
 
-function isAddress(key) {
+var isAddress = exports.isAddress = function(key) {
   return /^[0-9A-F]{16}$/.test(key);
-}
+};
 
 /**
  * Uses a diff to update a machine's state.
@@ -182,11 +182,98 @@ exports.applyDiff = function(diff, machine) {
       continue;
     }
 
+    if (p === 'exceptions') {
+      continue;
+    }
     throw new Error('Unrecognized property in diff: ' + p);
   }
 
   return machine;
 };
+
+/**
+ * Gathers the states changed by a diff so it can be reversed.
+ * @param {Diff} diff
+ * @param {Object} machine
+ * @return {Diff}
+ */
+exports.diffChanges = function(diff, machine) {
+  var changed = {};
+
+  for (var p in diff) {
+    if (isGenReg(p)) {
+      changed[p] = machine.general[p];
+      continue;
+    }
+
+    if (isSpecialReg(p)) {
+      changed[p] = machine.special[p];
+      continue;
+    }
+
+    if (isInternalAttr(p)) {
+      changed[p] = machine.internal[p];
+      continue;
+    }
+
+    if (isAddress(p)) {
+      changed[p] = machine.memory.getByte(p).toString(16);
+      continue;
+    }
+
+    if (p === 'exceptions') {
+      changed.rA = machine.special.rA;
+      continue;
+    }
+    throw new Error('Unrecognized property in diff: ' + p);
+  }
+
+  return changed;
+};
+
+/**
+ * Returns the side effects that result from the diff returned by a computation.
+ * Rules:
+ * 1. If a marginal register is set in the original diff set rL.
+ * 2. If the original diff does not set @, step @.
+ * 3. If the original diff includes exceptions, set rA.
+ */
+exports.diffEffects = function(diff, machine) {
+  var effects = {};
+
+  //1. If a marginal register is set in the original diff set rL.
+  var L = parseInt(machine.special.rL, 16);
+  var G = parseInt(machine.special.rG, 16);
+  var maxX = 0;
+
+  for (var p in diff) {
+    if (isGenReg(p)) {
+      var x = parseInt(p.substring(1), 10);
+
+      //is the register being set marginal?
+      if (L <= x && x < G) {
+        maxX = Math.max(maxX, x);
+      }
+    }
+  }
+  if (maxX) {
+    effects.rL = extendUnsignedTo64((maxX + 1).toString(16));
+  }
+
+  //2. If the original diff does not set @, step @.
+  if (!diff['@']) {
+    effects['@'] = step(machine);
+  }
+
+  //3. If the original diff includes exceptions, set rA.
+  //no trips yet so assume rA is zeroed
+  if (diff.exceptions) {
+    //TODO existing exceptions in rA?
+    effects.rA = extendUnsignedTo64(parseInt(diff.exceptions, 2).toString(16).toUpperCase());
+  }
+
+  return effects;
+}
 
 /**
  * Non-mutating extend.
@@ -415,7 +502,7 @@ var RA = exports.RA = function(h, state) {
   return uint64ToOcta(atUint64(state).add(hexToUint64(h).multiply(4)));
 };
 
-exports.step = function(state) {
+var step = exports.step = function(state) {
   return RA('01', state);
 };
 

@@ -11,7 +11,7 @@ var loadPadTetraU = _.compose(_.extendUnsignedTo64, _.loadTetra);
 
 /**
  * Load a byte from memory at the address obtained by casting the octabytes in
- * $Y and $Z to unsigned integers and summing them. Place the sign-extend byte
+ * $Y and $Z to unsigned integers and summing them. Place the sign-extended byte
  * into register $X.
  * @param {State} state
  * @param {Hex} X - destination register

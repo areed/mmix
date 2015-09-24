@@ -1,3 +1,4 @@
+var Big = require('big.js');
 var _ = require('./utils');
 
 /**
@@ -11,10 +12,10 @@ var _ = require('./utils');
 var SL = exports.SL = function(state, X, Y, Z) {
   var yInt = _.regToInt(Y, state);
   var zUint = _.regToUint64(Z, state);
-  var xInt = yInt.times(Big(2).pow(zInt));
+  var xInt = yInt.times(Big(2).pow(parseInt(zUint.toString(10), 10)));
   var diff = _.build(
     _.genRegKey(X),
-    xInt
+    _.hexify64(xInt)
   );
 
   return _.bigOverflows64(xInt) ? _.extend({'exceptions': '01000000'}, diff) : diff;

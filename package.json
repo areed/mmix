@@ -1,6 +1,6 @@
 {
   "name": "mmix",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "MMIX machine emulator",
   "main": "index.js",
   "directories": {

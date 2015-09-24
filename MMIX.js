@@ -2,6 +2,7 @@
 var lodash = require('lodash');
 var _ = require('./utils');
 var Memory = require('./memory');
+var opcodes = require('./opcodes');
 
 /**
  * @constructor
@@ -19,6 +20,7 @@ function MMIX(program) {
   //keep track of the state that was changed with each diff so it will be
   //possible to step backwards through the program too
   this.changes = [];
+  this.costs = [];
 
   //The special registers and the global general registers are stored in a
   //single register file because there are exactly 32 special registers and G is
@@ -160,8 +162,14 @@ function MMIX(program) {
 MMIX.prototype.next = function() {
   //@ has already been set to the instruction to execute here
   var index = parseInt(this.internal['@'], 16) / 4;
-  var instruction = this.memory.text[index];
-  var diff = _.execute(instruction.toString(16), this);
+  var instruction = this.memory.text[index].toString(16).toUpperCase();
+  var cost = opcodes.costs[instruction.substring(0,2)];
+  var accmcost = lodash.last(this.costs) || {oops: 0, mems: 0};
+  this.costs.push({
+    oops: accmcost.oops + cost.oops,
+    mems: accmcost.mems + cost.mems,
+  });
+  var diff = _.execute(instruction, this);
   var more = _.diffEffects(diff, this);
   var fulldiff = lodash.assign({}, diff, more);
   //lookup current value in machine before applying diff
@@ -176,6 +184,7 @@ MMIX.prototype.next = function() {
 };
 
 MMIX.prototype.prev = function() {
+  this.costs.pop();
   this.diffs.pop();
   _.applyDiff(this.changes.pop(), this);
 };
@@ -190,8 +199,10 @@ MMIX.prototype.isHalted = function() {
   return at >= this.memory.text.length;
 };
 
+MMIX.prototype.cost = function() {
+  return _.last(this.costs);
+};
 /*
-MMIX.prototype.costs = function() {
   var costs = {};
   for (var a in this.counts) {
     if (this.counts.hasOwnProperty(a)) {

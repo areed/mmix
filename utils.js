@@ -1,5 +1,5 @@
 var Big = require('big.js');
-var Long = require('Long');
+var Long = require('long');
 var hexa = require('hexa');
 var _ = require('highland');
 var underscore = require('underscore');

@@ -1,4 +1,4 @@
-var Long = require('Long');
+var Long = require('long');
 
 //default user space segment sizes
 var TEXT_SEGMENT_SIZE_DEFAULT = 512;

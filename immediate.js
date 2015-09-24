@@ -1,6 +1,6 @@
 var _ = require('./utils');
 var Big = require('big.js');
-var Long = require('Long');
+var Long = require('long');
 
 var two = Big(2);
 

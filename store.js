@@ -1,4 +1,4 @@
-var Long = require('Long');
+var Long = require('long');
 var _ = require('./utils');
 
 /**

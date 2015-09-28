@@ -244,7 +244,7 @@ exports.diffEffects = function(diff, machine) {
   //1. If a marginal register is set in the original diff set rL.
   var L = parseInt(machine.special.rL, 16);
   var G = parseInt(machine.special.rG, 16);
-  var maxX = 0;
+  var maxX;
 
   for (var p in diff) {
     if (isGenReg(p)) {
@@ -252,11 +252,11 @@ exports.diffEffects = function(diff, machine) {
 
       //is the register being set marginal?
       if (L <= x && x < G) {
-        maxX = Math.max(maxX, x);
+        maxX = Math.max((maxX || 0), x);
       }
     }
   }
-  if (maxX) {
+  if (typeof maxX === 'number') {
     effects.rL = extendUnsignedTo64((maxX + 1).toString(16));
   }
 

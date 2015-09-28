@@ -2,7 +2,7 @@
 var lodash = require('lodash');
 var _ = require('./utils');
 var Memory = require('./memory');
-var opcodes = require('./opcodes');
+var ops = require('./ops');
 
 /**
  * @constructor
@@ -163,7 +163,7 @@ MMIX.prototype.next = function() {
   //@ has already been set to the instruction to execute here
   var index = parseInt(this.internal['@'], 16) / 4;
   var instruction = this.memory.text[index].toString(16).toUpperCase();
-  var cost = opcodes.costs[instruction.substring(0,2)];
+  var cost = ops.costs[instruction.substring(0,2)];
   var accmcost = lodash.last(this.costs) || {oops: 0, mems: 0};
   this.costs.push({
     oops: accmcost.oops + cost.oops,
@@ -202,19 +202,6 @@ MMIX.prototype.isHalted = function() {
 MMIX.prototype.cost = function() {
   return _.last(this.costs);
 };
-/*
-  var costs = {};
-  for (var a in this.counts) {
-    if (this.counts.hasOwnProperty(a)) {
-      var op = this.memory.store[a];
-      var cost = opcodes.costs[op];
-      var count = this.counts[a];
-      costs[a] = {oops: cost.oops * count, mems: cost.mems * count};
-    }
-  }
-  return costs;
-};
-*/
 
 /**
  * Reads the high and low int32s from a Uint32Array ann concatenates them as hex

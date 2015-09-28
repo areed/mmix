@@ -1,4 +1,4 @@
-var _ = require('./utils');
+var _ = require('../utils');
 
 /**
  * Bitwsie and.

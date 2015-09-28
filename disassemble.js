@@ -1,4 +1,4 @@
-var opcodes = require('./opcodes');
+var ops = require('./ops');
 
 /**
  * Returns the opname and arguments from a tetra.
@@ -6,8 +6,8 @@ var opcodes = require('./opcodes');
  * @param {Array}
  */
 function disassemble(instruction) {
-  var opname = opcodes.opnames[instruction.substring(0,2)];
-  var format = opcodes.formats[opname];
+  var opname = ops.opnames[instruction.substring(0,2)];
+  var format = ops.formats[opname];
   var args = [];
   var p = 2;
 

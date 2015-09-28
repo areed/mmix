@@ -1,4 +1,4 @@
-var _ = require('./utils');
+var _ = require('../utils');
 
 var parseHex = function(h) {
   return parseInt(h.join(''), 16);

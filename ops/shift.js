@@ -1,5 +1,5 @@
 var Big = require('big.js');
-var _ = require('./utils');
+var _ = require('../utils');
 
 /**
  * Shift left.

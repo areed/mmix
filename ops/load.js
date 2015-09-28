@@ -1,4 +1,4 @@
-var _ = require('./utils');
+var _ = require('../utils');
 
 var loadPadByte = _.compose(_.signExtend8To64, _.loadByte);
 var loadPadByteU = _.compose(_.extendUnsignedTo64, _.loadByte);

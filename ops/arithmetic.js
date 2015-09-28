@@ -1,4 +1,4 @@
-var _ = require('./utils');
+var _ = require('../utils');
 var Big = require('big.js');
 
 var modTwo64th = _.compose(_.octafyBig, _.curry(_.remainder, _.twoToThe64th));

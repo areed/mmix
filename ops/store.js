@@ -1,5 +1,5 @@
 var Long = require('long');
-var _ = require('./utils');
+var _ = require('../utils');
 
 /**
  * Store the least significant byte of $X into M[$X + $Y]. An integer overflow

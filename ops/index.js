@@ -1,4 +1,4 @@
-var _ = require('./utils');
+var _ = require('../utils');
 var arithmetic = require('./arithmetic');
 var bitwise = require('./bitwise');
 var branch = require('./branch');

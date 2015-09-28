@@ -3,9 +3,6 @@
   "version": "0.1.2",
   "description": "MMIX machine emulator",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
   "dependencies": {
     "big.js": "^3.1.3",
     "hexa": "latest",
@@ -20,7 +17,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "document": "jsdoc --destination dist --recurse types.js index.js registers.js utils.js memory.js && go run server.go"
+    "document": "jsdoc --destination dist --recurse types.js utils.js memory.js && go run server.go"
   },
   "repository": {
     "type": "git",

@@ -12,7 +12,7 @@ var disassemble = require('../../disassemble');
 //test(require('./conditionals'));
 //test(require('./immediate'));
 //test(require('./interrupts'));
-//test(require('./load'));
+test(require('./load'));
 //test(require('./shift'));
 test(require('./store'));
 //test(require('./swym'));

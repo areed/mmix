@@ -22,19 +22,11 @@ exports.LDB = [
   //address computation overflows
   ['80010203', {
     $2: 'FFFFFFFFFFFFFFFF',
-    $3: '0000000000000004',
-    '0000000000000003': 'CC',
+    $3: '2000000000000004',
+    '2000000000000003': 'CC',
   }, {
     //no exception occurs
     $1: 'FFFFFFFFFFFFFFCC',
-  }],
-  //uninitialized memory
-  ['80010203', {
-    $2: '8000000000000000',
-    $3: '8000000000000000',
-  }, {
-    //all 0's
-    $1: '0000000000000000',
   }],
 ];
 
@@ -54,21 +46,6 @@ exports.LDBI = [
   }, {
     //sign-extended with 1's
     $0: 'FFFFFFFFFFFFFFAB',
-  }],
-  //address computation overflows
-  ['81000104', {
-    $1: 'FFFFFFFFFFFFFFFF',
-    '0000000000000003': '77',
-  }, {
-    //no exception occurs
-    $0: '0000000000000077',
-  }],
-  //uninitialized memory
-  ['81000100', {
-    $1: '0000000000000000',
-  }, {
-    //all 0's
-    $0: '0000000000000000',
   }],
 ];
 
@@ -94,8 +71,8 @@ exports.LDBU = [
   //address computation overflows
   ['82000102', {
     $1: 'FFFFFFFFFFFFFFFF',
-    $2: '0000000000000001',
-    '0000000000000000': '9B',
+    $2: '2000000000000001',
+    '2000000000000000': '9B',
   }, {
     //no exception occurs
     $0: '000000000000009B',
@@ -126,14 +103,6 @@ exports.LDBUI = [
   }, {
     //padded with 0's
     $0: '0000000000000045',
-  }],
-  //address computation overflows
-  ['830001FF', {
-    $1: 'FFFFFFFFFFFFFF10',
-    '000000000000000F': 'AA',
-  }, {
-    //no exception occurs
-    $0: '00000000000000AA',
   }],
   //uninitialized memory
   ['83000100', {

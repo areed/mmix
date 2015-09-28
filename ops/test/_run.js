@@ -4,7 +4,7 @@ var MMIX = require('../../MMIX');
 var _ = require('../../utils');
 var disassemble = require('../../disassemble');
 
-//test(require('./arithmetic'));
+test(require('./arithmetic'));
 //test(require('./bitwise'));
 //test(require('./bytewise'));
 //test(require('./branch'));

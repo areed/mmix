@@ -1,3 +1,5 @@
+var _ = require('../utils');
+
 /**
  * Get address. Transforms a relative address into an absolute address.
  * @param {State} state

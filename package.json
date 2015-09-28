@@ -1,6 +1,6 @@
 {
   "name": "mmix",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "MMIX machine emulator",
   "main": "index.js",
   "dependencies": {
@@ -20,7 +20,7 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
-    "test": "mocha ops/test/_run.js",
+    "test": "mocha ops/test/_run.js test",
     "browserTest": "gulp serveTests",
     "makeBrowserTests": "gulp makeBrowserTests",
     "document": "jsdoc --destination dist --recurse types.js utils.js memory.js && go run server.go"

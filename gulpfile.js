@@ -6,7 +6,14 @@ var serve = require('gulp-serve');
 gulp.task('makeBrowserTests', ['copyMochaAssets', 'bundleTests']);
 
 gulp.task('bundleTests', function() {
-  return browserify('ops/test/_run.js')
+  return browserify([
+    'ops/test/_run.js',
+    'test/assemble.js',
+    'test/disassemble.js',
+    'test/memory.js',
+    'test/MMIX.js',
+    'test/utils.js',
+  ])
     .bundle()
     .pipe(source('tests.js'))
     .pipe(gulp.dest('dist/tests'));

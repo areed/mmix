@@ -22,6 +22,7 @@ describe('Utils', function() {
         '2000000000000100': 'FF',
         '@': '0000000000000104',
       };
+      machine.special.rL = '0000000000000003';
       utils.applyDiff(diff, machine);
       expect(machine.general).to.have.property('$0', '0000000000000000');
       expect(machine.general).to.have.property('$1', '1111111111111111');
@@ -42,6 +43,7 @@ describe('Utils', function() {
         [
           {
             '$2': '0000000000000000',
+            '@': '0000000000000004',
           },
           {},
         ],
@@ -52,6 +54,7 @@ describe('Utils', function() {
           },
           {
             'rL': '0000000000000009',
+            '@': '0000000000000004',
           },
         ],
       ].forEach(function(t) {

@@ -1,7 +1,8 @@
 .DS_Store
 *.swp
 *.pdf
-dist/
+dist/*
+!dist/tests/index.html
 
 # Logs
 logs

@@ -35,7 +35,10 @@ function differ(tests) {
 
     describe('State is: ' + JSON.stringify(state), function() {
       before(function() {
-        machine = _.applyDiff(state, new MMIX());
+        machine = new MMIX();
+        var effects = _.diffEffects(state, machine);
+        _.applyDiff(effects, machine);
+        _.applyDiff(state, machine);
       });
       
       describe(instruction + ' (' + pretty[0] + ' ' + pretty.slice(1).join(', ') + ')', function() {

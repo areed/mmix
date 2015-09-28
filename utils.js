@@ -554,7 +554,7 @@ exports.specialRegUint = function(r, state) {
  */
 exports.execute = function(tetra, state) {
   //circular dependency
-  return require('./opcodes').ops[parseInt(OP(tetra), 16)](state, X(tetra), Y(tetra), Z(tetra));
+  return require('./ops').ops[parseInt(OP(tetra), 16)](state, X(tetra), Y(tetra), Z(tetra));
 };
 
 /**

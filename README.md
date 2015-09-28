@@ -3,6 +3,6 @@ mmix
 
 MMIX machine emulator
 
-[GUI](http://areed.io/mmix)
+[GUI](https://areed.io/mmix)
 
 [Tests](https://areed.io/mmix/test/)

@@ -20,7 +20,7 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "mocha ops/test/_run.js",
     "browserTest": "gulp serveTests",
     "document": "jsdoc --destination dist --recurse types.js utils.js memory.js && go run server.go"
   },

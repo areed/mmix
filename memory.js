@@ -2,7 +2,7 @@ var Long = require('long');
 
 //default user space segment sizes
 var TEXT_SEGMENT_SIZE_DEFAULT = 512;
-var DATA_SEGMENT_SIZE_DEFAULT = 512;
+var DATA_SEGMENT_SIZE_DEFAULT = 2048;
 var POOL_SEGMENT_SIZE_DEFAULT = 512;
 var STACK_SEGMENT_SIZE_DEFAULT = 512;
 

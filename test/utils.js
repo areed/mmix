@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var Big = require('big.js');
 
-var MMIX = require('../mmix');
+var MMIX = require('../MMIX');
 var Memory = require('../memory');
 var utils = require('../utils');
 

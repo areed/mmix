@@ -5,17 +5,15 @@ var _ = require('../../utils');
 var disassemble = require('../../disassemble');
 
 test(require('./arithmetic'));
-//test(require('./bitwise'));
-//test(require('./bytewise'));
-//test(require('./branch'));
-//test(require('./compare'));
-//test(require('./conditionals'));
-//test(require('./immediate'));
-//test(require('./interrupts'));
+test(require('./bitwise'));
+test(require('./branch'));
+test(require('./bytewise'));
+test(require('./compare'));
+test(require('./conditionals'));
+test(require('./immediate'));
 test(require('./load'));
-//test(require('./shift'));
 test(require('./store'));
-//test(require('./swym'));
+test(require('./swym'));
 
 function test(module) {
   lodash.each(lodash.keys(module), function(key) {

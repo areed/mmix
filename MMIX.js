@@ -11,7 +11,7 @@ var ops = require('./ops');
  */
 function MMIX(program) {
   this.memory = new Memory();
-  this.memory.text = program;
+  this.memory.text = program || this.memory.text;
   this.internal = _.internals();
 
   //every step of the program generates a diff that can be applied to the

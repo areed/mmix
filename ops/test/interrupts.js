@@ -19,3 +19,13 @@ exports.TRIP = [
     '@': '0000000000000000',
   }],
 ];
+
+//only the simplest RESUME 0 with a negative value in rX is supported
+exports.RESUME = [
+  ['F9000000', {
+    rW: '0000000000000104',
+    rX: '8000000020000000',
+  }, {
+    '@': '0000000000000104'
+  }],
+];

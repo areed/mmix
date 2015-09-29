@@ -64,26 +64,42 @@ exports.TRAP = function TRAP(state, X, Y, Z) {
  * @param {Hex} Z - a byte
  */
 exports.RESUME = function RESUME(state, X, Y, Z) {
+  var rW = _.specialRegOcta('rW', state);
+  var rX = _.specialRegOcta('rX', state);
+  var rY = _.specialRegOcta('rY', state);
+  var rZ = _.specialRegOcta('rZ', state);
+
   if (Z === '00') {
-    //execution register is negative
-    if (_.octaIsNegative(state.rX)) {
+    //if execution register is negative proceed to rW
+    if (_.octaIsNegative(rX)) {
       var diff = {
-        '@': state.rW,
+        '@': rW,
       };
-      //restore $Y
-      diff[_.genRegKey(state.rX.substring(12, 14))] = state.rY;
-      //TODO restore immediate is noop here
-      //restore $Z
-      diff[_.genRegKey(state.rX.substring(14, 16))] = state.rZ;
 
       return diff;
 
 /*** nothing else below here in the RESUME op has been implemented ***/
 
+    /*
+     * ropcode 0 might be implemented by calling the operation here then
+     * returning rW as @ in the diff, i.e. the inserted instruction is executed
+     * immediately and the result is included with the RESUME operation's diff.
+     *
+     * ropcode 1 might be implemented by saving $Y and $Z somewhere hidden from
+     * the programmer, then setting their values from rY and rZ, executing the
+     * inserted instruction immediately and returning the result with this diff,
+     * but not before restoring $Y and $Z.
+     *
+     * ropcode 2 might be implemented simply by including $X in the diff to this
+     * RESUME operation from rZ, and exceptions from the third byte of rX.
+     *
+     * In all cases the cost of the inserted instruction would be ignored.
+     */
+
     //execution register is nonnegative
     } else {
       //ropcode
-      switch (state.rX.substring(0, 2)) {
+      switch (rX.substring(0, 2)) {
       case '00':
         //simply inserts the instruction from the low tetra of rX into the
         //instruction stream

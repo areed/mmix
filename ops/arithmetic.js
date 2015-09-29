@@ -322,9 +322,9 @@ exports.MULU = function(state, X, Y, Z) {
 
   return _.build(
     _.genRegKey(X),
-    prod.substring(16, 32),
+    doubleOcta.substring(16, 32),
     'rH',
-    prod.substring(0, 16)
+    doubleOcta.substring(0, 16)
   );
 };
 
@@ -344,9 +344,9 @@ exports.MULUI = function(state, X, Y, Z) {
 
   return _.build(
     _.genRegKey(X),
-    prod.substring(16, 32),
+    doubleOcta.substring(16, 32),
     'rH',
-    prod.substring(0, 16)
+    doubleOcta.substring(0, 16)
   );
 };
 

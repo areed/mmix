@@ -32,10 +32,10 @@ var SL = exports.SL = function(state, X, Y, Z) {
 var SLI = exports.SLI = function(state, X, Y, Z) {
   var yInt = _.regToInt(Y, state);
   var zUint = _.byteToUint(Z, state);
-  var xInt = yInt.times(Big(2).pow(zUint));
+  var xInt = yInt.times(Big(2).pow(parseInt(zUint.toString(10), 10)));
   var diff = _.build(
     _.genRegKey(X),
-    xInt
+    _.hexify64(xInt)
   );
 
   return _.bigOverflows64(xInt) ? _.extend({'exceptions': '01000000'}, diff) : diff;
@@ -76,13 +76,13 @@ exports.SLUI = function(state, X, Y, Z) {
 exports.SR = function(state, X, Y, Z) {
   var yInt = _.regToInt(Y, state);
   var zUint = _.regToUint(Z, state);
-  var xInt = _.quotient(Big(2).pow(zUint), yInt);
+  var xInt = _.quotient(Big(2).pow(parseInt(zUint.toString(10), 10)), yInt);
   var diff = _.build(
     _.genRegKey(X),
     _.hexify64(xInt)
   );
 
-  return bigOverflows64(xInt) ? _.extend({exceptions: '01000000'}, diff) : diff;
+  return _.bigOverflows64(xInt) ? _.extend({exceptions: '01000000'}, diff) : diff;
 };
   
 /**
@@ -96,13 +96,13 @@ exports.SR = function(state, X, Y, Z) {
 exports.SRI = function(state, X, Y, Z) {
   var yInt = _.regToInt(Y, state);
   var zUint = _.byteToUint(Z);
-  var xInt = _.quotient(Big(2).pow(zUint), yInt);
+  var xInt = _.quotient(Big(2).pow(parseInt(zUint.toString(10), 10)), yInt);
   var diff = _.build(
     _.genRegKey(X),
     _.hexify64(xInt)
   );
 
-  return bigOverflows64(xInt) ? _.extend({exceptions: '01000000'}, diff) : diff;
+  return _.bigOverflows64(xInt) ? _.extend({exceptions: '01000000'}, diff) : diff;
 };
 
 /**
@@ -116,7 +116,7 @@ exports.SRI = function(state, X, Y, Z) {
 exports.SRU = function(state, X, Y, Z) {
   var yUint = _.regToUint(Y, state);
   var zUint = _.regToUint(Z, state);
-  var xUint = _.quotient(Big(2).pow(zUint), yUint);
+  var xUint = _.quotient(Big(2).pow(parseInt(zUint.toString(10), 10)), yUint);
 
   return _.build(
     _.genRegKey(X),
@@ -135,7 +135,7 @@ exports.SRU = function(state, X, Y, Z) {
 exports.SRUI = function(state, X, Y, Z) {
   var yUint = _.regToUint(Y, state);
   var zUint = _.byteToUint(Z, state);
-  var xUint = _.quotient(Big(2).pow(zUint), yUint);
+  var xUint = _.quotient(Big(2).pow(parseInt(zUint.toString(10), 10)), yUint);
 
   return _.build(
     _.genRegKey(X),

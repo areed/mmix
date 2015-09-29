@@ -12,6 +12,7 @@ test(require('./compare'));
 test(require('./conditionals'));
 test(require('./immediate'));
 test(require('./load'));
+test(require('./shift'));
 test(require('./store'));
 test(require('./swym'));
 

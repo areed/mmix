@@ -464,18 +464,6 @@ exports.atStep = function(state) {
 };
 
 /**
- * Returns the key of a cell in the state's memory object.
- * @param {Hex} octa
- * @return {String}
- */
-exports.memKey = function(hex) {
-  if (hex.length !== 16) {
-    throw new Error('memKey expects an octa, got: ' + hex);
-  }
-  return hex;
-};
-
-/**
  * Returns the instruction tetra from '@'.
  * @param {State} state
  * @return {Hex} the tetra instruction
@@ -515,6 +503,15 @@ var step = exports.step = function(state) {
  */
 exports.RAB = function(h, state) {
   return uint64ToOcta(atUint64(state).subtract(hexToUint64(h).multiply(4)));
+};
+
+/**
+ * Returns @ + (4*wyde) - 2^18
+ */
+exports.jumpBackWyde = function(state, wyde) {
+  var XY = Long.fromString(wyde, true, 16).multiply(4);
+
+  return uint64ToOcta(atUint64(state).add(XY).subtract(262144));
 };
 
 /**

@@ -85,5 +85,5 @@ exports.JMP = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.JMPB = function(state, X, Y, Z) {
-  return _.build('@', _.RAB(X + Y + Z, state));
+  return _.build('@', _.jumpBackTriple(state, X +  Y + Z));
 };

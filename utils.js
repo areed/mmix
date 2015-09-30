@@ -496,22 +496,28 @@ var step = exports.step = function(state) {
 };
 
 /**
+ * Returns @ + (4*wyde) - 2^18
+ */
+var jumpBackWyde = exports.jumpBackWyde = function(state, wyde) {
+  var XY = Long.fromString(wyde, true, 16).multiply(4);
+
+  return uint64ToOcta(atUint64(state).add(XY).subtract(262144));
+};
+
+/**
  * Returns the relative address backward.
  * @param {State}
  * @param {Hex} h - a wyde or triple byte unsigned
  * @return {Hex} an octabyte
  */
 exports.RAB = function(h, state) {
-  return uint64ToOcta(atUint64(state).subtract(hexToUint64(h).multiply(4)));
+  return jumpBackWyde(state, h);
 };
 
-/**
- * Returns @ + (4*wyde) - 2^18
- */
-exports.jumpBackWyde = function(state, wyde) {
-  var XY = Long.fromString(wyde, true, 16).multiply(4);
+exports.jumpBackTriple = function(state, hex) {
+  var XYZ = Long.fromString(hex, true, 16).multiply(4);
 
-  return uint64ToOcta(atUint64(state).add(XY).subtract(262144));
+  return uint64ToOcta(atUint64(state).add(XYZ).subtract(67108864));
 };
 
 /**

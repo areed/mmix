@@ -16,6 +16,7 @@ test(require('./jump'));
 test(require('./load'));
 test(require('./shift'));
 test(require('./store'));
+test(require('./subroutine'));
 test(require('./swym'));
 
 function test(module) {

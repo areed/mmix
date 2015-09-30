@@ -3,6 +3,7 @@ var Long = require('long');
 var hexa = require('hexa');
 var _ = require('highland');
 var underscore = require('underscore');
+var lodash = require('lodash');
 
 var twoToThe64th = exports.twoToThe64th = Big(2).pow(64);
 
@@ -893,11 +894,54 @@ var matrix = exports.matrix = function(octa) {
   ];
 };
 
-exports.pairs = function pairs(A, B) {
-  return A.map(function(row, i) {
-    return row.map(function(a) {
-      return row.map(function(y, j) {
-        return [A[i][j], B[j][i]];
+exports.matrixT = function(octa) {
+  var _ = lodash;
+  var bits = binary(octa);
+  var byteIndices = [0, 8, 16, 24, 32, 40, 48, 56];
+
+  var offset = function(n) {
+    return _.map(byteIndices, function(i) {
+      return i + n;
+    });
+  };
+
+  return [
+    _.at(bits, byteIndices),
+    _.at(bits, offset(1)),
+    _.at(bits, offset(2)),
+    _.at(bits, offset(3)),
+    _.at(bits, offset(4)),
+    _.at(bits, offset(5)),
+    _.at(bits, offset(6)),
+    _.at(bits, offset(7)),
+  ];
+};
+
+/**
+ * If A is an m X n matrix and B is an n X p matrix, returns a new m X p matrix
+ * where each entry is an array of pairs.
+ */
+exports.pairs = function(A, B) {
+  var m = A.length;
+  var p = B[0].length;
+  var C = [];
+
+  for (var i = 0; i < p; i++) {
+    C[i] = [];
+
+    for (var j = 0; j < m; j++) {
+      C[i][j] = [A[i], B[j]];
+    }
+  }
+
+  return C;
+};
+
+exports.pair = function(C, fn) {
+  return C.map(function(row) {
+    return row.map(function(entry) {
+      return entry[0].map(function(e, i) {
+        return fn(e, entry[1][i]);
       });
     });
   });
@@ -919,6 +963,19 @@ exports.reducePairs = function reducePairs(fn, C) {
       });
     });
   });
+};
+
+exports.matrixTOcta = function(M) {
+  var bits = [];
+
+  for (var i = 0; i < 8; i++) {
+    for (var j = 0; j < 8; j++) {
+      var index = (i * 8) + j;
+      bits[index] = M[j][i];
+    }
+  }
+
+  return bits;
 };
 
 exports.matrixToBits = function matrixToBits(M) {
@@ -950,3 +1007,6 @@ exports.times = function times(a, b) {
  */
 var atUint64 = exports.atUint64 = compose(hexToUint64, atAddress);
 
+exports.binaryToHex = function(bits) {
+  return extendUnsignedTo64(Long.fromString(bits, true, 2).toString(16).toUpperCase());
+};

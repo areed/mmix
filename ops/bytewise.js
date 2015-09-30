@@ -63,11 +63,11 @@ exports.WDIF = function(state, X, Y, Z) {
   var yWydes = _.chunk(4, y.split('')).map(parseHex);
   var zWydes = _.chunk(4, z.split('')).map(parseHex);
 
-  var answer = yWdyes.map(function(b, j) {
+  var answer = yWydes.map(function(b, j) {
     return Math.max(0, b - zWydes[j]);
   });
 
-  return _.build(_.genRegKey(X), answer.map(_.hexifyByte).join(''));
+  return _.build(_.genRegKey(X), answer.map(_.hexifyWyde).join(''));
 };
 
 
@@ -90,7 +90,7 @@ exports.WDIFI = function(state, X, Y, Z) {
     return Math.max(0, b - zWydes[j]);
   });
 
-  return _.build(_.genRegKey(X), answer.map(_.hexifyByte).join(''));
+  return _.build(_.genRegKey(X), answer.map(_.hexifyWyde).join(''));
 };
 
 /**
@@ -112,7 +112,7 @@ exports.TDIF = function(state, X, Y, Z) {
     return Math.max(0, b - zTetras[j]);
   });
 
-  return _.build(_.genRegKey(X), answer.map(_.hexifyByte).join(''));
+  return _.build(_.genRegKey(X), answer.map(_.hexifyTetra).join(''));
 };
 
 /**
@@ -134,7 +134,7 @@ exports.TDIFI = function(state, X, Y, Z) {
     return Math.max(0, b - zTetras[j]);
   });
 
-  return _.build(_.genRegKey(X), answer.map(_.hexifyByte).join(''));
+  return _.build(_.genRegKey(X), answer.map(_.hexifyTetra).join(''));
 };
 
 /**
@@ -237,13 +237,19 @@ exports.SADDI = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.MOR = function(state, X, Y, Z) {
-  var y = _.matrix(_.genRegOcta(Y, state));
-  var z = _.matrix(_.genRegOcta(Z, state));
-  var C = _.reducePairedVectors(_.times, _.reducePairs(_.or, _.pairs(y, z)));
+  var y = _.matrixT(_.genRegOcta(Y, state));
+  var z = _.matrixT(_.genRegOcta(Z, state));
+  var C = _.pair(_.pairs(y, z), _.times)
+    .map(function(row, i) {
+      return row.map(function(entry, j) {
+       return entry.reduce(_.or);
+      });
+    });
+  var bits = _.matrixTOcta(C).join('');
 
   return _.build(
     _.genRegKey(X),
-    _.binaryToHex(_.matrixToBits(C))
+    _.binaryToHex(bits)
   );
 };
 
@@ -256,13 +262,19 @@ exports.MOR = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.MORI = function(state, X, Y, Z) {
-  var y = _.matrix(_.genRegOcta(Y, state));
+  var y = _.matrixT(_.genRegOcta(Y, state));
   var z = _.matrix(_.extendUnsignedTo64(Z));
-  var C = _.reducePairedVectors(_.times, _.reducePairs(_.or, _.pairs(y, z)));
+  var C = _.pair(_.pairs(y, z), _.times)
+    .map(function(row, i) {
+      return row.map(function(entry, j) {
+       return entry.reduce(_.or);
+      });
+    });
+  var bits = _.matrixTOcta(C).join('');
 
   return _.build(
     _.genRegKey(X),
-    _.binaryToHex(_.matrixToBits(C))
+    _.binaryToHex(bits)
   );
 };
 
@@ -275,13 +287,19 @@ exports.MORI = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.MXOR = function(state, X, Y, Z) {
-  var y = _.matrix(_.genRegOcta(Y, state));
-  var z = _.matrix(_.genRegOcta(Z, state));
-  var C = _.reducePairedVectors(_.times, _.reducePairs(_.xor, _.pairs(y, z)));
+  var y = _.matrixT(_.genRegOcta(Y, state));
+  var z = _.matrixT(_.genRegOcta(Z, state));
+  var C = _.pair(_.pairs(y, z), _.times)
+    .map(function(row, i) {
+      return row.map(function(entry, j) {
+       return entry.reduce(_.xor);
+      });
+    });
+  var bits = _.matrixTOcta(C).join('');
 
   return _.build(
     _.genRegKey(X),
-    _.binaryToHex(_.matrixToBits(C))
+    _.binaryToHex(bits)
   );
 };
 
@@ -294,12 +312,18 @@ exports.MXOR = function(state, X, Y, Z) {
  * @return {Diff}
  */
 exports.MXORI = function(state, X, Y, Z) {
-  var y = _.matrix(_.genRegOcta(Y, state));
+  var y = _.matrixT(_.genRegOcta(Y, state));
   var z = _.matrix(_.extendUnsignedTo64(Z));
-  var C = _.reducePairedVectors(_.times, _.reducePairs(_.xor, _.pairs(y, z)));
+  var C = _.pair(_.pairs(y, z), _.times)
+    .map(function(row, i) {
+      return row.map(function(entry, j) {
+       return entry.reduce(_.xor);
+      });
+    });
+  var bits = _.matrixTOcta(C).join('');
 
   return _.build(
     _.genRegKey(X),
-    _.binaryToHex(_.matrixToBits(C))
+    _.binaryToHex(bits)
   );
 };

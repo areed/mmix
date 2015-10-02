@@ -1,3 +1,4 @@
+var _ = require('../utils');
 var special = {
   '00': 'rB',
   '01': 'rD',
@@ -42,7 +43,7 @@ var special = {
  */
 exports.GET = function(state, X, Y, Z) {
   var key = special[Z];
-  var contents = _.specialRegOcta(key);
+  var contents = _.specialRegOcta(key, state);
 
   return _.build(
     _.genRegKey(X),
@@ -61,7 +62,7 @@ exports.GET = function(state, X, Y, Z) {
 exports.PUT = function(state, X, Y, Z) {
   return _.build(
     special[X],
-    _.genRegOcta(Z)
+    _.genRegOcta(Z, state)
   );
   //TODO illegal PUT commands should cause an illegal instruction interrupt or a
   //privileged operation interrupt
@@ -86,12 +87,12 @@ exports.PUTI = function(state, X, Y, Z) {
  * Save process state.
  */
 exports.SAVE = function(state, X, Y, Z) {
-  throw new Error('not implemented');
+  throw new Error('SAVE not implemented');
 };
 
 /**
  * Restore process state.
  */
 exports.UNSAVE = function(state, X, Y, Z) {
-  throw new Error('not implemented');
+  throw new Error('UNSAVE not implemented');
 };

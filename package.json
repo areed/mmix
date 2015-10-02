@@ -1,6 +1,6 @@
 {
   "name": "mmix",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "MMIX machine emulator",
   "main": "index.js",
   "dependencies": {

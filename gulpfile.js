@@ -12,6 +12,7 @@ gulp.task('bundleTests', function() {
     'test/disassemble.js',
     'test/memory.js',
     'test/MMIX.js',
+    'test/subroutines.js',
     'test/utils.js',
   ])
     .bundle()

@@ -157,11 +157,33 @@ var isAddress = exports.isAddress = function(key) {
 };
 
 /**
+ * Returns true if a diff is the result of a POP instruction.
+ * @param {Diff} diff
+ * @param {State} machine
+ */
+function isPop(diff, machine) {
+  if (!diff.rO) {
+    return false;
+  }
+  var state = Long.fromString(machine.special.rO, true, 16);
+  var next = Long.fromString(diff.rO, true, 16);
+
+  return next.compare(state) === -1;
+}
+
+/**
  * Uses a diff to update a machine's state.
  * @param {Diff} diff
  * @param {Object} machine
  */
 exports.applyDiff = function(diff, machine) {
+  var isPOP = isPop(diff, machine);
+
+  //must set rO before setting hole
+  if (isPOP) {
+    machine.special.rO = diff.rO;
+  }
+
   for (var p in diff) {
     if (isGenReg(p)) {
       machine.general[p] = diff[p];
@@ -169,6 +191,10 @@ exports.applyDiff = function(diff, machine) {
     }
 
     if (isSpecialReg(p)) {
+      if (isPOP && p === 'rO') {
+        //already set
+        continue;
+      }
       machine.special[p] = diff[p];
       continue;
     }

@@ -27,11 +27,11 @@ function MMIX(program) {
   //at least 32. The leftmost 64 items in the file store the special registers
   //(2 consecutive int32 items per 64 bit register) and the rightmost 448
   //positions are available for global registers.
-  var nonLocalRegisterFile = this.nonLocalRegisterFile = new Uint32Array(256 * 2);
+  var nonLocalRegisterFile = new Uint32Array(256 * 2);
   //Local registers are stored in the local register stack file. See §42 of
   //mmix-doc.pdf for details. It's a cyclic array backed by stack segment
   //memory.
-  var localRegisterFile = this.localRegisterFile = new Uint32Array(512 * 2);
+  var localRegisterFile = new Uint32Array(512 * 2);
 
   //The two register banks above are implementation level details. The MMIX
   //machine interface exposes 256 general and 32 special registers to the
@@ -154,6 +154,25 @@ function MMIX(program) {
       },
     });
   });
+
+  //tau
+  Object.defineProperty(this, 'tau', {
+    enumerable: true,
+    get: function() {
+      //assume stack memory always starts at #6000000000000000 and only the last
+      //few bytes are relevant
+      var rO = parseInt(special.rO.substring(8), 16);
+
+      return rO / 8;
+    },
+  });
+
+  //read from stack - this abstracts over the localRegisterFile and stack
+  //segment memory
+  this.S = function(tau) {
+    //TODO read from memory when more than 512 local registers are used
+    return read(localRegisterFile, tau);
+  };
 
   //preset certain special registers
   special.rG = '0000000000000020'; //global registers start at 32

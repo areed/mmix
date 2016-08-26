@@ -3,6 +3,6 @@ mmix
 
 MMIX machine emulator
 
-[GUI](https://areed.io/mmix)
+[GUI](http://beethoven.io)
 
-[Tests](https://areed.io/mmix/test/)
+[Tests](http://beethoven.io/test)

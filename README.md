@@ -3,6 +3,6 @@ mmix
 
 MMIX machine emulator
 
-[GUI](http://beethoven.io)
+[Run Tests in Browser](http://beethoven.io/test)
 
-[Tests](http://beethoven.io/test)
+[GUI](http://beethoven.io)

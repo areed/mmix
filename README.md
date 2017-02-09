@@ -7,4 +7,4 @@ MMIX machine emulator
 
 [GUI](http://beethoven.io)
 
-[Intro](https://areed.io/posts/mmix-addition/)
+[Intro](https://areed.io/mmix-introduction.html)
